@@ -45,6 +45,28 @@ export default function Dashboard() {
     storage.savePatients(updatedPatients);
   };
 
+  const handlePatientDelete = (patientId) => {
+    // Delete patient
+    const updatedPatients = patients.filter(p => p.id !== patientId);
+    setPatients(updatedPatients);
+    storage.savePatients(updatedPatients);
+    
+    // Delete all prescriptions for this patient
+    const allPrescriptions = storage.getPrescriptions();
+    const updatedPrescriptions = allPrescriptions.filter(p => p.patientId !== patientId);
+    storage.savePrescriptions(updatedPrescriptions);
+    
+    // Delete all bills for this patient
+    const allBills = storage.getBills();
+    const updatedBills = allBills.filter(b => b.patientId !== patientId);
+    storage.saveBills(updatedBills);
+    
+    // If currently viewing this patient, go back to list
+    if (selectedPatient && selectedPatient.id === patientId) {
+      handleBackToList();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -57,7 +79,7 @@ export default function Dashboard() {
             <div className="flex space-x-4">
               <button
                 onClick={() => handleNewPrescription()}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors shadow-sm"
               >
                 <Plus size={20} />
                 <span>New Prescription</span>
@@ -80,7 +102,7 @@ export default function Dashboard() {
                   placeholder="Search patients by name, ID, or phone..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
             </div>
@@ -89,6 +111,7 @@ export default function Dashboard() {
               patients={filteredPatients}
               onPatientSelect={handlePatientSelect}
               onNewPrescription={handleNewPrescription}
+              onPatientDelete={handlePatientDelete}
             />
           </div>
         )}
