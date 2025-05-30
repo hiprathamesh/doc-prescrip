@@ -21,5 +21,5 @@ Your prescription from your visit on ${visitDate} is ready. Please find the atta
 If you have any questions, please feel free to contact us.
 
 Best regards,
-Dr. [Your Father's Name]`;
+Dr. Prashant Nikam`;
 };

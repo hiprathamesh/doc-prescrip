@@ -9,15 +9,15 @@ export const generatePDF = async (prescription, patient) => {
   // Header
   pdf.setFontSize(20);
   pdf.setFont(undefined, 'bold');
-  pdf.text('Dr. [Your Father\'s Name]', pageWidth / 2, yPosition, { align: 'center' });
+  pdf.text('Dr. Prashant Nikam', pageWidth / 2, yPosition, { align: 'center' });
   
   yPosition += 10;
   pdf.setFontSize(12);
   pdf.setFont(undefined, 'normal');
-  pdf.text('MBBS, MD - General Medicine', pageWidth / 2, yPosition, { align: 'center' });
+  pdf.text('BAMS (College Name)', pageWidth / 2, yPosition, { align: 'center' });
   
   yPosition += 8;
-  pdf.text('Clinic Address | Phone: +91-XXXXXXXXXX', pageWidth / 2, yPosition, { align: 'center' });
+  pdf.text('Chaitanya Hospital, Deola | Phone: +91-9422765758', pageWidth / 2, yPosition, { align: 'center' });
   
   yPosition += 15;
   pdf.line(20, yPosition, pageWidth - 20, yPosition);
