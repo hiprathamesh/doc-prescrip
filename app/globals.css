@@ -23,3 +23,13 @@
     @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
   }
 }
+
+/* Add to your global CSS file */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

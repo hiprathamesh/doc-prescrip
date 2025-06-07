@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Plus, Trash2, Save, X } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Save, X, FileText, Search } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { generatePDF } from '../utils/pdfGenerator';
 import { sendWhatsApp, generateWhatsAppMessage } from '../utils/whatsapp';
 import { formatDate, getTodayString } from '../utils/dateUtils';
 import { MEDICAL_CONDITIONS, SEVERITY_OPTIONS, DURATION_OPTIONS, MEDICATION_TIMING, FREQUENCY_OPTIONS } from '../lib/constants';
+import PillSelector from './PillSelector';
+import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from '../lib/medicalData';
 
 export default function NewPrescription({ patient, patients, onBack, onPatientUpdate }) {
   const [selectedPatient, setSelectedPatient] = useState(patient);
@@ -43,6 +45,11 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   // Previous prescription for reference
   const [previousPrescription, setPreviousPrescription] = useState(null);
 
+  // Prescription templates state
+  const [templates, setTemplates] = useState([]);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [templateSearch, setTemplateSearch] = useState('');
+
   useEffect(() => {
     if (selectedPatient) {
       const prescriptions = storage.getPrescriptionsByPatient(selectedPatient.id);
@@ -51,6 +58,10 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       }
     }
   }, [selectedPatient]);
+
+  useEffect(() => {
+    loadTemplates();
+  }, []);
 
   // Focus on custom input when it becomes visible
   useEffect(() => {
@@ -86,6 +97,77 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     onPatientUpdate(updatedPatients);
     setSelectedPatient(newPatient);
     setIsNewPatient(false);
+  };
+
+  const loadTemplates = () => {
+    const savedTemplates = storage.getTemplates();
+    setTemplates(savedTemplates);
+  };
+
+  const filteredTemplates = templates.filter(template =>
+    template.name.toLowerCase().includes(templateSearch.toLowerCase()) ||
+    template.description.toLowerCase().includes(templateSearch.toLowerCase()) ||
+    template.diagnosis.some(d => d.name.toLowerCase().includes(templateSearch.toLowerCase()))
+  );
+
+  const applyTemplate = (template) => {
+    // Apply template data to current prescription
+
+    // Apply symptoms with proper structure
+    if (template.symptoms && template.symptoms.length > 0) {
+      setSymptoms(template.symptoms.map(symptom => ({
+        ...symptom,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+      })));
+    }
+
+    // Apply diagnosis with proper structure
+    if (template.diagnosis && template.diagnosis.length > 0) {
+      setDiagnoses(template.diagnosis.map(diagnosis => ({
+        ...diagnosis,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+      })));
+    }
+
+    // Apply medications with proper structure
+    if (template.medications && template.medications.length > 0) {
+      setMedications(template.medications.map(medication => ({
+        ...medication,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+      })));
+    }
+
+    // Apply lab results with proper structure
+    if (template.labResults && template.labResults.length > 0) {
+      setLabResults(template.labResults.map(labResult => ({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        testName: labResult.testName || labResult.name || labResult
+      })));
+    }
+
+    // Convert template notes to list format
+    if (template.doctorNotes && template.doctorNotes.trim()) {
+      const notes = template.doctorNotes.split('\n').filter(note => note.trim()).map(note => ({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        text: note.trim()
+      }));
+      setDoctorNotesList(notes);
+    }
+
+    // Convert template advice to list format
+    if (template.advice && template.advice.trim()) {
+      const advice = template.advice.split('\n').filter(a => a.trim()).map(a => ({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        text: a.trim()
+      }));
+      setAdviceList(advice);
+    }
+
+    setShowTemplates(false);
+    setTemplateSearch('');
+
+    // Show success message
+    alert(`Template "${template.name}" applied successfully!`);
   };
 
   // Medical History Functions
@@ -233,10 +315,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   const addLabResult = () => {
     const newLabResult = {
       id: Date.now().toString(),
-      testName: '',
-      result: '',
-      normalRange: '',
-      notes: ''
+      testName: ''
     };
     setLabResults([...labResults, newLabResult]);
   };
@@ -344,7 +423,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   return (
     <div className="space-y-8 bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen">
       {/* Enhanced Header */}
-      <div className="bg-white shadow-lg border-grafy-200 sticky top-0 z-40">
+      <div className="bg-white shadow-lg border-grafy-200 sticky top-0 z-40 rounded-b-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -521,6 +600,83 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
             )}
 
+            {/* Prescription Templates Section */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Prescription Templates</h3>
+                <button
+                  onClick={() => setShowTemplates(!showTemplates)}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>{showTemplates ? 'Hide Templates' : 'Browse Templates'}</span>
+                </button>
+              </div>
+
+              {showTemplates && (
+                <div className="space-y-4 animate-in slide-in-from-top duration-300">
+                  {/* Template Search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search templates..."
+                      value={templateSearch}
+                      onChange={(e) => setTemplateSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    />
+                  </div>
+
+                  {/* Templates Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                    {filteredTemplates.length > 0 ? (
+                      filteredTemplates.map((template) => (
+                        <div
+                          key={template.id}
+                          onClick={() => applyTemplate(template)}
+                          className="p-4 border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 cursor-pointer group"
+                        >
+                          <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-purple-800">
+                            {template.name}
+                          </h4>
+                          <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+
+                          {/* Quick preview */}
+                          <div className="space-y-2">
+                            {template.diagnosis.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {template.diagnosis.slice(0, 2).map((diag, index) => (
+                                  <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                    {diag.name}
+                                  </span>
+                                ))}
+                                {template.diagnosis.length > 2 && (
+                                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                                    +{template.diagnosis.length - 2}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            <div className="text-xs text-gray-500">
+                              {template.medications.length} medications • {template.symptoms.length} symptoms
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-full text-center py-8 text-gray-500">
+                        <FileText className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+                        <p>
+                          {templateSearch ? 'No templates match your search.' : 'No templates available.'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Enhanced Medical History */}
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
               <h3 className="text-xl font-bold text-gray-900 mb-6">Medical History</h3>
@@ -531,8 +687,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     key={condition}
                     onClick={() => toggleMedicalCondition(condition)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105 ${selectedMedicalHistory.has(condition)
-                        ? 'bg-blue-600 text-white shadow-lg hover:bg-blue-700'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                      ? 'bg-blue-600 text-white shadow-lg hover:bg-blue-700'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
                       }`}
                   >
                     {condition}
@@ -545,8 +701,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     <button
                       onClick={() => toggleMedicalCondition(condition)}
                       className={`px-4 py-2 pr-8 rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105 ${selectedMedicalHistory.has(condition)
-                          ? 'bg-blue-600 text-white shadow-lg hover:bg-blue-700'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                        ? 'bg-blue-600 text-white shadow-lg hover:bg-blue-700'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
                         }`}
                     >
                       {condition}
@@ -611,56 +767,66 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
             {/* Symptoms */}
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Symptoms</h3>
-                <button
-                  onClick={addSymptom}
-                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Symptom</span>
-                </button>
-              </div>
-              <div className="space-y-4">
-                {symptoms.map((symptom) => (
-                  <div key={symptom.id} className="grid grid-cols-4 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-                    <input
-                      type="text"
-                      placeholder="Symptom name"
-                      value={symptom.name}
-                      onChange={(e) => updateSymptom(symptom.id, 'name', e.target.value)}
-                      className="input-field"
-                    />
-                    <select
-                      value={symptom.severity}
-                      onChange={(e) => updateSymptom(symptom.id, 'severity', e.target.value)}
-                      className="input-field"
-                    >
-                      {SEVERITY_OPTIONS.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={symptom.duration}
-                      onChange={(e) => updateSymptom(symptom.id, 'duration', e.target.value)}
-                      className="input-field"
-                    >
-                      <option value="">Select duration</option>
-                      {DURATION_OPTIONS.map(duration => (
-                        <option key={duration} value={duration}>{duration}</option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() => removeSymptom(symptom.id)}
-                      className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                {symptoms.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No symptoms added yet. Click "Add Symptom" to start.</p>
+              <div className="space-y-6">
+                <PillSelector
+                  title="Select Symptoms"
+                  items={[...PREDEFINED_SYMPTOMS, ...storage.getCustomSymptoms()]}
+                  onSelect={(symptom) => {
+                    const newSymptom = {
+                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                      name: symptom,
+                      severity: 'mild',
+                      duration: ''
+                    };
+                    setSymptoms([...symptoms, newSymptom]);
+                  }}
+                  searchPlaceholder="Search symptoms..."
+                  onAddCustom={(symptom) => {
+                    storage.addCustomSymptom(symptom);
+                    const newSymptom = {
+                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                      name: symptom,
+                      severity: 'mild',
+                      duration: ''
+                    };
+                    setSymptoms([...symptoms, newSymptom]);
+                  }}
+                />
+
+                {/* Selected symptoms with details */}
+                {symptoms.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-800">Selected Symptoms</h4>
+                    {symptoms.map((symptom) => (
+                      <div key={symptom.id} className="grid grid-cols-4 gap-4 items-center p-4 bg-gray-50 rounded-xl">
+                        <div className="font-medium text-gray-900">{symptom.name}</div>
+                        <select
+                          value={symptom.severity}
+                          onChange={(e) => updateSymptom(symptom.id, 'severity', e.target.value)}
+                          className="input-field"
+                        >
+                          {SEVERITY_OPTIONS.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={symptom.duration}
+                          onChange={(e) => updateSymptom(symptom.id, 'duration', e.target.value)}
+                          className="input-field"
+                        >
+                          <option value="">Select duration</option>
+                          {DURATION_OPTIONS.map(duration => (
+                            <option key={duration} value={duration}>{duration}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => removeSymptom(symptom.id)}
+                          className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -668,44 +834,52 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
             {/* Diagnosis */}
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Diagnosis</h3>
-                <button
-                  onClick={addDiagnosis}
-                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Diagnosis</span>
-                </button>
-              </div>
-              <div className="space-y-4">
-                {diagnoses.map((diagnosis) => (
-                  <div key={diagnosis.id} className="grid grid-cols-3 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-                    <input
-                      type="text"
-                      placeholder="Diagnosis name"
-                      value={diagnosis.name}
-                      onChange={(e) => updateDiagnosis(diagnosis.id, 'name', e.target.value)}
-                      className="input-field"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Description (optional)"
-                      value={diagnosis.description}
-                      onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
-                      className="input-field"
-                    />
-                    <button
-                      onClick={() => removeDiagnosis(diagnosis.id)}
-                      className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                {diagnoses.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No diagnosis added yet. Click "Add Diagnosis" to start.</p>
+              <div className="space-y-6">
+                <PillSelector
+                  title="Select Diagnosis"
+                  items={[...PREDEFINED_DIAGNOSES, ...storage.getCustomDiagnoses()]}
+                  onSelect={(diagnosis) => {
+                    const newDiagnosis = {
+                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                      name: diagnosis,
+                      description: ''
+                    };
+                    setDiagnoses([...diagnoses, newDiagnosis]);
+                  }}
+                  searchPlaceholder="Search diagnoses..."
+                  onAddCustom={(diagnosis) => {
+                    storage.addCustomDiagnosis(diagnosis);
+                    const newDiagnosis = {
+                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                      name: diagnosis,
+                      description: ''
+                    };
+                    setDiagnoses([...diagnoses, newDiagnosis]);
+                  }}
+                />
+
+                {/* Selected diagnoses with details */}
+                {diagnoses.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-800">Selected Diagnoses</h4>
+                    {diagnoses.map((diagnosis) => (
+                      <div key={diagnosis.id} className="grid grid-cols-3 gap-4 items-center p-4 bg-gray-50 rounded-xl">
+                        <div className="font-medium text-gray-900">{diagnosis.name}</div>
+                        <input
+                          type="text"
+                          placeholder="Description (optional)"
+                          value={diagnosis.description}
+                          onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
+                          className="input-field"
+                        />
+                        <button
+                          onClick={() => removeDiagnosis(diagnosis.id)}
+                          className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -784,58 +958,43 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
             {/* Lab Results */}
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Lab Results</h3>
-                <button
-                  onClick={addLabResult}
-                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Lab Result</span>
-                </button>
-              </div>
-              <div className="space-y-4">
-                {labResults.map((lab) => (
-                  <div key={lab.id} className="grid grid-cols-5 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-                    <input
-                      type="text"
-                      placeholder="Test name"
-                      value={lab.testName}
-                      onChange={(e) => updateLabResult(lab.id, 'testName', e.target.value)}
-                      className="input-field"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Result"
-                      value={lab.result}
-                      onChange={(e) => updateLabResult(lab.id, 'result', e.target.value)}
-                      className="input-field"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Normal range"
-                      value={lab.normalRange}
-                      onChange={(e) => updateLabResult(lab.id, 'normalRange', e.target.value)}
-                      className="input-field"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Notes"
-                      value={lab.notes}
-                      onChange={(e) => updateLabResult(lab.id, 'notes', e.target.value)}
-                      className="input-field"
-                    />
-                    <button
-                      onClick={() => removeLabResult(lab.id)}
-                      className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                {labResults.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No lab results added yet. Click "Add Lab Result" to start.</p>
+              <div className="space-y-6">
+                <PillSelector
+                  title="Select Lab Tests"
+                  items={[...PREDEFINED_LAB_TESTS, ...storage.getCustomLabTests()]}
+                  onSelect={(labTest) => {
+                    const newLabResult = {
+                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                      testName: labTest
+                    };
+                    setLabResults([...labResults, newLabResult]);
+                  }}
+                  searchPlaceholder="Search lab tests..."
+                  onAddCustom={(labTest) => {
+                    storage.addCustomLabTest(labTest);
+                    const newLabResult = {
+                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                      testName: labTest
+                    };
+                    setLabResults([...labResults, newLabResult]);
+                  }}
+                />
+
+                {/* Selected lab results */}
+                {labResults.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-800">Selected Lab Tests</h4>
+                    {labResults.map((lab) => (
+                      <div key={lab.id} className="grid grid-cols-2 gap-4 items-center p-4 bg-gray-50 rounded-xl">
+                        <div className="font-medium text-gray-900">{lab.testName}</div>
+                        <button
+                          onClick={() => removeLabResult(lab.id)}
+                          className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

@@ -4,14 +4,16 @@ import { useState, useEffect } from 'react';
 import PatientList from './PatientList';
 import PatientDetails from './PatientDetails';
 import NewPrescription from './NewPrescription';
-import { 
-  Plus, 
-  Search, 
-  Users, 
-  Calendar, 
-  DollarSign, 
-  TrendingUp, 
-  Clock, 
+import PrescriptionTemplates from './PrescriptionTemplates';
+import MedicalDataManager from './MedicalDataManager';
+import {
+  Plus,
+  Search,
+  Users,
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  Clock,
   FileText,
   AlertCircle,
   Activity,
@@ -29,7 +31,7 @@ export default function Dashboard() {
   const [prescriptions, setPrescriptions] = useState([]);
   const [bills, setBills] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard' | 'list' | 'details' | 'prescription'
+  const [currentView, setCurrentView] = useState('dashboard'); // Add 'templates' to possible values
   const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState({});
 
@@ -41,11 +43,11 @@ export default function Dashboard() {
     const savedPatients = storage.getPatients();
     const savedPrescriptions = storage.getPrescriptions();
     const savedBills = storage.getBills();
-    
+
     setPatients(savedPatients);
     setPrescriptions(savedPrescriptions);
     setBills(savedBills);
-    
+
     calculateStats(savedPatients, savedPrescriptions, savedBills);
   };
 
@@ -57,25 +59,25 @@ export default function Dashboard() {
 
     // Patients stats
     const totalPatients = patients.length;
-    const newPatientsThisWeek = patients.filter(p => 
+    const newPatientsThisWeek = patients.filter(p =>
       new Date(p.createdAt) >= oneWeekAgo
     ).length;
-    const newPatientsThisMonth = patients.filter(p => 
+    const newPatientsThisMonth = patients.filter(p =>
       new Date(p.createdAt) >= oneMonthAgo
     ).length;
 
     // Visit stats
-    const visitsThisWeek = prescriptions.filter(p => 
+    const visitsThisWeek = prescriptions.filter(p =>
       new Date(p.visitDate) >= oneWeekAgo
     ).length;
-    const visitsThisMonth = prescriptions.filter(p => 
+    const visitsThisMonth = prescriptions.filter(p =>
       new Date(p.visitDate) >= oneMonthAgo
     ).length;
 
     // Follow-up stats
-    const upcomingFollowUps = prescriptions.filter(p => 
-      p.followUpDate && 
-      new Date(p.followUpDate) <= oneWeekFromNow && 
+    const upcomingFollowUps = prescriptions.filter(p =>
+      p.followUpDate &&
+      new Date(p.followUpDate) <= oneWeekFromNow &&
       new Date(p.followUpDate) >= now
     );
 
@@ -83,7 +85,7 @@ export default function Dashboard() {
     const totalRevenue = bills.reduce((sum, bill) => sum + bill.amount, 0);
     const paidRevenue = bills.filter(b => b.isPaid).reduce((sum, bill) => sum + bill.amount, 0);
     const pendingRevenue = totalRevenue - paidRevenue;
-    const revenueThisMonth = bills.filter(b => 
+    const revenueThisMonth = bills.filter(b =>
       new Date(b.createdAt) >= oneMonthAgo
     ).reduce((sum, bill) => sum + bill.amount, 0);
 
@@ -137,6 +139,14 @@ export default function Dashboard() {
     setCurrentView('list');
   };
 
+  const handleViewTemplates = () => {
+    setCurrentView('templates');
+  };
+
+  const handleViewMedicalData = () => {
+    setCurrentView('medical-data');
+  };
+
   const handlePatientUpdate = (updatedPatients) => {
     setPatients(updatedPatients);
     storage.savePatients(updatedPatients);
@@ -147,29 +157,29 @@ export default function Dashboard() {
     const updatedPatients = patients.filter(p => p.id !== patientId);
     setPatients(updatedPatients);
     storage.savePatients(updatedPatients);
-    
+
     const allPrescriptions = storage.getPrescriptions();
     const updatedPrescriptions = allPrescriptions.filter(p => p.patientId !== patientId);
     storage.savePrescriptions(updatedPrescriptions);
-    
+
     const allBills = storage.getBills();
     const updatedBills = allBills.filter(b => b.patientId !== patientId);
     storage.saveBills(updatedBills);
-    
+
     if (selectedPatient && selectedPatient.id === patientId) {
       handleBackToDashboard();
     }
-    
+
     loadAllData();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Enhanced Header */}
-      <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-40">
+      <header className="bg-white max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 shadow-lg border border-gray-200 sticky top-0 z-40 rounded-b-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <div 
+            <div
               className="flex items-center space-x-4"
               onClick={() => setCurrentView('dashboard')}
               style={{ cursor: 'pointer' }}
@@ -186,7 +196,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               {currentView !== 'dashboard' && (
                 <button
@@ -197,13 +207,13 @@ export default function Dashboard() {
                   <span>Dashboard</span>
                 </button>
               )}
-              
+
               <button
                 onClick={() => handleNewPrescription()}
                 className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <Plus size={20} />
-                <span className="font-medium">New Prescription</span>
+                <span className="font-medium hidden sm:inline">New Prescription</span>
               </button>
             </div>
           </div>
@@ -299,7 +309,7 @@ export default function Dashboard() {
                     <TrendingUp className="w-5 h-5 text-blue-600" />
                     <span>Quick Actions</span>
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-4"> {/* Changed from grid-cols-2 to grid-cols-3 */}
                     <button
                       onClick={() => handleNewPrescription()}
                       className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl border border-blue-200 transition-all duration-200 group"
@@ -329,6 +339,36 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </button>
+
+                    <button
+                      onClick={handleViewTemplates}
+                      className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl border border-purple-200 transition-all duration-200 group"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-purple-600 rounded-lg group-hover:scale-110 transition-transform">
+                          <FileText className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-semibold text-gray-900">Templates</p>
+                          <p className="text-sm text-gray-600">Manage templates</p>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={handleViewMedicalData}
+                      className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-xl border border-orange-200 transition-all duration-200 group"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-orange-600 rounded-lg group-hover:scale-110 transition-transform">
+                          <Plus className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-semibold text-gray-900">Medical Data</p>
+                          <p className="text-sm text-gray-600">Manage symptoms & diagnoses</p>
+                        </div>
+                      </div>
+                    </button>
                   </div>
                 </div>
 
@@ -346,12 +386,12 @@ export default function Dashboard() {
                       View All
                     </button>
                   </div>
-                  
+
                   <div className="space-y-4">
                     {stats.recentPrescriptions?.length > 0 ? (
                       stats.recentPrescriptions.map((prescription) => (
                         <div key={prescription.id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
-                             onClick={() => handlePatientSelect(prescription.patient)}>
+                          onClick={() => handlePatientSelect(prescription.patient)}>
                           <div className="p-2 bg-blue-100 rounded-lg">
                             <FileText className="w-4 h-4 text-blue-600" />
                           </div>
@@ -392,14 +432,14 @@ export default function Dashboard() {
                     <CalendarDays className="w-5 h-5 text-purple-600" />
                     <span>Upcoming Follow-ups</span>
                   </h3>
-                  
+
                   <div className="space-y-3">
                     {stats.upcomingFollowUps?.length > 0 ? (
                       stats.upcomingFollowUps.slice(0, 5).map((prescription) => {
                         const patient = patients.find(p => p.id === prescription.patientId);
                         return (
                           <div key={prescription.id} className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer"
-                               onClick={() => patient && handlePatientSelect(patient)}>
+                            onClick={() => patient && handlePatientSelect(patient)}>
                             <div className="p-1.5 bg-purple-600 rounded-full">
                               <Clock className="w-3 h-3 text-white" />
                             </div>
@@ -425,7 +465,7 @@ export default function Dashboard() {
                     <BarChart3 className="w-5 h-5 text-orange-600" />
                     <span>This Month</span>
                   </h3>
-                  
+
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">New Patients</span>
@@ -505,6 +545,15 @@ export default function Dashboard() {
             onBack={handleBackToDashboard}
             onPatientUpdate={handlePatientUpdate}
           />
+        )}
+
+        {/* Add templates view */}
+        {currentView === 'templates' && (
+          <PrescriptionTemplates onBack={handleBackToDashboard} />
+        )}
+
+        {currentView === 'medical-data' && (
+          <MedicalDataManager onBack={handleBackToDashboard} />
         )}
       </main>
     </div>

@@ -113,10 +113,7 @@ export const generatePDF = async (prescription, patient) => {
     pdf.setFontSize(10);
     pdf.setFont(undefined, 'normal');
     prescription.labResults.forEach(lab => {
-      pdf.text(`• ${lab.testName}: ${lab.result}`, 25, yPosition);
-      if (lab.normalRange) {
-        pdf.text(`(Normal: ${lab.normalRange})`, 120, yPosition);
-      }
+      pdf.text(`• ${lab.testName}`, 25, yPosition);
       yPosition += 6;
     });
     yPosition += 5;
