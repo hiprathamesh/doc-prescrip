@@ -240,7 +240,7 @@ export const storage = {
       return response.data || [];
     } catch (error) {
       console.error('Error fetching custom symptoms:', error);
-      return [];
+      return []; // Always return an array
     }
   },
 
@@ -291,7 +291,7 @@ export const storage = {
       return response.data || [];
     } catch (error) {
       console.error('Error fetching custom diagnoses:', error);
-      return [];
+      return []; // Always return an array
     }
   },
 
@@ -342,7 +342,7 @@ export const storage = {
       return response.data || [];
     } catch (error) {
       console.error('Error fetching custom lab tests:', error);
-      return [];
+      return []; // Always return an array
     }
   },
 
@@ -393,7 +393,7 @@ export const storage = {
       return response.data || [];
     } catch (error) {
       console.error('Error fetching custom medications:', error);
-      return [];
+      return []; // Always return an array
     }
   },
 

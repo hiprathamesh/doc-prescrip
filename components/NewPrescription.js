@@ -51,6 +51,12 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   const [showTemplates, setShowTemplates] = useState(false);
   const [templateSearch, setTemplateSearch] = useState('');
 
+  // Initialize custom data
+  const [customSymptoms, setCustomSymptoms] = useState([]);
+  const [customDiagnoses, setCustomDiagnoses] = useState([]);
+  const [customLabTests, setCustomLabTests] = useState([]);
+  const [customMedications, setCustomMedications] = useState([]);
+
   useEffect(() => {
     if (selectedPatient) {
       const prescriptions = storage.getPrescriptionsByPatient(selectedPatient.id);
@@ -71,6 +77,11 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       customInputRef.current.focus();
     }
   }, [isAddingCustom]);
+
+  // Load custom data on mount
+  useEffect(() => {
+    loadCustomData();
+  }, []);
 
   const generatePatientId = () => {
     const prefix = 'P';
@@ -428,6 +439,30 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     }
   };
 
+  // Load custom data from storage
+  const loadCustomData = async () => {
+    try {
+      const [symptoms, diagnoses, labTests, medications] = await Promise.all([
+        storage.getCustomSymptoms(),
+        storage.getCustomDiagnoses(), 
+        storage.getCustomLabTests(),
+        storage.getCustomMedications()
+      ]);
+      
+      setCustomSymptoms(symptoms || []);
+      setCustomDiagnoses(diagnoses || []);
+      setCustomLabTests(labTests || []);
+      setCustomMedications(medications || []);
+    } catch (error) {
+      console.error('Error loading custom data:', error);
+      // Set fallback empty arrays
+      setCustomSymptoms([]);
+      setCustomDiagnoses([]);
+      setCustomLabTests([]);
+      setCustomMedications([]);
+    }
+  };
+
   return (
     <div className="space-y-8 bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen">
       {/* Enhanced Header */}
@@ -778,7 +813,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               <div className="space-y-6">
                 <PillSelector
                   title="Select Symptoms"
-                  items={[...PREDEFINED_SYMPTOMS, ...storage.getCustomSymptoms()]}
+                  items={[...PREDEFINED_SYMPTOMS, ...customSymptoms]}
                   onSelect={(symptom) => {
                     const newSymptom = {
                       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -789,8 +824,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     setSymptoms([...symptoms, newSymptom]);
                   }}
                   searchPlaceholder="Search symptoms..."
-                  onAddCustom={(symptom) => {
-                    storage.addCustomSymptom(symptom);
+                  onAddCustom={async (symptom) => {
+                    await storage.addCustomSymptom(symptom);
+                    await loadCustomData(); // Reload custom data
                     const newSymptom = {
                       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                       name: symptom,
@@ -845,7 +881,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               <div className="space-y-6">
                 <PillSelector
                   title="Select Diagnosis"
-                  items={[...PREDEFINED_DIAGNOSES, ...storage.getCustomDiagnoses()]}
+                  items={[...PREDEFINED_DIAGNOSES, ...customDiagnoses]}
                   onSelect={(diagnosis) => {
                     const newDiagnosis = {
                       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -855,8 +891,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     setDiagnoses([...diagnoses, newDiagnosis]);
                   }}
                   searchPlaceholder="Search diagnoses..."
-                  onAddCustom={(diagnosis) => {
-                    storage.addCustomDiagnosis(diagnosis);
+                  onAddCustom={async (diagnosis) => {
+                    await storage.addCustomDiagnosis(diagnosis);
+                    await loadCustomData(); // Reload custom data
                     const newDiagnosis = {
                       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                       name: diagnosis,
@@ -908,8 +945,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     };
                     setMedications([...medications, newMedication]);
                   }}
-                  onAddCustom={(medication) => {
-                    storage.addCustomMedication(medication);
+                  onAddCustom={async (medication) => {
+                    await storage.addCustomMedication(medication);
+                    await loadCustomData(); // Reload custom data
                     const newMedication = {
                       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                       name: medication,
@@ -980,7 +1018,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               <div className="space-y-6">
                 <PillSelector
                   title="Select Lab Tests"
-                  items={[...PREDEFINED_LAB_TESTS, ...storage.getCustomLabTests()]}
+                  items={[...PREDEFINED_LAB_TESTS, ...customLabTests]}
                   onSelect={(labTest) => {
                     const newLabResult = {
                       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -989,8 +1027,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     setLabResults([...labResults, newLabResult]);
                   }}
                   searchPlaceholder="Search lab tests..."
-                  onAddCustom={(labTest) => {
-                    storage.addCustomLabTest(labTest);
+                  onAddCustom={async (labTest) => {
+                    await storage.addCustomLabTest(labTest);
+                    await loadCustomData(); // Reload custom data
                     const newLabResult = {
                       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                       testName: labTest
