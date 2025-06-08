@@ -46,7 +46,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   // Previous prescription for reference
   const [previousPrescription, setPreviousPrescription] = useState(null);
 
-  // Prescription templates state
+  // Initialize templates as empty array to prevent filter error
   const [templates, setTemplates] = useState([]);
   const [showTemplates, setShowTemplates] = useState(false);
   const [templateSearch, setTemplateSearch] = useState('');
@@ -60,6 +60,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     }
   }, [selectedPatient]);
 
+  // Add this useEffect to load templates
   useEffect(() => {
     loadTemplates();
   }, []);
@@ -100,15 +101,21 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     setIsNewPatient(false);
   };
 
-  const loadTemplates = () => {
-    const savedTemplates = storage.getTemplates();
-    setTemplates(savedTemplates);
+  const loadTemplates = async () => {
+    try {
+      const savedTemplates = await storage.getTemplates();
+      setTemplates(savedTemplates || []); // Ensure it's always an array
+    } catch (error) {
+      console.error('Error loading templates:', error);
+      setTemplates([]); // Fallback to empty array
+    }
   };
 
-  const filteredTemplates = templates.filter(template =>
+  // Fix the filter function with safety check
+  const filteredTemplates = (templates || []).filter(template =>
     template.name.toLowerCase().includes(templateSearch.toLowerCase()) ||
     template.description.toLowerCase().includes(templateSearch.toLowerCase()) ||
-    template.diagnosis.some(d => d.name.toLowerCase().includes(templateSearch.toLowerCase()))
+    (template.diagnosis || []).some(d => d.name.toLowerCase().includes(templateSearch.toLowerCase()))
   );
 
   const applyTemplate = (template) => {

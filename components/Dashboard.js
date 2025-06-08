@@ -39,16 +39,24 @@ export default function Dashboard() {
     loadAllData();
   }, []);
 
-  const loadAllData = () => {
-    const savedPatients = storage.getPatients();
-    const savedPrescriptions = storage.getPrescriptions();
-    const savedBills = storage.getBills();
+  const loadAllData = async () => {
+    try {
+      // Load all data concurrently
+      const [savedPatients, savedPrescriptions, savedBills] = await Promise.all([
+        storage.getPatients(),
+        storage.getPrescriptions(),
+        storage.getBills()
+      ]);
 
-    setPatients(savedPatients);
-    setPrescriptions(savedPrescriptions);
-    setBills(savedBills);
+      setPatients(savedPatients);
+      setPrescriptions(savedPrescriptions);
+      setBills(savedBills);
 
-    calculateStats(savedPatients, savedPrescriptions, savedBills);
+      calculateStats(savedPatients, savedPrescriptions, savedBills);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      // Handle error - maybe show a notification to user
+    }
   };
 
   const calculateStats = (patients, prescriptions, bills) => {
@@ -147,24 +155,24 @@ export default function Dashboard() {
     setCurrentView('medical-data');
   };
 
-  const handlePatientUpdate = (updatedPatients) => {
+  const handlePatientUpdate = async (updatedPatients) => {
     setPatients(updatedPatients);
-    storage.savePatients(updatedPatients);
+    await storage.savePatients(updatedPatients);
     loadAllData();
   };
 
-  const handlePatientDelete = (patientId) => {
+  const handlePatientDelete = async (patientId) => {
     const updatedPatients = patients.filter(p => p.id !== patientId);
     setPatients(updatedPatients);
-    storage.savePatients(updatedPatients);
+    await storage.savePatients(updatedPatients);
 
-    const allPrescriptions = storage.getPrescriptions();
+    const allPrescriptions = await storage.getPrescriptions();
     const updatedPrescriptions = allPrescriptions.filter(p => p.patientId !== patientId);
-    storage.savePrescriptions(updatedPrescriptions);
+    await storage.savePrescriptions(updatedPrescriptions);
 
-    const allBills = storage.getBills();
+    const allBills = await storage.getBills();
     const updatedBills = allBills.filter(b => b.patientId !== patientId);
-    storage.saveBills(updatedBills);
+    await storage.saveBills(updatedBills);
 
     if (selectedPatient && selectedPatient.id === patientId) {
       handleBackToDashboard();
