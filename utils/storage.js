@@ -127,4 +127,24 @@ export const storage = {
       storage.saveCustomLabTests(labTests);
     }
   },
+
+  // Custom Medications
+  getCustomMedications: () => {
+    if (typeof window === 'undefined') return [];
+    const data = localStorage.getItem('custom_medications');
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveCustomMedications: (medications) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('custom_medications', JSON.stringify(medications));
+  },
+
+  addCustomMedication: (medication) => {
+    const medications = storage.getCustomMedications();
+    if (!medications.includes(medication)) {
+      medications.push(medication);
+      storage.saveCustomMedications(medications);
+    }
+  },
 };

@@ -8,6 +8,7 @@ import { sendWhatsApp, generateWhatsAppMessage } from '../utils/whatsapp';
 import { formatDate, getTodayString } from '../utils/dateUtils';
 import { MEDICAL_CONDITIONS, SEVERITY_OPTIONS, DURATION_OPTIONS, MEDICATION_TIMING, FREQUENCY_OPTIONS } from '../lib/constants';
 import PillSelector from './PillSelector';
+import MedicationSelector from './MedicationSelector';
 import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from '../lib/medicalData';
 
 export default function NewPrescription({ patient, patients, onBack, onPatientUpdate }) {
@@ -887,70 +888,81 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
             {/* Medications */}
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Medications</h3>
-                <button
-                  onClick={addMedication}
-                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Medication</span>
-                </button>
-              </div>
-              <div className="space-y-4">
-                {medications.map((medication) => (
-                  <div key={medication.id} className="grid grid-cols-6 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-                    <input
-                      type="text"
-                      placeholder="Medication name"
-                      value={medication.name}
-                      onChange={(e) => updateMedication(medication.id, 'name', e.target.value)}
-                      className="input-field"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Dosage"
-                      value={medication.dosage}
-                      onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
-                      className="input-field"
-                    />
-                    <select
-                      value={medication.timing}
-                      onChange={(e) => updateMedication(medication.id, 'timing', e.target.value)}
-                      className="input-field"
-                    >
-                      {MEDICATION_TIMING.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={medication.frequency}
-                      onChange={(e) => updateMedication(medication.id, 'frequency', e.target.value)}
-                      className="input-field"
-                    >
-                      <option value="">Frequency</option>
-                      {FREQUENCY_OPTIONS.map(freq => (
-                        <option key={freq} value={freq}>{freq}</option>
-                      ))}
-                    </select>
-                    <input
-                      type="text"
-                      placeholder="Duration"
-                      value={medication.duration}
-                      onChange={(e) => updateMedication(medication.id, 'duration', e.target.value)}
-                      className="input-field"
-                    />
-                    <button
-                      onClick={() => removeMedication(medication.id)}
-                      className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                {medications.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No medications added yet. Click "Add Medication" to start.</p>
+              <div className="space-y-6">
+                <MedicationSelector
+                  onSelect={(medication) => {
+                    const newMedication = {
+                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                      name: medication,
+                      dosage: '',
+                      timing: 'after_meal',
+                      frequency: '',
+                      duration: ''
+                    };
+                    setMedications([...medications, newMedication]);
+                  }}
+                  onAddCustom={(medication) => {
+                    storage.addCustomMedication(medication);
+                    const newMedication = {
+                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                      name: medication,
+                      dosage: '',
+                      timing: 'after_meal',
+                      frequency: '',
+                      duration: ''
+                    };
+                    setMedications([...medications, newMedication]);
+                  }}
+                />
+
+                {/* Selected medications with details */}
+                {medications.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-800">Selected Medications</h4>
+                    {medications.map((medication) => (
+                      <div key={medication.id} className="grid grid-cols-6 gap-4 items-center p-4 bg-gray-50 rounded-xl">
+                        <div className="font-medium text-gray-900">{medication.name}</div>
+                        <input
+                          type="text"
+                          placeholder="Dosage"
+                          value={medication.dosage}
+                          onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
+                          className="input-field"
+                        />
+                        <select
+                          value={medication.timing}
+                          onChange={(e) => updateMedication(medication.id, 'timing', e.target.value)}
+                          className="input-field"
+                        >
+                          {MEDICATION_TIMING.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={medication.frequency}
+                          onChange={(e) => updateMedication(medication.id, 'frequency', e.target.value)}
+                          className="input-field"
+                        >
+                          <option value="">Frequency</option>
+                          {FREQUENCY_OPTIONS.map(freq => (
+                            <option key={freq} value={freq}>{freq}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          placeholder="Duration"
+                          value={medication.duration}
+                          onChange={(e) => updateMedication(medication.id, 'duration', e.target.value)}
+                          className="input-field"
+                        />
+                        <button
+                          onClick={() => removeMedication(medication.id)}
+                          className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
