@@ -116,17 +116,17 @@ class MedicationApiService {
 
       let allMedications = [];
 
-      if (openFDAResults.status === 'fulfilled') {
+      if (openFDAResults.status === 'fulfilled' && Array.isArray(openFDAResults.value)) {
         allMedications.push(...openFDAResults.value);
       }
 
-      if (rxNavResults.status === 'fulfilled') {
+      if (rxNavResults.status === 'fulfilled' && Array.isArray(rxNavResults.value)) {
         allMedications.push(...rxNavResults.value);
       }
 
       // Remove duplicates based on name
       const uniqueMedications = allMedications.filter((med, index, self) =>
-        index === self.findIndex(m => m.name.toLowerCase() === med.name.toLowerCase())
+        index === self.findIndex(m => m.name && med.name && m.name.toLowerCase() === med.name.toLowerCase())
       );
 
       return uniqueMedications.slice(0, limit);

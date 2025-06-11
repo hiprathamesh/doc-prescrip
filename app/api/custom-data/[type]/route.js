@@ -1,9 +1,6 @@
 import { databaseService } from '../../../../services/databaseService';
 import { NextResponse } from 'next/server';
 
-/**
- * GET /api/custom-data/[type] - Fetch custom data by type
- */
 export async function GET(request, { params }) {
   try {
     const { type } = params;
@@ -39,9 +36,6 @@ export async function GET(request, { params }) {
   }
 }
 
-/**
- * POST /api/custom-data/[type] - Save custom data by type
- */
 export async function POST(request, { params }) {
   try {
     const { type } = params;

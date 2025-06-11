@@ -1,9 +1,8 @@
 /**
- * Updated storage service that uses MongoDB Atlas through API calls
- * This replaces localStorage with cloud database storage
+ * Storage service that uses MongoDB Atlas through API calls
  */
 
-// API endpoints for different data types
+// API endpoints
 const API_ENDPOINTS = {
   PATIENTS: '/api/patients',
   PRESCRIPTIONS: '/api/prescriptions',
@@ -14,9 +13,6 @@ const API_ENDPOINTS = {
 
 /**
  * Helper function to make API calls
- * @param {string} url - API endpoint URL
- * @param {Object} options - Fetch options
- * @returns {Promise<Object>} API response
  */
 async function apiCall(url, options = {}) {
   try {
@@ -31,77 +27,59 @@ async function apiCall(url, options = {}) {
     const data = await response.json();
     
     if (!response.ok) {
-      throw new Error(data.error || `API call failed: ${response.status}`);
+      console.error(`API call failed: ${response.status}`, data);
+      throw new Error(`API call failed: ${response.status} - ${data.error || 'Unknown error'}`);
     }
     
     return data;
   } catch (error) {
     console.error('API call error:', error);
-    // Fallback to empty data for GET requests
-    if (!options.method || options.method === 'GET') {
-      return { success: true, data: [] };
+    // Don't return empty structure for non-GET requests
+    if (options.method && options.method !== 'GET') {
+      throw error;
     }
-    throw error;
+    // Return empty structure for GET requests
+    return { success: true, data: [] };
   }
 }
 
 export const storage = {
   
-  // ==================== PATIENTS OPERATIONS ====================
-  
-  /**
-   * Get all patients from MongoDB Atlas
-   * @returns {Promise<Array>} Array of patient objects
-   */
+  // PATIENTS
   getPatients: async () => {
     try {
       const response = await apiCall(API_ENDPOINTS.PATIENTS);
-      return response.data || [];
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-      console.error('Error fetching patients:', error);
+      console.error('Error getting patients:', error);
       return [];
     }
   },
 
-  /**
-   * Save patients to MongoDB Atlas
-   * @param {Array} patients - Array of patient objects
-   * @returns {Promise<boolean>} Success status
-   */
   savePatients: async (patients) => {
     try {
-      await apiCall(API_ENDPOINTS.PATIENTS, {
+      const response = await apiCall(API_ENDPOINTS.PATIENTS, {
         method: 'POST',
         body: JSON.stringify({ patients })
       });
-      return true;
+      return response.success !== false;
     } catch (error) {
       console.error('Error saving patients:', error);
       return false;
     }
   },
 
-  // ==================== PRESCRIPTIONS OPERATIONS ====================
-
-  /**
-   * Get all prescriptions from MongoDB Atlas
-   * @returns {Promise<Array>} Array of prescription objects
-   */
+  // PRESCRIPTIONS
   getPrescriptions: async () => {
     try {
       const response = await apiCall(API_ENDPOINTS.PRESCRIPTIONS);
-      return response.data || [];
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-      console.error('Error fetching prescriptions:', error);
+      console.error('Error getting prescriptions:', error);
       return [];
     }
   },
 
-  /**
-   * Save prescriptions to MongoDB Atlas
-   * @param {Array} prescriptions - Array of prescription objects
-   * @returns {Promise<boolean>} Success status
-   */
   savePrescriptions: async (prescriptions) => {
     try {
       await apiCall(API_ENDPOINTS.PRESCRIPTIONS, {
@@ -115,42 +93,29 @@ export const storage = {
     }
   },
 
-  /**
-   * Get prescriptions for a specific patient
-   * @param {string} patientId - Patient ID
-   * @returns {Promise<Array>} Array of prescriptions for the patient
-   */
   getPrescriptionsByPatient: async (patientId) => {
     try {
-      const response = await apiCall(`${API_ENDPOINTS.PRESCRIPTIONS}/patient/${patientId}`);
-      return response.data || [];
+      // Ensure patientId is always a string for consistency
+      const normalizedPatientId = patientId?.toString();
+      const response = await apiCall(`${API_ENDPOINTS.PRESCRIPTIONS}/patient/${normalizedPatientId}`);
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-      console.error('Error fetching prescriptions by patient:', error);
+      console.error('Error getting prescriptions by patient:', error);
       return [];
     }
   },
 
-  // ==================== BILLS OPERATIONS ====================
-
-  /**
-   * Get all bills from MongoDB Atlas
-   * @returns {Promise<Array>} Array of bill objects
-   */
+  // BILLS
   getBills: async () => {
     try {
       const response = await apiCall(API_ENDPOINTS.BILLS);
-      return response.data || [];
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-      console.error('Error fetching bills:', error);
+      console.error('Error getting bills:', error);
       return [];
     }
   },
 
-  /**
-   * Save bills to MongoDB Atlas
-   * @param {Array} bills - Array of bill objects
-   * @returns {Promise<boolean>} Success status
-   */
   saveBills: async (bills) => {
     try {
       await apiCall(API_ENDPOINTS.BILLS, {
@@ -164,42 +129,29 @@ export const storage = {
     }
   },
 
-  /**
-   * Get bills for a specific patient
-   * @param {string} patientId - Patient ID
-   * @returns {Promise<Array>} Array of bills for the patient
-   */
   getBillsByPatient: async (patientId) => {
     try {
-      const response = await apiCall(`${API_ENDPOINTS.BILLS}/patient/${patientId}`);
-      return response.data || [];
+      // Ensure patientId is always a string for consistency
+      const normalizedPatientId = patientId?.toString();
+      const response = await apiCall(`${API_ENDPOINTS.BILLS}/patient/${normalizedPatientId}`);
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-      console.error('Error fetching bills by patient:', error);
+      console.error('Error getting bills by patient:', error);
       return [];
     }
   },
 
-  // ==================== TEMPLATES OPERATIONS ====================
-
-  /**
-   * Get all prescription templates
-   * @returns {Promise<Array>} Array of template objects
-   */
+  // TEMPLATES
   getTemplates: async () => {
     try {
       const response = await apiCall(API_ENDPOINTS.TEMPLATES);
-      return response.data || [];
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-      console.error('Error fetching templates:', error);
+      console.error('Error getting templates:', error);
       return [];
     }
   },
 
-  /**
-   * Save templates to MongoDB Atlas
-   * @param {Array} templates - Array of template objects
-   * @returns {Promise<boolean>} Success status
-   */
   saveTemplates: async (templates) => {
     try {
       await apiCall(API_ENDPOINTS.TEMPLATES, {
@@ -213,47 +165,47 @@ export const storage = {
     }
   },
 
-  /**
-   * Get a specific template by ID
-   * @param {string} id - Template ID
-   * @returns {Promise<Object|null>} Template object or null
-   */
-  getTemplate: async (id) => {
+  saveTemplate: async (template) => {
     try {
-      const templates = await storage.getTemplates();
-      return templates.find(template => template.id === id) || null;
+      const response = await apiCall(`${API_ENDPOINTS.TEMPLATES}/single`, {
+        method: 'POST',
+        body: JSON.stringify({ template })
+      });
+      return response.data || template;
     } catch (error) {
-      console.error('Error fetching template:', error);
+      console.error('Error saving template:', error);
       return null;
     }
   },
 
-  // ==================== CUSTOM DATA OPERATIONS ====================
-
-  /**
-   * Get custom symptoms from MongoDB Atlas
-   * @returns {Promise<Array>} Array of custom symptoms
-   */
-  getCustomSymptoms: async () => {
+  deleteTemplate: async (templateId) => {
     try {
-      const response = await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/symptoms`);
-      return response.data || [];
+      await apiCall(`${API_ENDPOINTS.TEMPLATES}/${templateId}`, {
+        method: 'DELETE'
+      });
+      return true;
     } catch (error) {
-      console.error('Error fetching custom symptoms:', error);
-      return []; // Always return an array
+      console.error('Error deleting template:', error);
+      return false;
     }
   },
 
-  /**
-   * Save custom symptoms to MongoDB Atlas
-   * @param {Array} symptoms - Array of symptom strings
-   * @returns {Promise<boolean>} Success status
-   */
+  // CUSTOM DATA
+  getCustomSymptoms: async () => {
+    try {
+      const response = await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/symptoms`);
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      console.error('Error getting custom symptoms:', error);
+      return [];
+    }
+  },
+
   saveCustomSymptoms: async (symptoms) => {
     try {
       await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/symptoms`, {
         method: 'POST',
-        body: JSON.stringify({ items: symptoms })
+        body: JSON.stringify({ items: Array.isArray(symptoms) ? symptoms : [] })
       });
       return true;
     } catch (error) {
@@ -262,11 +214,6 @@ export const storage = {
     }
   },
 
-  /**
-   * Add a custom symptom (helper method)
-   * @param {string} symptom - Symptom to add
-   * @returns {Promise<boolean>} Success status
-   */
   addCustomSymptom: async (symptom) => {
     try {
       const symptoms = await storage.getCustomSymptoms();
@@ -281,30 +228,21 @@ export const storage = {
     }
   },
 
-  /**
-   * Get custom diagnoses from MongoDB Atlas
-   * @returns {Promise<Array>} Array of custom diagnoses
-   */
   getCustomDiagnoses: async () => {
     try {
       const response = await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/diagnoses`);
-      return response.data || [];
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-      console.error('Error fetching custom diagnoses:', error);
-      return []; // Always return an array
+      console.error('Error getting custom diagnoses:', error);
+      return [];
     }
   },
 
-  /**
-   * Save custom diagnoses to MongoDB Atlas
-   * @param {Array} diagnoses - Array of diagnosis strings
-   * @returns {Promise<boolean>} Success status
-   */
   saveCustomDiagnoses: async (diagnoses) => {
     try {
       await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/diagnoses`, {
         method: 'POST',
-        body: JSON.stringify({ items: diagnoses })
+        body: JSON.stringify({ items: Array.isArray(diagnoses) ? diagnoses : [] })
       });
       return true;
     } catch (error) {
@@ -313,11 +251,6 @@ export const storage = {
     }
   },
 
-  /**
-   * Add a custom diagnosis (helper method)
-   * @param {string} diagnosis - Diagnosis to add
-   * @returns {Promise<boolean>} Success status
-   */
   addCustomDiagnosis: async (diagnosis) => {
     try {
       const diagnoses = await storage.getCustomDiagnoses();
@@ -332,30 +265,21 @@ export const storage = {
     }
   },
 
-  /**
-   * Get custom lab tests from MongoDB Atlas
-   * @returns {Promise<Array>} Array of custom lab tests
-   */
   getCustomLabTests: async () => {
     try {
       const response = await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/lab-tests`);
-      return response.data || [];
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-      console.error('Error fetching custom lab tests:', error);
-      return []; // Always return an array
+      console.error('Error getting custom lab tests:', error);
+      return [];
     }
   },
 
-  /**
-   * Save custom lab tests to MongoDB Atlas
-   * @param {Array} labTests - Array of lab test strings
-   * @returns {Promise<boolean>} Success status
-   */
   saveCustomLabTests: async (labTests) => {
     try {
       await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/lab-tests`, {
         method: 'POST',
-        body: JSON.stringify({ items: labTests })
+        body: JSON.stringify({ items: Array.isArray(labTests) ? labTests : [] })
       });
       return true;
     } catch (error) {
@@ -364,11 +288,6 @@ export const storage = {
     }
   },
 
-  /**
-   * Add a custom lab test (helper method)
-   * @param {string} labTest - Lab test to add
-   * @returns {Promise<boolean>} Success status
-   */
   addCustomLabTest: async (labTest) => {
     try {
       const labTests = await storage.getCustomLabTests();
@@ -383,30 +302,21 @@ export const storage = {
     }
   },
 
-  /**
-   * Get custom medications from MongoDB Atlas
-   * @returns {Promise<Array>} Array of custom medications
-   */
   getCustomMedications: async () => {
     try {
       const response = await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/medications`);
-      return response.data || [];
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-      console.error('Error fetching custom medications:', error);
-      return []; // Always return an array
+      console.error('Error getting custom medications:', error);
+      return [];
     }
   },
 
-  /**
-   * Save custom medications to MongoDB Atlas
-   * @param {Array} medications - Array of medication strings
-   * @returns {Promise<boolean>} Success status
-   */
   saveCustomMedications: async (medications) => {
     try {
       await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/medications`, {
         method: 'POST',
-        body: JSON.stringify({ items: medications })
+        body: JSON.stringify({ items: Array.isArray(medications) ? medications : [] })
       });
       return true;
     } catch (error) {
@@ -415,11 +325,6 @@ export const storage = {
     }
   },
 
-  /**
-   * Add a custom medication (helper method)
-   * @param {string} medication - Medication to add
-   * @returns {Promise<boolean>} Success status
-   */
   addCustomMedication: async (medication) => {
     try {
       const medications = await storage.getCustomMedications();
@@ -432,5 +337,5 @@ export const storage = {
       console.error('Error adding custom medication:', error);
       return false;
     }
-  },
+  }
 };

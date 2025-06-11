@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Plus, Trash2, Save, X, FileText, Search } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Save, X, FileText, Search, RotateCw } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { generatePDF } from '../utils/pdfGenerator';
 import { sendWhatsApp, generateWhatsAppMessage } from '../utils/whatsapp';
 import { formatDate, getTodayString } from '../utils/dateUtils';
-import { MEDICAL_CONDITIONS, SEVERITY_OPTIONS, DURATION_OPTIONS, MEDICATION_TIMING, FREQUENCY_OPTIONS } from '../lib/constants';
+import { MEDICAL_CONDITIONS, SEVERITY_OPTIONS, DURATION_OPTIONS, MEDICATION_TIMING, MEDICATION_DURATION_OPTIONS } from '../lib/constants';
 import PillSelector from './PillSelector';
 import MedicationSelector from './MedicationSelector';
 import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from '../lib/medicalData';
@@ -56,6 +56,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   const [customDiagnoses, setCustomDiagnoses] = useState([]);
   const [customLabTests, setCustomLabTests] = useState([]);
   const [customMedications, setCustomMedications] = useState([]);
+  const [isLoadingCustomData, setIsLoadingCustomData] = useState(true);
 
   useEffect(() => {
     if (selectedPatient) {
@@ -89,51 +90,67 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     return `${prefix}${timestamp}`;
   };
 
-  const handleCreateNewPatient = () => {
+  const handleCreateNewPatient = async () => {
     if (!newPatientData.name || !newPatientData.age || !newPatientData.phone) {
       alert('Please fill all required fields for new patient');
       return;
     }
 
-    const newPatient = {
-      id: generatePatientId(),
-      name: newPatientData.name,
-      gender: newPatientData.gender,
-      age: parseInt(newPatientData.age),
-      phone: newPatientData.phone,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+    try {
+      const newPatient = {
+        id: generatePatientId(),
+        name: newPatientData.name,
+        gender: newPatientData.gender,
+        age: parseInt(newPatientData.age),
+        phone: newPatientData.phone,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
 
-    const updatedPatients = [...patients, newPatient];
-    storage.savePatients(updatedPatients);
-    onPatientUpdate(updatedPatients);
-    setSelectedPatient(newPatient);
-    setIsNewPatient(false);
+      const updatedPatients = [...patients, newPatient];
+      const success = await storage.savePatients(updatedPatients);
+      
+      if (success) {
+        onPatientUpdate(updatedPatients);
+        setSelectedPatient(newPatient);
+        setIsNewPatient(false);
+      } else {
+        alert('Failed to create patient. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating patient:', error);
+      alert('Failed to create patient. Please try again.');
+    }
   };
 
   const loadTemplates = async () => {
     try {
       const savedTemplates = await storage.getTemplates();
-      setTemplates(savedTemplates || []); // Ensure it's always an array
+      setTemplates(Array.isArray(savedTemplates) ? savedTemplates : []);
     } catch (error) {
       console.error('Error loading templates:', error);
-      setTemplates([]); // Fallback to empty array
+      setTemplates([]);
     }
   };
 
-  // Fix the filter function with safety check
-  const filteredTemplates = (templates || []).filter(template =>
-    template.name.toLowerCase().includes(templateSearch.toLowerCase()) ||
-    template.description.toLowerCase().includes(templateSearch.toLowerCase()) ||
-    (template.diagnosis || []).some(d => d.name.toLowerCase().includes(templateSearch.toLowerCase()))
-  );
+  // Fix the filter function with better safety checks
+  const filteredTemplates = (templates || []).filter(template => {
+    if (!template) return false;
+    
+    const nameMatch = template.name?.toLowerCase().includes(templateSearch.toLowerCase());
+    const descMatch = template.description?.toLowerCase().includes(templateSearch.toLowerCase());
+    const diagMatch = (template.diagnosis || []).some(d => 
+      d?.name?.toLowerCase().includes(templateSearch.toLowerCase())
+    );
+    
+    return nameMatch || descMatch || diagMatch;
+  });
 
   const applyTemplate = (template) => {
-    // Apply template data to current prescription
+    if (!template) return;
 
     // Apply symptoms with proper structure
-    if (template.symptoms && template.symptoms.length > 0) {
+    if (template.symptoms && Array.isArray(template.symptoms) && template.symptoms.length > 0) {
       setSymptoms(template.symptoms.map(symptom => ({
         ...symptom,
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
@@ -141,7 +158,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     }
 
     // Apply diagnosis with proper structure
-    if (template.diagnosis && template.diagnosis.length > 0) {
+    if (template.diagnosis && Array.isArray(template.diagnosis) && template.diagnosis.length > 0) {
       setDiagnoses(template.diagnosis.map(diagnosis => ({
         ...diagnosis,
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
@@ -149,7 +166,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     }
 
     // Apply medications with proper structure
-    if (template.medications && template.medications.length > 0) {
+    if (template.medications && Array.isArray(template.medications) && template.medications.length > 0) {
       setMedications(template.medications.map(medication => ({
         ...medication,
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
@@ -157,7 +174,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     }
 
     // Apply lab results with proper structure
-    if (template.labResults && template.labResults.length > 0) {
+    if (template.labResults && Array.isArray(template.labResults) && template.labResults.length > 0) {
       setLabResults(template.labResults.map(labResult => ({
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         testName: labResult.testName || labResult.name || labResult
@@ -314,16 +331,37 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     const newMedication = {
       id: Date.now().toString(),
       name: '',
+      timing: {
+        morning: false,
+        afternoon: false,
+        evening: false,
+        night: false
+      },
       dosage: '',
-      timing: 'after_meal',
-      frequency: '',
-      duration: ''
+      mealTiming: 'after_meal',
+      duration: '',
+      remarks: ''
     };
     setMedications([...medications, newMedication]);
   };
 
   const updateMedication = (id, field, value) => {
-    setMedications(medications.map(m => m.id === id ? { ...m, [field]: value } : m));
+    setMedications(medications.map(m => {
+      if (m.id === id) {
+        if (field.startsWith('timing.')) {
+          const timingField = field.split('.')[1];
+          return {
+            ...m,
+            timing: {
+              ...m.timing,
+              [timingField]: value
+            }
+          };
+        }
+        return { ...m, [field]: value };
+      }
+      return m;
+    }));
   };
 
   const removeMedication = (id) => {
@@ -357,91 +395,103 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       return;
     }
 
-    // Convert medical history to the expected format
-    const medicalHistoryObj = {
-      alcoholConsumption: selectedMedicalHistory.has('Alcohol Consumption'),
-      smoking: selectedMedicalHistory.has('Smoking'),
-      kidneyStone: selectedMedicalHistory.has('Kidney Stone'),
-      diabetes: selectedMedicalHistory.has('Diabetes'),
-      hypertension: selectedMedicalHistory.has('Hypertension'),
-      heartDisease: selectedMedicalHistory.has('Heart Disease'),
-      allergies: [],
-      otherConditions: Array.from(selectedMedicalHistory).filter(condition =>
-        !MEDICAL_CONDITIONS.includes(condition)
-      )
-    };
+    try {
+      // Convert medical history to the expected format
+      const medicalHistoryObj = {
+        alcoholConsumption: selectedMedicalHistory.has('Alcohol Consumption'),
+        smoking: selectedMedicalHistory.has('Smoking'),
+        kidneyStone: selectedMedicalHistory.has('Kidney Stone'),
+        diabetes: selectedMedicalHistory.has('Diabetes'),
+        hypertension: selectedMedicalHistory.has('Hypertension'),
+        heartDisease: selectedMedicalHistory.has('Heart Disease'),
+        allergies: [],
+        otherConditions: Array.from(selectedMedicalHistory).filter(condition =>
+          !MEDICAL_CONDITIONS.includes(condition)
+        )
+      };
 
-    const prescription = {
-      id: Date.now().toString(),
-      patientId: selectedPatient.id,
-      visitDate: new Date(),
-      symptoms,
-      diagnosis: diagnoses,
-      medications,
-      labResults,
-      medicalHistory: medicalHistoryObj,
-      doctorNotes: doctorNotesList.map(note => note.text).join('\n'),
-      advice: adviceList.map(advice => advice.text).join('\n'),
-      followUpDate: followUpDate ? new Date(followUpDate) : undefined,
-      createdAt: new Date()
-    };
-
-    // Save prescription
-    const prescriptions = storage.getPrescriptions();
-    prescriptions.push(prescription);
-    storage.savePrescriptions(prescriptions);
-
-    // Create bill if consultation fee is provided
-    if (consultationFee && parseFloat(consultationFee) > 0) {
-      const bill = {
-        id: Date.now().toString() + '_bill',
-        patientId: selectedPatient.id,
-        prescriptionId: prescription.id,
-        amount: parseFloat(consultationFee),
-        description: `Consultation - ${formatDate(new Date())}`,
-        isPaid: false,
+      const prescription = {
+        id: Date.now().toString(),
+        // Ensure patientId is always stored as string
+        patientId: selectedPatient.id?.toString(),
+        visitDate: new Date(),
+        symptoms,
+        diagnosis: diagnoses,
+        medications,
+        labResults,
+        medicalHistory: medicalHistoryObj,
+        doctorNotes: doctorNotesList.map(note => note.text).join('\n'),
+        advice: adviceList.map(advice => advice.text).join('\n'),
+        followUpDate: followUpDate ? new Date(followUpDate) : undefined,
         createdAt: new Date()
       };
 
-      const bills = storage.getBills();
-      bills.push(bill);
-      storage.saveBills(bills);
-    }
+      // Save prescription
+      const prescriptions = await storage.getPrescriptions();
+      const updatedPrescriptions = [...prescriptions, prescription];
+      const prescriptionSaved = await storage.savePrescriptions(updatedPrescriptions);
 
-    // Update patient's last visited date
-    const updatedPatients = patients.map(p =>
-      p.id === selectedPatient.id
-        ? {
-          ...p,
-          lastVisited: new Date(),
-          nextExpected: followUpDate ? new Date(followUpDate) : undefined,
-          updatedAt: new Date()
-        }
-        : p
-    );
-    storage.savePatients(updatedPatients);
-    onPatientUpdate(updatedPatients);
+      if (!prescriptionSaved) {
+        throw new Error('Failed to save prescription');
+      }
 
-    // Generate and send PDF
-    try {
-      await generatePDF(prescription, selectedPatient);
+      // Create bill if consultation fee is provided
+      if (consultationFee && parseFloat(consultationFee) > 0) {
+        const bill = {
+          id: Date.now().toString() + '_bill',
+          // Ensure patientId is always stored as string
+          patientId: selectedPatient.id?.toString(),
+          prescriptionId: prescription.id,
+          amount: parseFloat(consultationFee),
+          description: `Consultation - ${formatDate(new Date())}`,
+          isPaid: false,
+          createdAt: new Date()
+        };
 
-      // Send WhatsApp message
-      const message = generateWhatsAppMessage(selectedPatient.name, formatDate(new Date()));
-      sendWhatsApp(selectedPatient.phone, message);
+        const bills = await storage.getBills();
+        const updatedBills = [...bills, bill];
+        await storage.saveBills(updatedBills);
+      }
 
-      alert('Prescription saved and sent successfully!');
-      onBack();
+      // Update patient's last visited date
+      const updatedPatients = patients.map(p =>
+        p.id === selectedPatient.id
+          ? {
+            ...p,
+            lastVisited: new Date(),
+            nextExpected: followUpDate ? new Date(followUpDate) : undefined,
+            updatedAt: new Date()
+          }
+          : p
+      );
+      await storage.savePatients(updatedPatients);
+      onPatientUpdate(updatedPatients);
+
+      // Generate and send PDF
+      try {
+        await generatePDF(prescription, selectedPatient);
+
+        // Send WhatsApp message
+        const message = generateWhatsAppMessage(selectedPatient.name, formatDate(new Date()));
+        sendWhatsApp(selectedPatient.phone, message);
+
+        alert('Prescription saved and sent successfully!');
+        onBack();
+      } catch (pdfError) {
+        console.error('Error generating PDF:', pdfError);
+        alert('Prescription saved successfully, but failed to generate PDF. Please try again.');
+        onBack();
+      }
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Prescription saved but failed to generate PDF');
-      onBack();
+      console.error('Error saving prescription:', error);
+      alert('Failed to save prescription. Please try again.');
     }
   };
 
   // Load custom data from storage
   const loadCustomData = async () => {
     try {
+      setIsLoadingCustomData(true);
       const [symptoms, diagnoses, labTests, medications] = await Promise.all([
         storage.getCustomSymptoms(),
         storage.getCustomDiagnoses(), 
@@ -460,6 +510,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       setCustomDiagnoses([]);
       setCustomLabTests([]);
       setCustomMedications([]);
+    } finally {
+      setIsLoadingCustomData(false);
     }
   };
 
@@ -686,7 +738,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
                           {/* Quick preview */}
                           <div className="space-y-2">
-                            {template.diagnosis.length > 0 && (
+                            {(template.diagnosis || []).length > 0 && (
                               <div className="flex flex-wrap gap-1">
                                 {template.diagnosis.slice(0, 2).map((diag, index) => (
                                   <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
@@ -702,7 +754,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                             )}
 
                             <div className="text-xs text-gray-500">
-                              {template.medications.length} medications • {template.symptoms.length} symptoms
+                              {(template.medications || []).length} medications • {(template.symptoms || []).length} symptoms
                             </div>
                           </div>
                         </div>
@@ -933,79 +985,133 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
             {/* Medications */}
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
               <div className="space-y-6">
-                <MedicationSelector
-                  onSelect={(medication) => {
-                    const newMedication = {
-                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                      name: medication,
-                      dosage: '',
-                      timing: 'after_meal',
-                      frequency: '',
-                      duration: ''
-                    };
-                    setMedications([...medications, newMedication]);
-                  }}
-                  onAddCustom={async (medication) => {
-                    await storage.addCustomMedication(medication);
-                    await loadCustomData(); // Reload custom data
-                    const newMedication = {
-                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                      name: medication,
-                      dosage: '',
-                      timing: 'after_meal',
-                      frequency: '',
-                      duration: ''
-                    };
-                    setMedications([...medications, newMedication]);
-                  }}
-                />
+                {isLoadingCustomData ? (
+                  <div className="text-center py-8">
+                    <RotateCw className="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2" />
+                    <p className="text-gray-500">Loading medications...</p>
+                  </div>
+                ) : (
+                  <MedicationSelector
+                    onSelect={(medication) => {
+                      const newMedication = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        name: medication,
+                        timing: {
+                          morning: false,
+                          afternoon: false,
+                          evening: false,
+                          night: false
+                        },
+                        dosage: '',
+                        mealTiming: 'after_meal',
+                        duration: '',
+                        remarks: ''
+                      };
+                      setMedications([...medications, newMedication]);
+                    }}
+                    onAddCustom={async (medication) => {
+                      await storage.addCustomMedication(medication);
+                      await loadCustomData(); // Reload custom data
+                      const newMedication = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        name: medication,
+                        timing: {
+                          morning: false,
+                          afternoon: false,
+                          evening: false,
+                          night: false
+                        },
+                        dosage: '',
+                        mealTiming: 'after_meal',
+                        duration: '',
+                        remarks: ''
+                      };
+                      setMedications([...medications, newMedication]);
+                    }}
+                  />
+                )}
 
                 {/* Selected medications with details */}
                 {medications.length > 0 && (
                   <div className="space-y-4">
                     <h4 className="text-lg font-semibold text-gray-800">Selected Medications</h4>
                     {medications.map((medication) => (
-                      <div key={medication.id} className="grid grid-cols-6 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-                        <div className="font-medium text-gray-900">{medication.name}</div>
-                        <input
-                          type="text"
-                          placeholder="Dosage"
-                          value={medication.dosage}
-                          onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
-                          className="input-field"
-                        />
-                        <select
-                          value={medication.timing}
-                          onChange={(e) => updateMedication(medication.id, 'timing', e.target.value)}
-                          className="input-field"
-                        >
-                          {MEDICATION_TIMING.map(option => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                        <select
-                          value={medication.frequency}
-                          onChange={(e) => updateMedication(medication.id, 'frequency', e.target.value)}
-                          className="input-field"
-                        >
-                          <option value="">Frequency</option>
-                          {FREQUENCY_OPTIONS.map(freq => (
-                            <option key={freq} value={freq}>{freq}</option>
-                          ))}
-                        </select>
-                        <input
-                          type="text"
-                          placeholder="Duration"
-                          value={medication.duration}
-                          onChange={(e) => updateMedication(medication.id, 'duration', e.target.value)}
-                          className="input-field"
-                        />
-                        <button
-                          onClick={() => removeMedication(medication.id)}
-                          className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <div key={medication.id} className="p-4 bg-gray-50 rounded-xl space-y-4">
+                        {/* Medication name and timing */}
+                        <div className="grid grid-cols-6 gap-4 items-center">
+                          <div className="font-medium text-gray-900">{medication.name}</div>
+                          
+                          {/* Timing checkboxes */}
+                          <div className="col-span-4 flex items-center space-x-3">
+                            {{
+                              morning: 'M',
+                              afternoon: 'A',
+                              evening: 'E',
+                              night: 'N'
+                            } && Object.entries(medication.timing).map(([key, value]) => (
+                              <div key={key} className="flex flex-col items-center space-y-1">
+                                <button
+                                  type="button"
+                                  onClick={() => updateMedication(medication.id, `timing.${key}`, !value)}
+                                  className={`w-8 h-8 rounded-lg border-2 transition-all duration-200 flex items-center justify-center ${
+                                    value
+                                      ? 'border-green-300 bg-green-100'
+                                      : 'border-gray-300 hover:border-gray-400'
+                                  }`}
+                                >
+                                  {value && (
+                                    <div className="w-5 h-5 bg-green-500 rounded-md"></div>
+                                  )}
+                                </button>
+                                <span className="text-xs text-gray-600 font-medium">{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <button
+                            onClick={() => removeMedication(medication.id)}
+                            className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        {/* Dosage, meal timing, and duration */}
+                        <div className="grid grid-cols-4 gap-4 items-center">
+                          <input
+                            type="text"
+                            placeholder="Dosage (e.g., 500mg)"
+                            value={medication.dosage}
+                            onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
+                            className="input-field"
+                          />
+                          <select
+                            value={medication.mealTiming}
+                            onChange={(e) => updateMedication(medication.id, 'mealTiming', e.target.value)}
+                            className="input-field"
+                          >
+                            {MEDICATION_TIMING.map(option => (
+                              <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                          </select>
+                          <select
+                            value={medication.duration}
+                            onChange={(e) => updateMedication(medication.id, 'duration', e.target.value)}
+                            className="input-field"
+                          >
+                            <option value="">Select duration</option>
+                            {MEDICATION_DURATION_OPTIONS.map(duration => (
+                              <option key={duration} value={duration}>{duration}</option>
+                            ))}
+                          </select>
+                          <input
+                            type="text"
+                            placeholder="Remarks"
+                            value={medication.remarks}
+                            onChange={(e) => updateMedication(medication.id, 'remarks', e.target.value)}
+                            className="input-field"
+                          />
+                        </div>
                       </div>
                     ))}
                   </div>

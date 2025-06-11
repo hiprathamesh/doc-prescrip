@@ -17,44 +17,67 @@ export default function MedicalDataManager({ onBack }) {
     loadData();
   }, []);
 
-  const loadData = () => {
-    setCustomSymptoms(storage.getCustomSymptoms());
-    setCustomDiagnoses(storage.getCustomDiagnoses());
-    setCustomLabTests(storage.getCustomLabTests());
+  const loadData = async () => {
+    try {
+      const [symptoms, diagnoses, labTests] = await Promise.all([
+        storage.getCustomSymptoms(),
+        storage.getCustomDiagnoses(),
+        storage.getCustomLabTests()
+      ]);
+      
+      setCustomSymptoms(symptoms || []);
+      setCustomDiagnoses(diagnoses || []);
+      setCustomLabTests(labTests || []);
+    } catch (error) {
+      console.error('Error loading custom data:', error);
+      setCustomSymptoms([]);
+      setCustomDiagnoses([]);
+      setCustomLabTests([]);
+    }
   };
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     if (!newItem.trim()) return;
 
-    if (activeTab === 'symptoms') {
-      const updated = [...customSymptoms, newItem.trim()];
-      setCustomSymptoms(updated);
-      storage.saveCustomSymptoms(updated);
-    } else if (activeTab === 'diagnoses') {
-      const updated = [...customDiagnoses, newItem.trim()];
-      setCustomDiagnoses(updated);
-      storage.saveCustomDiagnoses(updated);
-    } else if (activeTab === 'lab-tests') {
-      const updated = [...customLabTests, newItem.trim()];
-      setCustomLabTests(updated);
-      storage.saveCustomLabTests(updated);
+    try {
+      if (activeTab === 'symptoms') {
+        const updated = [...customSymptoms, newItem.trim()];
+        setCustomSymptoms(updated);
+        await storage.saveCustomSymptoms(updated);
+      } else if (activeTab === 'diagnoses') {
+        const updated = [...customDiagnoses, newItem.trim()];
+        setCustomDiagnoses(updated);
+        await storage.saveCustomDiagnoses(updated);
+      } else if (activeTab === 'lab-tests') {
+        const updated = [...customLabTests, newItem.trim()];
+        setCustomLabTests(updated);
+        await storage.saveCustomLabTests(updated);
+      }
+      setNewItem('');
+    } catch (error) {
+      console.error('Error adding item:', error);
+      alert('Failed to add item. Please try again.');
     }
-    setNewItem('');
   };
 
-  const handleDeleteItem = (item) => {
-    if (activeTab === 'symptoms') {
-      const updated = customSymptoms.filter(s => s !== item);
-      setCustomSymptoms(updated);
-      storage.saveCustomSymptoms(updated);
-    } else if (activeTab === 'diagnoses') {
-      const updated = customDiagnoses.filter(d => d !== item);
-      setCustomDiagnoses(updated);
-      storage.saveCustomDiagnoses(updated);
-    } else if (activeTab === 'lab-tests') {
-      const updated = customLabTests.filter(l => l !== item);
-      setCustomLabTests(updated);
-      storage.saveCustomLabTests(updated);
+  const handleDeleteItem = async (item) => {
+    try {
+      if (activeTab === 'symptoms') {
+        const updated = customSymptoms.filter(s => s !== item);
+        setCustomSymptoms(updated);
+        await storage.saveCustomSymptoms(updated);
+      } else if (activeTab === 'diagnoses') {
+        const updated = customDiagnoses.filter(d => d !== item);
+        setCustomDiagnoses(updated);
+        await storage.saveCustomDiagnoses(updated);
+      } else if (activeTab === 'lab-tests') {
+        const updated = customLabTests.filter(l => l !== item);
+        setCustomLabTests(updated);
+        await storage.saveCustomLabTests(updated);
+      }
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      alert('Failed to delete item. Please try again.');
     }
   };
 

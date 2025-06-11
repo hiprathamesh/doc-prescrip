@@ -90,13 +90,27 @@ export const generatePDF = async (prescription, patient) => {
     pdf.setFontSize(10);
     pdf.setFont(undefined, 'normal');
     prescription.medications.forEach((med, index) => {
-      const timing = med.timing.replace('_', ' ');
+      // Format timing
+      const timings = [];
+      if (med.timing?.morning) timings.push('Morning');
+      if (med.timing?.afternoon) timings.push('Afternoon');
+      if (med.timing?.evening) timings.push('Evening');
+      if (med.timing?.night) timings.push('Night');
+      const timingText = timings.length > 0 ? timings.join(', ') : 'As prescribed';
+      
+      // Format meal timing
+      const mealTiming = med.mealTiming ? med.mealTiming.replace('_', ' ') : 'after meal';
+      
       pdf.text(`${index + 1}. ${med.name}`, 25, yPosition);
       yPosition += 6;
-      pdf.text(`   Dosage: ${med.dosage} | ${timing} | ${med.frequency}`, 30, yPosition);
+      pdf.text(`   Dosage: ${med.dosage} | ${timingText} | ${mealTiming}`, 30, yPosition);
       if (med.duration) {
         yPosition += 6;
         pdf.text(`   Duration: ${med.duration}`, 30, yPosition);
+      }
+      if (med.remarks) {
+        yPosition += 6;
+        pdf.text(`   Remarks: ${med.remarks}`, 30, yPosition);
       }
       yPosition += 8;
     });

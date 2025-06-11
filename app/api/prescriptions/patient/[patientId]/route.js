@@ -7,7 +7,9 @@ import { NextResponse } from 'next/server';
 export async function GET(request, { params }) {
   try {
     const { patientId } = params;
-    const prescriptions = await databaseService.getPrescriptionsByPatient(patientId);
+    // Ensure patientId is properly decoded and normalized
+    const normalizedPatientId = decodeURIComponent(patientId).toString();
+    const prescriptions = await databaseService.getPrescriptionsByPatient(normalizedPatientId);
     return NextResponse.json({ success: true, data: prescriptions });
   } catch (error) {
     console.error('API Error fetching prescriptions by patient:', error);

@@ -2,10 +2,11 @@
 
 import { User, Phone, FileText, Trash2, MoreVertical } from 'lucide-react';
 import { formatDate } from '../utils/dateUtils';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function PatientList({ patients, onPatientSelect, onNewPrescription, onPatientDelete }) {
   const [dropdownOpen, setDropdownOpen] = useState(null);
+  const dropdownRefs = useRef({});
 
   const handleDeletePatient = (patient, e) => {
     e.stopPropagation();
@@ -14,6 +15,25 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
     }
     setDropdownOpen(null);
   };
+
+  const handleDropdownToggle = (patientId, e) => {
+    e.stopPropagation();
+    setDropdownOpen(dropdownOpen === patientId ? null : patientId);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownOpen && !Object.values(dropdownRefs.current).some(ref => 
+        ref && ref.contains(event.target)
+      )) {
+        setDropdownOpen(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [dropdownOpen]);
 
   if (patients.length === 0) {
     return (
@@ -56,7 +76,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {patients.map((patient) => (
+            {patients.map((patient, index) => (
               <tr key={patient.id} className="hover:bg-gray-50 cursor-pointer transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap" onClick={() => onPatientSelect(patient)}>
                   <div>
@@ -94,23 +114,26 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                       <span>New Prescription</span>
                     </button>
                     
-                    <div className="relative">
+                    <div 
+                      className="relative"
+                      ref={el => dropdownRefs.current[patient.id] = el}
+                    >
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDropdownOpen(dropdownOpen === patient.id ? null : patient.id);
-                        }}
+                        onClick={(e) => handleDropdownToggle(patient.id, e)}
                         className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                       >
                         <MoreVertical className="w-4 h-4" />
                       </button>
                       
                       {dropdownOpen === patient.id && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                        <div className={`absolute ${
+                          // Position dropdown above if it's one of the last 3 items
+                          index >= patients.length - 3 ? 'bottom-full mb-2' : 'top-full mt-2'
+                        } right-0 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200`}>
                           <div className="py-1">
                             <button
                               onClick={(e) => handleDeletePatient(patient, e)}
-                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
                               <span>Delete Patient</span>
@@ -126,14 +149,6 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
           </tbody>
         </table>
       </div>
-      
-      {/* Click outside to close dropdown */}
-      {dropdownOpen && (
-        <div 
-          className="fixed inset-0 z-5" 
-          onClick={() => setDropdownOpen(null)}
-        />
-      )}
     </div>
   );
 }

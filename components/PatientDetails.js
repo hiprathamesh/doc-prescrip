@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, FileText, DollarSign, Calendar, Phone, User, Trash2, MoreVertical } from 'lucide-react';
+import { ArrowLeft, FileText, DollarSign, Calendar, Phone, User, Trash2, MoreVertical, Pill } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 
@@ -17,48 +17,62 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
     }
   }, [patient]);
 
-  const loadPatientData = () => {
-    const patientPrescriptions = storage.getPrescriptionsByPatient(patient.id);
-    const patientBills = storage.getBillsByPatient(patient.id);
-    setPrescriptions(patientPrescriptions.sort((a, b) => new Date(b.visitDate) - new Date(a.visitDate)));
-    setBills(patientBills.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+  const loadPatientData = async () => {
+    try {
+      const patientPrescriptions = await storage.getPrescriptionsByPatient(patient.id);
+      const patientBills = await storage.getBillsByPatient(patient.id);
+      
+      // Ensure we have arrays and sort them
+      const prescriptionsArray = Array.isArray(patientPrescriptions) ? patientPrescriptions : [];
+      const billsArray = Array.isArray(patientBills) ? patientBills : [];
+      
+      setPrescriptions(prescriptionsArray.sort((a, b) => new Date(b.visitDate) - new Date(a.visitDate)));
+      setBills(billsArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+    } catch (error) {
+      console.error('Error loading patient data:', error);
+      setPrescriptions([]);
+      setBills([]);
+    }
   };
 
-  const toggleBillPayment = (billId) => {
-    const allBills = storage.getBills();
+  const toggleBillPayment = async (billId) => {
+    const allBills = await storage.getBills();
     const updatedBills = allBills.map(bill => 
       bill.id === billId 
         ? { ...bill, isPaid: !bill.isPaid, paidAt: !bill.isPaid ? new Date() : null }
         : bill
     );
-    storage.saveBills(updatedBills);
+    await storage.saveBills(updatedBills);
     loadPatientData();
   };
 
-  const deletePrescription = (prescriptionId) => {
+  const deletePrescription = async (prescriptionId) => {
     if (window.confirm('Are you sure you want to delete this prescription? This action cannot be undone.')) {
-      const allPrescriptions = storage.getPrescriptions();
+      const allPrescriptions = await storage.getPrescriptions();
       const updatedPrescriptions = allPrescriptions.filter(p => p.id !== prescriptionId);
-      storage.savePrescriptions(updatedPrescriptions);
-      
-      // Also delete any associated bills
-      const allBills = storage.getBills();
-      const updatedBills = allBills.filter(b => b.prescriptionId !== prescriptionId);
-      storage.saveBills(updatedBills);
-      
+      await storage.savePrescriptions(updatedPrescriptions);
+      loadPatientData();
+    }
+  };
+
+  const deleteBill = async (billId) => {
+    if (window.confirm('Are you sure you want to delete this bill? This action cannot be undone.')) {
+      const allBills = await storage.getBills();
+      const updatedBills = allBills.filter(b => b.id !== billId);
+      await storage.saveBills(updatedBills);
       loadPatientData();
       setDropdownOpen(null);
     }
   };
 
-  const deleteBill = (billId) => {
-    if (window.confirm('Are you sure you want to delete this bill? This action cannot be undone.')) {
-      const allBills = storage.getBills();
-      const updatedBills = allBills.filter(b => b.id !== billId);
-      storage.saveBills(updatedBills);
-      loadPatientData();
-      setDropdownOpen(null);
-    }
+  const formatMedicationTiming = (timing) => {
+    if (!timing) return 'As prescribed';
+    const timings = [];
+    if (timing.morning) timings.push('M');
+    if (timing.afternoon) timings.push('A');
+    if (timing.evening) timings.push('E');
+    if (timing.night) timings.push('N');
+    return timings.length > 0 ? timings.join('-') : 'As prescribed';
   };
 
   const totalBills = bills.reduce((sum, bill) => sum + bill.amount, 0);
@@ -249,16 +263,29 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                         </ul>
                       </div>
 
-                      <div>
-                        <h4 className="font-medium text-gray-800 mb-2">Medications</h4>
-                        <ul className="space-y-1">
-                          {prescription.medications.map((med) => (
-                            <li key={med.id} className="text-gray-700">
-                              {med.name} - {med.dosage} ({med.timing.replace('_', ' ')})
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                      {/* Medications */}
+                      {prescription.medications?.length > 0 && (
+                        <div>
+                          <h5 className="font-semibold text-gray-700 mb-2 flex items-center">
+                            <Pill className="w-4 h-4 mr-2" />
+                            Medications
+                          </h5>
+                          <div className="space-y-2">
+                            {prescription.medications.map((med, index) => (
+                              <div key={index} className="bg-green-50 p-3 rounded-lg border border-green-200">
+                                <div className="font-medium text-green-800">{med.name}</div>
+                                <div className="text-sm text-green-700 space-y-1">
+                                  <div>Dosage: {med.dosage}</div>
+                                  <div>Timing: {formatMedicationTiming(med.timing)}</div>
+                                  <div>Meal: {med.mealTiming?.replace('_', ' ') || 'after meal'}</div>
+                                  {med.duration && <div>Duration: {med.duration}</div>}
+                                  {med.remarks && <div>Remarks: {med.remarks}</div>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {prescription.doctorNotes && (

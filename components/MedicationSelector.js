@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Search, ChevronLeft, ChevronRight, Loader, Info } from 'lucide-react';
+import { Plus, Search, ChevronLeft, ChevronRight, RotateCw, Info } from 'lucide-react';
 import { medicationApiService } from '../services/medicationApi';
 import { COMMON_MEDICATIONS, MEDICATION_CATEGORIES } from '../lib/medicationData';
 import { storage } from '../utils/storage';
@@ -17,10 +17,34 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const searchTimeoutRef = useRef(null);
+  
+  // Add state for custom medications
+  const [customMedications, setCustomMedications] = useState([]);
+  const [isLoadingCustom, setIsLoadingCustom] = useState(true);
 
-  const customMedications = storage.getCustomMedications();
+  // Load custom medications on mount
+  useEffect(() => {
+    loadCustomMedications();
+  }, []);
+
+  const loadCustomMedications = async () => {
+    try {
+      setIsLoadingCustom(true);
+      const medications = await storage.getCustomMedications();
+      setCustomMedications(medications || []);
+    } catch (error) {
+      console.error('Error loading custom medications:', error);
+      setCustomMedications([]);
+    } finally {
+      setIsLoadingCustom(false);
+    }
+  };
 
   const getDisplayMedications = () => {
+    if (isLoadingCustom) {
+      return COMMON_MEDICATIONS; // Show only common medications while loading
+    }
+    
     if (selectedCategory === 'all') {
       return [...COMMON_MEDICATIONS, ...customMedications];
     }
@@ -90,9 +114,10 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
     setApiResults([]);
   };
 
-  const handleAddCustom = () => {
+  const handleAddCustom = async () => {
     if (searchTerm.trim() && onAddCustom) {
-      onAddCustom(searchTerm.trim());
+      await onAddCustom(searchTerm.trim());
+      await loadCustomMedications(); // Reload custom medications
       setSearchTerm('');
       setShowSearch(false);
       setApiResults([]);
@@ -180,7 +205,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             {isSearching && (
-              <Loader className="absolute right-3 top-3 h-4 w-4 text-blue-500 animate-spin" />
+              <RotateCw className="absolute right-3 top-3 h-4 w-4 text-blue-500 animate-spin" />
             )}
             <input
               type="text"
@@ -243,7 +268,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
                 </div>
               ) : (
                 <div className="p-4 text-center">
-                  <Loader className="w-6 h-6 animate-spin mx-auto text-blue-500" />
+                  <RotateCw className="w-6 h-6 animate-spin mx-auto text-blue-500" />
                   <p className="text-sm text-gray-500 mt-2">Searching medications...</p>
                 </div>
               )}

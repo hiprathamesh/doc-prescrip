@@ -317,7 +317,7 @@ export default function Dashboard() {
                     <TrendingUp className="w-5 h-5 text-blue-600" />
                     <span>Quick Actions</span>
                   </h3>
-                  <div className="grid grid-cols-3 gap-4"> {/* Changed from grid-cols-2 to grid-cols-3 */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <button
                       onClick={() => handleNewPrescription()}
                       className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl border border-blue-200 transition-all duration-200 group"

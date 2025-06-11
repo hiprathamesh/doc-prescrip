@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Search, Edit, Trash2, FileText, Calendar, User, Stethoscope } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate } from '../utils/dateUtils';
-import { MEDICAL_CONDITIONS, SEVERITY_OPTIONS, DURATION_OPTIONS, MEDICATION_TIMING, FREQUENCY_OPTIONS } from '../lib/constants';
+import { MEDICAL_CONDITIONS, SEVERITY_OPTIONS, DURATION_OPTIONS, MEDICATION_TIMING, MEDICATION_DURATION_OPTIONS } from '../lib/constants';
+import PillSelector from './PillSelector';
+import MedicationSelector from './MedicationSelector';
+import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from '../lib/medicalData';
 
 export default function PrescriptionTemplates({ onBack }) {
   const [templates, setTemplates] = useState([]);
@@ -16,15 +19,20 @@ export default function PrescriptionTemplates({ onBack }) {
     loadTemplates();
   }, []);
 
-  const loadTemplates = () => {
-    const savedTemplates = storage.getTemplates();
-    setTemplates(savedTemplates);
+  const loadTemplates = async () => {
+    try {
+      const savedTemplates = await storage.getTemplates();
+      setTemplates(Array.isArray(savedTemplates) ? savedTemplates : []);
+    } catch (error) {
+      console.error('Error loading templates:', error);
+      setTemplates([]);
+    }
   };
 
-  const filteredTemplates = templates.filter(template =>
-    template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    template.diagnosis.some(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredTemplates = (templates || []).filter(template =>
+    template.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    template.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (template.diagnosis || []).some(d => d.name?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleCreateNew = () => {
@@ -37,33 +45,43 @@ export default function PrescriptionTemplates({ onBack }) {
     setCurrentView('edit');
   };
 
-  const handleDelete = (templateId) => {
+  const handleDelete = async (templateId) => {
     if (confirm('Are you sure you want to delete this template?')) {
-      const updatedTemplates = templates.filter(t => t.id !== templateId);
-      setTemplates(updatedTemplates);
-      storage.saveTemplates(updatedTemplates);
+      try {
+        const success = await storage.deleteTemplate(templateId);
+        if (success) {
+          await loadTemplates(); // Reload templates after deletion
+        } else {
+          alert('Failed to delete template');
+        }
+      } catch (error) {
+        console.error('Error deleting template:', error);
+        alert('Error deleting template');
+      }
     }
   };
 
-  const handleSaveTemplate = (templateData) => {
-    const template = {
-      ...templateData,
-      id: selectedTemplate ? selectedTemplate.id : Date.now().toString(),
-      createdAt: selectedTemplate ? selectedTemplate.createdAt : new Date(),
-      updatedAt: new Date()
-    };
+  const handleSaveTemplate = async (templateData) => {
+    try {
+      const template = {
+        ...templateData,
+        id: selectedTemplate ? selectedTemplate.id : undefined,
+        createdAt: selectedTemplate ? selectedTemplate.createdAt : new Date(),
+        updatedAt: new Date()
+      };
 
-    let updatedTemplates;
-    if (selectedTemplate) {
-      updatedTemplates = templates.map(t => t.id === template.id ? template : t);
-    } else {
-      updatedTemplates = [...templates, template];
+      const savedTemplate = await storage.saveTemplate(template);
+      if (savedTemplate) {
+        await loadTemplates(); // Reload templates after saving
+        setCurrentView('list');
+        setSelectedTemplate(null);
+      } else {
+        alert('Failed to save template');
+      }
+    } catch (error) {
+      console.error('Error saving template:', error);
+      alert('Error saving template');
     }
-
-    setTemplates(updatedTemplates);
-    storage.saveTemplates(updatedTemplates);
-    setCurrentView('list');
-    setSelectedTemplate(null);
   };
 
   if (currentView === 'create' || currentView === 'edit') {
@@ -255,6 +273,42 @@ function TemplateEditor({ template, onSave, onCancel }) {
     advice: template?.advice || ''
   });
 
+  // Custom data states
+  const [customSymptoms, setCustomSymptoms] = useState([]);
+  const [customDiagnoses, setCustomDiagnoses] = useState([]);
+  const [customLabTests, setCustomLabTests] = useState([]);
+  const [customMedications, setCustomMedications] = useState([]);
+  const [isLoadingCustomData, setIsLoadingCustomData] = useState(true);
+
+  useEffect(() => {
+    loadCustomData();
+  }, []);
+
+  const loadCustomData = async () => {
+    try {
+      setIsLoadingCustomData(true);
+      const [symptoms, diagnoses, labTests, medications] = await Promise.all([
+        storage.getCustomSymptoms(),
+        storage.getCustomDiagnoses(), 
+        storage.getCustomLabTests(),
+        storage.getCustomMedications()
+      ]);
+      
+      setCustomSymptoms(symptoms || []);
+      setCustomDiagnoses(diagnoses || []);
+      setCustomLabTests(labTests || []);
+      setCustomMedications(medications || []);
+    } catch (error) {
+      console.error('Error loading custom data:', error);
+      setCustomSymptoms([]);
+      setCustomDiagnoses([]);
+      setCustomLabTests([]);
+      setCustomMedications([]);
+    } finally {
+      setIsLoadingCustomData(false);
+    }
+  };
+
   // Symptoms functions
   const addSymptom = () => {
     const newSymptom = {
@@ -315,10 +369,16 @@ function TemplateEditor({ template, onSave, onCancel }) {
     const newMedication = {
       id: Date.now().toString(),
       name: '',
+      timing: {
+        morning: false,
+        afternoon: false,
+        evening: false,
+        night: false
+      },
       dosage: '',
-      timing: 'after_meal',
-      frequency: '',
-      duration: ''
+      mealTiming: 'after_meal',
+      duration: '',
+      remarks: ''
     };
     setFormData({
       ...formData,
@@ -329,7 +389,22 @@ function TemplateEditor({ template, onSave, onCancel }) {
   const updateMedication = (id, field, value) => {
     setFormData({
       ...formData,
-      medications: formData.medications.map(m => m.id === id ? { ...m, [field]: value } : m)
+      medications: formData.medications.map(m => {
+        if (m.id === id) {
+          if (field.startsWith('timing.')) {
+            const timingField = field.split('.')[1];
+            return {
+              ...m,
+              timing: {
+                ...m.timing,
+                [timingField]: value
+              }
+            };
+          }
+          return { ...m, [field]: value };
+        }
+        return m;
+      })
     });
   };
 
@@ -433,218 +508,335 @@ function TemplateEditor({ template, onSave, onCancel }) {
         </div>
       </div>
 
-      {/* Symptoms Section */}
+      {/* Symptoms Section - Updated with PillSelector */}
       <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Symptoms</h3>
-          <button
-            onClick={addSymptom}
-            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Symptom</span>
-          </button>
-        </div>
-        <div className="space-y-4">
-          {formData.symptoms.map((symptom) => (
-            <div key={symptom.id} className="grid grid-cols-4 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-              <input
-                type="text"
-                placeholder="Symptom name"
-                value={symptom.name}
-                onChange={(e) => updateSymptom(symptom.id, 'name', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
-              <select
-                value={symptom.severity}
-                onChange={(e) => updateSymptom(symptom.id, 'severity', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              >
-                {SEVERITY_OPTIONS.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-              <select
-                value={symptom.duration}
-                onChange={(e) => updateSymptom(symptom.id, 'duration', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              >
-                <option value="">Select duration</option>
-                {DURATION_OPTIONS.map(duration => (
-                  <option key={duration} value={duration}>{duration}</option>
-                ))}
-              </select>
-              <button
-                onClick={() => removeSymptom(symptom.id)}
-                className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-          {formData.symptoms.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p>No symptoms added yet. Click "Add Symptom" to start.</p>
+        <div className="space-y-6">
+          <PillSelector
+            title="Select Symptoms"
+            items={[...PREDEFINED_SYMPTOMS, ...customSymptoms]}
+            onSelect={(symptom) => {
+              const newSymptom = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                name: symptom,
+                severity: 'mild',
+                duration: ''
+              };
+              setFormData({
+                ...formData,
+                symptoms: [...formData.symptoms, newSymptom]
+              });
+            }}
+            searchPlaceholder="Search symptoms..."
+            onAddCustom={async (symptom) => {
+              await storage.addCustomSymptom(symptom);
+              await loadCustomData();
+              const newSymptom = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                name: symptom,
+                severity: 'mild',
+                duration: ''
+              };
+              setFormData({
+                ...formData,
+                symptoms: [...formData.symptoms, newSymptom]
+              });
+            }}
+          />
+
+          {/* Selected symptoms with details */}
+          {formData.symptoms.length > 0 && (
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-gray-800">Selected Symptoms</h4>
+              {formData.symptoms.map((symptom) => (
+                <div key={symptom.id} className="grid grid-cols-4 gap-4 items-center p-4 bg-gray-50 rounded-xl">
+                  <div className="font-medium text-gray-900">{symptom.name}</div>
+                  <select
+                    value={symptom.severity}
+                    onChange={(e) => updateSymptom(symptom.id, 'severity', e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    {SEVERITY_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={symptom.duration}
+                    onChange={(e) => updateSymptom(symptom.id, 'duration', e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">Select duration</option>
+                    {DURATION_OPTIONS.map(duration => (
+                      <option key={duration} value={duration}>{duration}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => removeSymptom(symptom.id)}
+                    className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Diagnosis Section */}
+      {/* Diagnosis Section - Updated with PillSelector */}
       <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Diagnosis</h3>
-          <button
-            onClick={addDiagnosis}
-            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Diagnosis</span>
-          </button>
-        </div>
-        <div className="space-y-4">
-          {formData.diagnosis.map((diagnosis) => (
-            <div key={diagnosis.id} className="grid grid-cols-3 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-              <input
-                type="text"
-                placeholder="Diagnosis name"
-                value={diagnosis.name}
-                onChange={(e) => updateDiagnosis(diagnosis.id, 'name', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
-              <input
-                type="text"
-                placeholder="Description (optional)"
-                value={diagnosis.description}
-                onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
-              <button
-                onClick={() => removeDiagnosis(diagnosis.id)}
-                className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-          {formData.diagnosis.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p>No diagnosis added yet. Click "Add Diagnosis" to start.</p>
+        <div className="space-y-6">
+          <PillSelector
+            title="Select Diagnosis"
+            items={[...PREDEFINED_DIAGNOSES, ...customDiagnoses]}
+            onSelect={(diagnosis) => {
+              const newDiagnosis = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                name: diagnosis,
+                description: ''
+              };
+              setFormData({
+                ...formData,
+                diagnosis: [...formData.diagnosis, newDiagnosis]
+              });
+            }}
+            searchPlaceholder="Search diagnoses..."
+            onAddCustom={async (diagnosis) => {
+              await storage.addCustomDiagnosis(diagnosis);
+              await loadCustomData();
+              const newDiagnosis = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                name: diagnosis,
+                description: ''
+              };
+              setFormData({
+                ...formData,
+                diagnosis: [...formData.diagnosis, newDiagnosis]
+              });
+            }}
+          />
+
+          {/* Selected diagnoses with details */}
+          {formData.diagnosis.length > 0 && (
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-gray-800">Selected Diagnoses</h4>
+              {formData.diagnosis.map((diagnosis) => (
+                <div key={diagnosis.id} className="grid grid-cols-3 gap-4 items-center p-4 bg-gray-50 rounded-xl">
+                  <div className="font-medium text-gray-900">{diagnosis.name}</div>
+                  <input
+                    type="text"
+                    placeholder="Description (optional)"
+                    value={diagnosis.description}
+                    onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                  <button
+                    onClick={() => removeDiagnosis(diagnosis.id)}
+                    className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Medications Section */}
+      {/* Medications Section - Updated with MedicationSelector */}
       <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Medications</h3>
-          <button
-            onClick={addMedication}
-            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Medication</span>
-          </button>
-        </div>
-        <div className="space-y-4">
-          {formData.medications.map((medication) => (
-            <div key={medication.id} className="grid grid-cols-6 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-              <input
-                type="text"
-                placeholder="Medication name"
-                value={medication.name}
-                onChange={(e) => updateMedication(medication.id, 'name', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
-              <input
-                type="text"
-                placeholder="Dosage"
-                value={medication.dosage}
-                onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
-              <select
-                value={medication.timing}
-                onChange={(e) => updateMedication(medication.id, 'timing', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              >
-                {MEDICATION_TIMING.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-              <select
-                value={medication.frequency}
-                onChange={(e) => updateMedication(medication.id, 'frequency', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              >
-                <option value="">Frequency</option>
-                {FREQUENCY_OPTIONS.map(freq => (
-                  <option key={freq} value={freq}>{freq}</option>
-                ))}
-              </select>
-              <input
-                type="text"
-                placeholder="Duration"
-                value={medication.duration}
-                onChange={(e) => updateMedication(medication.id, 'duration', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
-              <button
-                onClick={() => removeMedication(medication.id)}
-                className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+        <div className="space-y-6">
+          {isLoadingCustomData ? (
+            <div className="text-center py-8">
+              <div className="w-8 h-8 animate-spin mx-auto border-4 border-blue-500 border-t-transparent rounded-full mb-2"></div>
+              <p className="text-gray-500">Loading medications...</p>
             </div>
-          ))}
-          {formData.medications.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p>No medications added yet. Click "Add Medication" to start.</p>
+          ) : (
+            <MedicationSelector
+              onSelect={(medication) => {
+                const newMedication = {
+                  id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                  name: medication,
+                  timing: {
+                    morning: false,
+                    afternoon: false,
+                    evening: false,
+                    night: false
+                  },
+                  dosage: '',
+                  mealTiming: 'after_meal',
+                  duration: '',
+                  remarks: ''
+                };
+                setFormData({
+                  ...formData,
+                  medications: [...formData.medications, newMedication]
+                });
+              }}
+              onAddCustom={async (medication) => {
+                await storage.addCustomMedication(medication);
+                await loadCustomData();
+                const newMedication = {
+                  id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                  name: medication,
+                  timing: {
+                    morning: false,
+                    afternoon: false,
+                    evening: false,
+                    night: false
+                  },
+                  dosage: '',
+                  mealTiming: 'after_meal',
+                  duration: '',
+                  remarks: ''
+                };
+                setFormData({
+                  ...formData,
+                  medications: [...formData.medications, newMedication]
+                });
+              }}
+            />
+          )}
+
+          {/* Selected medications with details */}
+          {formData.medications.length > 0 && (
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-gray-800">Selected Medications</h4>
+              {formData.medications.map((medication) => (
+                <div key={medication.id} className="p-4 bg-gray-50 rounded-xl space-y-4">
+                  {/* Medication name and timing */}
+                  <div className="grid grid-cols-6 gap-4 items-center">
+                    <div className="font-medium text-gray-900">{medication.name}</div>
+                    
+                    {/* Timing checkboxes */}
+                    <div className="col-span-4 flex items-center space-x-3">
+                      {[
+                        { key: 'morning', label: 'M' },
+                        { key: 'afternoon', label: 'A' },
+                        { key: 'evening', label: 'E' },
+                        { key: 'night', label: 'N' }
+                      ].map(({ key, label }) => (
+                        <div key={key} className="flex flex-col items-center space-y-1">
+                          <button
+                            type="button"
+                            onClick={() => updateMedication(medication.id, `timing.${key}`, !medication.timing?.[key])}
+                            className={`w-8 h-8 rounded-lg border-2 transition-all duration-200 flex items-center justify-center ${
+                              medication.timing?.[key]
+                                ? 'border-green-300 bg-green-100'
+                                : 'border-gray-300 hover:border-gray-400'
+                            }`}
+                          >
+                            {medication.timing?.[key] && (
+                              <div className="w-5 h-5 bg-green-500 rounded-md"></div>
+                            )}
+                          </button>
+                          <span className="text-xs text-gray-600 font-medium">{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <button
+                      onClick={() => removeMedication(medication.id)}
+                      className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Dosage, meal timing, and duration */}
+                  <div className="grid grid-cols-4 gap-4 items-center">
+                    <input
+                      type="text"
+                      placeholder="Dosage (e.g., 500mg)"
+                      value={medication.dosage}
+                      onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                    <select
+                      value={medication.mealTiming}
+                      onChange={(e) => updateMedication(medication.id, 'mealTiming', e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    >
+                      {MEDICATION_TIMING.map(option => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={medication.duration}
+                      onChange={(e) => updateMedication(medication.id, 'duration', e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    >
+                      <option value="">Select duration</option>
+                      {MEDICATION_DURATION_OPTIONS.map(duration => (
+                        <option key={duration} value={duration}>{duration}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Remarks"
+                      value={medication.remarks}
+                      onChange={(e) => updateMedication(medication.id, 'remarks', e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Lab Results Section */}
+      {/* Lab Results Section - Updated with PillSelector */}
       <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Lab Results</h3>
-          <button
-            onClick={addLabResult}
-            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Lab Test</span>
-          </button>
-        </div>
-        <div className="space-y-4">
-          {formData.labResults.map((lab) => (
-            <div key={lab.id} className="grid grid-cols-2 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-              <input
-                type="text"
-                placeholder="Test name"
-                value={lab.testName}
-                onChange={(e) => updateLabResult(lab.id, 'testName', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
-              <button
-                onClick={() => removeLabResult(lab.id)}
-                className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-          {formData.labResults.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p>No lab tests added yet. Click "Add Lab Test" to start.</p>
+        <div className="space-y-6">
+          <PillSelector
+            title="Select Lab Tests"
+            items={[...PREDEFINED_LAB_TESTS, ...customLabTests]}
+            onSelect={(labTest) => {
+              const newLabResult = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                testName: labTest
+              };
+              setFormData({
+                ...formData,
+                labResults: [...formData.labResults, newLabResult]
+              });
+            }}
+            searchPlaceholder="Search lab tests..."
+            onAddCustom={async (labTest) => {
+              await storage.addCustomLabTest(labTest);
+              await loadCustomData();
+              const newLabResult = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                testName: labTest
+              };
+              setFormData({
+                ...formData,
+                labResults: [...formData.labResults, newLabResult]
+              });
+            }}
+          />
+
+          {/* Selected lab results */}
+          {formData.labResults.length > 0 && (
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-gray-800">Selected Lab Tests</h4>
+              {formData.labResults.map((lab) => (
+                <div key={lab.id} className="grid grid-cols-2 gap-4 items-center p-4 bg-gray-50 rounded-xl">
+                  <div className="font-medium text-gray-900">{lab.testName}</div>
+                  <button
+                    onClick={() => removeLabResult(lab.id)}
+                    className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Doctor Notes and Advice */}
+      {/* Doctor Notes and Advice - Keep existing textarea approach for templates */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
           <h3 className="text-xl font-bold text-gray-900 mb-6">Doctor's Notes</h3>
