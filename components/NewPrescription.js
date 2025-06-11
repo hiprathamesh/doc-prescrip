@@ -516,24 +516,24 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   };
 
   return (
-    <div className="space-y-8 bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen">
+    <div className="space-y-6 sm:space-y-8 bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen">
       {/* Enhanced Header */}
-      <div className="bg-white shadow-lg border-grafy-200 sticky top-0 z-40 rounded-b-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+      <div className="bg-white shadow-lg border-gray-200 sticky top-0 z-40 rounded-b-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+            <div className="flex items-center space-x-3 sm:space-x-4">
               <button
                 onClick={onBack}
                 className="p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">New Prescription</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">New Prescription</h1>
             </div>
             <div className="flex space-x-3">
               <button
                 onClick={handleSavePrescription}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <Save className="w-4 h-4" />
                 <span className="font-medium">Save & Send</span>
@@ -543,13 +543,13 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
         {/* Patient Selection */}
         {!selectedPatient && (
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Select Patient</h2>
+          <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Select Patient</h2>
             <div className="space-y-6">
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <div className="flex-1 relative">
                   <select
                     onChange={(e) => {
@@ -560,7 +560,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                         setSelectedPatient(patient || null);
                       }
                     }}
-                    className="w-full p-4 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg bg-white shadow-sm hover:shadow-md appearance-none"
+                    className="w-full p-4 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-base sm:text-lg bg-white shadow-sm hover:shadow-md appearance-none"
                   >
                     <option value="">Select patient...</option>
                     {patients.map(patient => (
@@ -577,7 +577,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                 </div>
                 <button
                   onClick={() => toggleNewPatient()}
-                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-4 rounded-xl flex items-center space-x-2 font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-4 rounded-xl flex items-center justify-center space-x-2 font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
                   <Plus className="w-5 h-5" />
                   <span>Add Patient</span>
@@ -585,14 +585,14 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
 
               {isNewPatient && (
-                <div className="grid grid-cols-2 gap-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 animate-in slide-in-from-top duration-300">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 animate-in slide-in-from-top duration-300">
                   <div>
                     <label className="block text-sm font-semibold text-gray-800 mb-2">Name *</label>
                     <input
                       type="text"
                       value={newPatientData.name}
                       onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
-                      className="input-field"
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     />
                   </div>
                   <div>
@@ -601,7 +601,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       type="number"
                       value={newPatientData.age}
                       onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
-                      className="input-field"
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     />
                   </div>
                   <div>
@@ -609,7 +609,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     <select
                       value={newPatientData.gender}
                       onChange={(e) => setNewPatientData({ ...newPatientData, gender: e.target.value })}
-                      className="input-field"
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     >
                       <option value="male">Male</option>
                       <option value="female">Female</option>
@@ -622,13 +622,13 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       type="tel"
                       value={newPatientData.phone}
                       onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
-                      className="input-field"
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-1 sm:col-span-2">
                     <button
                       onClick={handleCreateNewPatient}
-                      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                      className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                     >
                       Create Patient
                     </button>
@@ -640,35 +640,35 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         )}
 
         {selectedPatient && (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* Patient Info */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Patient Information</h2>
-              <div className="grid grid-cols-4 gap-6 text-sm">
-                <div className="bg-gray-50 p-4 rounded-xl">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Patient Information</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-sm">
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
                   <span className="font-semibold text-gray-700 block mb-1">Name</span>
                   <span className="text-gray-900 font-medium">{selectedPatient.name}</span>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-xl">
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
                   <span className="font-semibold text-gray-700 block mb-1">ID</span>
                   <span className="text-gray-900 font-medium">{selectedPatient.id}</span>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-xl">
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
                   <span className="font-semibold text-gray-700 block mb-1">Age</span>
                   <span className="text-gray-900 font-medium">{selectedPatient.age} years</span>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-xl">
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
                   <span className="font-semibold text-gray-700 block mb-1">Phone</span>
                   <span className="text-gray-900 font-medium">{selectedPatient.phone}</span>
                 </div>
               </div>
             </div>
 
-            {/* Previous Visit Reference */}
+            {/* Previous Visit Reference - responsive */}
             {previousPrescription && (
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-8 rounded-2xl border-2 border-blue-200 shadow-lg">
-                <h3 className="text-xl font-bold text-blue-900 mb-6">Previous Visit Reference</h3>
-                <div className="grid grid-cols-3 gap-6 text-sm">
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 sm:p-8 rounded-2xl border-2 border-blue-200 shadow-lg">
+                <h3 className="text-lg sm:text-xl font-bold text-blue-900 mb-6">Previous Visit Reference</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
                   <div className="bg-white p-4 rounded-xl shadow-sm">
                     <h4 className="font-semibold text-blue-800 mb-3">Medications</h4>
                     <ul className="space-y-2">
@@ -695,13 +695,13 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
             )}
 
-            {/* Prescription Templates Section */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Prescription Templates</h3>
+            {/* Prescription Templates Section - responsive */}
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900">Prescription Templates</h3>
                 <button
                   onClick={() => setShowTemplates(!showTemplates)}
-                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 py-2 rounded-xl flex items-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 py-2 rounded-xl flex items-center justify-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
                   <FileText className="w-4 h-4" />
                   <span>{showTemplates ? 'Hide Templates' : 'Browse Templates'}</span>
@@ -722,8 +722,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     />
                   </div>
 
-                  {/* Templates Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                  {/* Templates Grid - responsive */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
                     {filteredTemplates.length > 0 ? (
                       filteredTemplates.map((template) => (
                         <div
@@ -772,10 +772,10 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               )}
             </div>
 
-            {/* Enhanced Medical History */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">Medical History</h3>
-              <div className="flex flex-wrap gap-3">
+            {/* Enhanced Medical History - responsive */}
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Medical History</h3>
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 {/* Predefined conditions */}
                 {MEDICAL_CONDITIONS.map((condition) => (
                   <button
@@ -861,7 +861,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
             </div>
 
             {/* Symptoms */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
               <div className="space-y-6">
                 <PillSelector
                   title="Select Symptoms"
@@ -892,14 +892,14 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                 {/* Selected symptoms with details */}
                 {symptoms.length > 0 && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-gray-800">Selected Symptoms</h4>
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-800">Selected Symptoms</h4>
                     {symptoms.map((symptom) => (
-                      <div key={symptom.id} className="grid grid-cols-4 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-                        <div className="font-medium text-gray-900">{symptom.name}</div>
+                      <div key={symptom.id} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-center p-4 bg-gray-50 rounded-xl">
+                        <div className="font-medium text-gray-900 sm:mb-0 mb-2">{symptom.name}</div>
                         <select
                           value={symptom.severity}
                           onChange={(e) => updateSymptom(symptom.id, 'severity', e.target.value)}
-                          className="input-field"
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         >
                           {SEVERITY_OPTIONS.map(option => (
                             <option key={option.value} value={option.value}>{option.label}</option>
@@ -908,7 +908,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                         <select
                           value={symptom.duration}
                           onChange={(e) => updateSymptom(symptom.id, 'duration', e.target.value)}
-                          className="input-field"
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         >
                           <option value="">Select duration</option>
                           {DURATION_OPTIONS.map(duration => (
@@ -917,7 +917,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                         </select>
                         <button
                           onClick={() => removeSymptom(symptom.id)}
-                          className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                          className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors sm:justify-self-end"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -929,7 +929,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
             </div>
 
             {/* Diagnosis */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
               <div className="space-y-6">
                 <PillSelector
                   title="Select Diagnosis"
@@ -958,20 +958,20 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                 {/* Selected diagnoses with details */}
                 {diagnoses.length > 0 && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-gray-800">Selected Diagnoses</h4>
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-800">Selected Diagnoses</h4>
                     {diagnoses.map((diagnosis) => (
-                      <div key={diagnosis.id} className="grid grid-cols-3 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-                        <div className="font-medium text-gray-900">{diagnosis.name}</div>
+                      <div key={diagnosis.id} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center p-4 bg-gray-50 rounded-xl">
+                        <div className="font-medium text-gray-900 sm:mb-0 mb-2">{diagnosis.name}</div>
                         <input
                           type="text"
                           placeholder="Description (optional)"
                           value={diagnosis.description}
                           onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
-                          className="input-field"
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         />
                         <button
                           onClick={() => removeDiagnosis(diagnosis.id)}
-                          className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                          className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors sm:justify-self-end"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -982,8 +982,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
             </div>
 
-            {/* Medications */}
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+            {/* Medications section with responsive medication details */}
+            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
               <div className="space-y-6">
                 {isLoadingCustomData ? (
                   <div className="text-center py-8">
@@ -1034,21 +1034,16 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                 {/* Selected medications with details */}
                 {medications.length > 0 && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-gray-800">Selected Medications</h4>
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-800">Selected Medications</h4>
                     {medications.map((medication) => (
                       <div key={medication.id} className="p-4 bg-gray-50 rounded-xl space-y-4">
-                        {/* Medication name and timing */}
-                        <div className="grid grid-cols-6 gap-4 items-center">
-                          <div className="font-medium text-gray-900">{medication.name}</div>
+                        {/* Medication name and timing - responsive */}
+                        <div className="grid grid-cols-1 sm:grid-cols-6 gap-4 items-center">
+                          <div className="font-medium text-gray-900 sm:mb-0 mb-2">{medication.name}</div>
                           
-                          {/* Timing checkboxes */}
-                          <div className="col-span-4 flex items-center space-x-3">
-                            {{
-                              morning: 'M',
-                              afternoon: 'A',
-                              evening: 'E',
-                              night: 'N'
-                            } && Object.entries(medication.timing).map(([key, value]) => (
+                          {/* Timing checkboxes - responsive */}
+                          <div className="col-span-1 sm:col-span-4 flex items-center space-x-3 justify-center sm:justify-start">
+                            {Object.entries(medication.timing).map(([key, value]) => (
                               <div key={key} className="flex flex-col items-center space-y-1">
                                 <button
                                   type="button"
@@ -1063,32 +1058,32 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                                     <div className="w-5 h-5 bg-green-500 rounded-md"></div>
                                   )}
                                 </button>
-                                <span className="text-xs text-gray-600 font-medium">{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                                <span className="text-xs text-gray-600 font-medium">{key.charAt(0).toUpperCase()}</span>
                               </div>
                             ))}
                           </div>
                           
                           <button
                             onClick={() => removeMedication(medication.id)}
-                            className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                            className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors sm:justify-self-end"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
 
-                        {/* Dosage, meal timing, and duration */}
-                        <div className="grid grid-cols-4 gap-4 items-center">
+                        {/* Dosage, meal timing, and duration - responsive */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
                           <input
                             type="text"
                             placeholder="Dosage (e.g., 500mg)"
                             value={medication.dosage}
                             onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
-                            className="input-field"
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                           />
                           <select
                             value={medication.mealTiming}
                             onChange={(e) => updateMedication(medication.id, 'mealTiming', e.target.value)}
-                            className="input-field"
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                           >
                             {MEDICATION_TIMING.map(option => (
                               <option key={option.value} value={option.value}>{option.label}</option>
@@ -1097,7 +1092,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                           <select
                             value={medication.duration}
                             onChange={(e) => updateMedication(medication.id, 'duration', e.target.value)}
-                            className="input-field"
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                           >
                             <option value="">Select duration</option>
                             {MEDICATION_DURATION_OPTIONS.map(duration => (
@@ -1109,7 +1104,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                             placeholder="Remarks"
                             value={medication.remarks}
                             onChange={(e) => updateMedication(medication.id, 'remarks', e.target.value)}
-                            className="input-field"
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                           />
                         </div>
                       </div>
@@ -1252,12 +1247,12 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   value={followUpDate}
                   onChange={(e) => setFollowUpDate(e.target.value)}
                   min={getTodayString()}
-                  className="input-field"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
 
-              <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">Consultation Fee</h3>
+              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Consultation Fee</h3>
                 <div className="flex items-center space-x-3">
                   <span className="text-gray-600 font-medium text-lg">₹</span>
                   <input
@@ -1265,7 +1260,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     value={consultationFee}
                     onChange={(e) => setConsultationFee(e.target.value)}
                     placeholder="500"
-                    className="input-field"
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   />
                 </div>
               </div>

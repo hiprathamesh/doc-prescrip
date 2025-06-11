@@ -98,10 +98,10 @@ export default function PrescriptionTemplates({ onBack }) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8 px-4 sm:px-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+        <div className="flex items-center space-x-3 sm:space-x-4">
           <button
             onClick={onBack}
             className="p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200"
@@ -109,13 +109,13 @@ export default function PrescriptionTemplates({ onBack }) {
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Prescription Templates</h1>
-            <p className="text-gray-600 mt-1">Manage your common prescription templates</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Prescription Templates</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">Manage your common prescription templates</p>
           </div>
         </div>
         <button
           onClick={handleCreateNew}
-          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
           <Plus className="w-5 h-5" />
           <span className="font-medium">New Template</span>
@@ -123,7 +123,7 @@ export default function PrescriptionTemplates({ onBack }) {
       </div>
 
       {/* Search Bar */}
-      <div className="max-w-2xl">
+      <div className="w-full">
         <div className="relative">
           <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
           <input
@@ -131,22 +131,22 @@ export default function PrescriptionTemplates({ onBack }) {
             placeholder="Search templates by name, description, or diagnosis..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-lg shadow-lg"
+            className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-base sm:text-lg shadow-lg"
           />
         </div>
       </div>
 
       {/* Templates Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredTemplates.length > 0 ? (
           filteredTemplates.map((template) => (
-            <div key={template.id} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div key={template.id} className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
               <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{template.name}</h3>
-                  <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 truncate">{template.name}</h3>
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{template.description}</p>
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex space-x-1 sm:space-x-2 ml-2">
                   <button
                     onClick={() => handleEdit(template)}
                     className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
@@ -167,7 +167,7 @@ export default function PrescriptionTemplates({ onBack }) {
                 {/* Symptoms */}
                 {template.symptoms?.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold text-gray-700 mb-1 flex items-center space-x-1">
+                    <h4 className="text-xs font-semibold text-gray-700 mb-2 flex items-center space-x-1">
                       <FileText className="w-3 h-3" />
                       <span>Symptoms</span>
                     </h4>
@@ -189,7 +189,7 @@ export default function PrescriptionTemplates({ onBack }) {
                 {/* Diagnosis */}
                 {template.diagnosis?.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold text-gray-700 mb-1 flex items-center space-x-1">
+                    <h4 className="text-xs font-semibold text-gray-700 mb-2 flex items-center space-x-1">
                       <Stethoscope className="w-3 h-3" />
                       <span>Diagnosis</span>
                     </h4>
@@ -211,11 +211,11 @@ export default function PrescriptionTemplates({ onBack }) {
                 {/* Medications */}
                 {template.medications?.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold text-gray-700 mb-1 flex items-center space-x-1">
+                    <h4 className="text-xs font-semibold text-gray-700 mb-2 flex items-center space-x-1">
                       <FileText className="w-3 h-3" />
                       <span>Medications</span>
                     </h4>
-                    <div className="text-xs text-gray-600">
+                    <div className="text-xs text-gray-600 space-y-1">
                       {template.medications.slice(0, 2).map((med, index) => (
                         <div key={index} className="truncate">• {med.name} - {med.dosage}</div>
                       ))}
@@ -451,30 +451,30 @@ function TemplateEditor({ template, onSave, onCancel }) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8 px-4 sm:px-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+        <div className="flex items-center space-x-3 sm:space-x-4">
           <button
             onClick={onCancel}
             className="p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200"
           >
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
             {template ? 'Edit Template' : 'Create New Template'}
           </h1>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
           <button
             onClick={onCancel}
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+            className="w-full sm:w-auto px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             <span className="font-medium">Save Template</span>
           </button>
@@ -482,9 +482,9 @@ function TemplateEditor({ template, onSave, onCancel }) {
       </div>
 
       {/* Template Basic Info */}
-      <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <h3 className="text-xl font-bold text-gray-900 mb-6">Template Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Template Information</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-semibold text-gray-800 mb-2">Template Name *</label>
             <input
@@ -509,7 +509,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
       </div>
 
       {/* Symptoms Section - Updated with PillSelector */}
-      <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
         <div className="space-y-6">
           <PillSelector
             title="Select Symptoms"
@@ -583,7 +583,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
       </div>
 
       {/* Diagnosis Section - Updated with PillSelector */}
-      <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
         <div className="space-y-6">
           <PillSelector
             title="Select Diagnosis"
@@ -643,7 +643,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
       </div>
 
       {/* Medications Section - Updated with MedicationSelector */}
-      <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
         <div className="space-y-6">
           {isLoadingCustomData ? (
             <div className="text-center py-8">
@@ -786,7 +786,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
       </div>
 
       {/* Lab Results Section - Updated with PillSelector */}
-      <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
         <div className="space-y-6">
           <PillSelector
             title="Select Lab Tests"
@@ -836,10 +836,10 @@ function TemplateEditor({ template, onSave, onCancel }) {
         </div>
       </div>
 
-      {/* Doctor Notes and Advice - Keep existing textarea approach for templates */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Doctor's Notes</h3>
+      {/* Enhanced Doctor Notes and Advice */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Doctor's Notes</h3>
           <textarea
             value={formData.doctorNotes}
             onChange={(e) => setFormData({ ...formData, doctorNotes: e.target.value })}
@@ -850,8 +850,8 @@ function TemplateEditor({ template, onSave, onCancel }) {
           <p className="text-sm text-gray-500 mt-2">Separate each note with a new line</p>
         </div>
 
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Advice to Patient</h3>
+        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Advice to Patient</h3>
           <textarea
             value={formData.advice}
             onChange={(e) => setFormData({ ...formData, advice: e.target.value })}

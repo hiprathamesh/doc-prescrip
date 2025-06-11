@@ -37,21 +37,104 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
 
   if (patients.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-8 text-center">
-        <User className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No patients found</h3>
-        <p className="text-gray-600 mb-4">Start by creating a new prescription for a patient.</p>
+      <div className="bg-white rounded-lg shadow p-6 sm:p-8 text-center">
+        <User className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mb-4" />
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No patients found</h3>
+        <p className="text-sm sm:text-base text-gray-600 mb-4">Start by creating a new prescription for a patient.</p>
       </div>
     );
   }
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Patients ({patients.length})</h2>
+      <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900">Patients ({patients.length})</h2>
       </div>
       
-      <div className="overflow-x-auto">
+      {/* Mobile view */}
+      <div className="block sm:hidden">
+        <div className="divide-y divide-gray-200">
+          {patients.map((patient, index) => (
+            <div key={patient.id} className="p-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex-1" onClick={() => onPatientSelect(patient)}>
+                  <div className="font-medium text-gray-900">{patient.name}</div>
+                  <div className="text-sm text-gray-600">
+                    {patient.gender} • {patient.age} years • ID: {patient.id}
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600 mt-1">
+                    <Phone className="w-3 h-3 mr-1 text-gray-500" />
+                    {patient.phone}
+                  </div>
+                </div>
+                
+                <div className="relative ml-2" ref={el => dropdownRefs.current[patient.id] = el}>
+                  <button
+                    onClick={(e) => handleDropdownToggle(patient.id, e)}
+                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
+                  
+                  {dropdownOpen === patient.id && (
+                    <div className={`absolute ${
+                      index >= patients.length - 3 ? 'bottom-full mb-2' : 'top-full mt-2'
+                    } right-0 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200`}>
+                      <div className="py-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onNewPrescription(patient);
+                            setDropdownOpen(null);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center space-x-2 transition-colors"
+                        >
+                          <FileText className="w-4 h-4" />
+                          <span>New Prescription</span>
+                        </button>
+                        <button
+                          onClick={(e) => handleDeletePatient(patient, e)}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span>Delete Patient</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-500">Last Visit:</span>
+                  <div className="font-medium text-gray-900">{formatDate(patient.lastVisited)}</div>
+                </div>
+                <div>
+                  <span className="text-gray-500">Next Expected:</span>
+                  <div className="font-medium text-gray-900">{formatDate(patient.nextExpected)}</div>
+                </div>
+              </div>
+              
+              <div className="mt-3">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNewPrescription(patient);
+                  }}
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>New Prescription</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop view */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -127,7 +210,6 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                       
                       {dropdownOpen === patient.id && (
                         <div className={`absolute ${
-                          // Position dropdown above if it's one of the last 3 items
                           index >= patients.length - 3 ? 'bottom-full mb-2' : 'top-full mt-2'
                         } right-0 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200`}>
                           <div className="py-1">

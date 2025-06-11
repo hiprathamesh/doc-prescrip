@@ -64,9 +64,9 @@ export default function PillSelector({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h4 className="text-lg font-semibold text-gray-800">{title}</h4>
-        <div className="flex items-center space-x-2">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+        <h4 className="text-base sm:text-lg font-semibold text-gray-800">{title}</h4>
+        <div className="flex items-center justify-end space-x-2">
           <button
             onClick={() => setShowSearch(!showSearch)}
             className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
@@ -77,7 +77,7 @@ export default function PillSelector({
           {canScrollLeft && (
             <button
               onClick={() => scroll('left')}
-              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -85,7 +85,7 @@ export default function PillSelector({
           {canScrollRight && (
             <button
               onClick={() => scroll('right')}
-              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -144,14 +144,14 @@ export default function PillSelector({
       <div className="relative">
         <div
           ref={scrollContainerRef}
-          className="flex space-x-3 overflow-x-auto scrollbar-hide pb-2"
+          className="flex space-x-2 sm:space-x-3 overflow-x-auto scrollbar-hide pb-2"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {items.map((item, index) => (
             <button
               key={index}
               onClick={() => handleSelect(item)}
-              className="flex-shrink-0 px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-800 rounded-full text-sm font-medium transition-all duration-200 border border-gray-300 hover:border-blue-300 transform hover:scale-105"
+              className="flex-shrink-0 px-3 sm:px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-800 rounded-full text-sm font-medium transition-all duration-200 border border-gray-300 hover:border-blue-300 transform hover:scale-105 whitespace-nowrap"
             >
               {item}
             </button>

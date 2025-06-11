@@ -144,9 +144,9 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h4 className="text-lg font-semibold text-gray-800">Select Medications</h4>
-        <div className="flex items-center space-x-2">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
+        <h4 className="text-base sm:text-lg font-semibold text-gray-800">Select Medications</h4>
+        <div className="flex items-center justify-end space-x-2">
           <button
             onClick={() => setShowSearch(!showSearch)}
             className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
@@ -157,7 +157,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
           {canScrollLeft && (
             <button
               onClick={() => scroll('left')}
-              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -165,7 +165,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
           {canScrollRight && (
             <button
               onClick={() => scroll('right')}
-              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -189,7 +189,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
           <button
             key={category}
             onClick={() => setSelectedCategory(category)}
-            className={`px-3 py-1 rounded-full text-sm transition-colors ${
+            className={`px-3 py-1 rounded-full text-sm transition-colors whitespace-nowrap ${
               selectedCategory === category 
                 ? 'bg-blue-600 text-white' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -281,14 +281,14 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
       <div className="relative">
         <div
           ref={scrollContainerRef}
-          className="flex space-x-3 overflow-x-auto scrollbar-hide pb-2"
+          className="flex space-x-2 sm:space-x-3 overflow-x-auto scrollbar-hide pb-2"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {getDisplayMedications().map((medication, index) => (
             <button
               key={index}
               onClick={() => handleSelect(medication)}
-              className="flex-shrink-0 px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-800 rounded-full text-sm font-medium transition-all duration-200 border border-gray-300 hover:border-blue-300 transform hover:scale-105"
+              className="flex-shrink-0 px-3 sm:px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-800 rounded-full text-sm font-medium transition-all duration-200 border border-gray-300 hover:border-blue-300 transform hover:scale-105 whitespace-nowrap"
             >
               {medication}
             </button>
@@ -298,15 +298,15 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
 
       {/* Medication Details Modal */}
       {showMedicationDetails && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-2xl w-full m-4 max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">{showMedicationDetails.name}</h3>
+              <h3 className="text-lg sm:text-xl font-bold">{showMedicationDetails.name}</h3>
               <button
                 onClick={() => setShowMedicationDetails(null)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 p-1"
               >
-                ×
+                <X className="w-5 h-5" />
               </button>
             </div>
             <div className="space-y-4 text-sm">
