@@ -111,6 +111,53 @@ class DatabaseService {
     }
   }
 
+  async savePrescription(prescription) {
+    try {
+      const collection = await getCollection(COLLECTIONS.PRESCRIPTIONS);
+
+      // Helper to check for valid ObjectId
+      const isValidObjectId = (id) => {
+        return typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id);
+      };
+
+      if (prescription.id && isValidObjectId(prescription.id)) {
+        // Update existing prescription
+        const { id, ...updateData } = prescription;
+        const prescriptionToUpdate = {
+          ...updateData,
+          updatedAt: new Date()
+        };
+
+        const result = await collection.replaceOne(
+          { _id: new ObjectId(id) },
+          prescriptionToUpdate
+        );
+
+        if (result.matchedCount === 0) {
+          throw new Error(`Prescription with id ${id} not found`);
+        }
+
+        return { ...prescriptionToUpdate, id };
+      } else {
+        // Insert new prescription (either no id or not a valid ObjectId)
+        const prescriptionToSave = {
+          ...prescription,
+          createdAt: prescription.createdAt || new Date(),
+          updatedAt: new Date()
+        };
+
+        // Remove the id field if it exists but is not a valid ObjectId
+        delete prescriptionToSave.id;
+
+        const result = await collection.insertOne(prescriptionToSave);
+        return { ...prescriptionToSave, id: result.insertedId.toString() };
+      }
+    } catch (error) {
+      console.error('Database error saving prescription:', error);
+      throw new Error(`Database error: ${error.message}`);
+    }
+  }
+
   // ==================== BILLS OPERATIONS ====================
   
   async getBills() {

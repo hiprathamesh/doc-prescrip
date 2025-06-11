@@ -6,6 +6,7 @@ import PatientDetails from './PatientDetails';
 import NewPrescription from './NewPrescription';
 import PrescriptionTemplates from './PrescriptionTemplates';
 import MedicalDataManager from './MedicalDataManager';
+import MedicalCertificate from './MedicalCertificate';
 import {
   Plus,
   Search,
@@ -153,6 +154,11 @@ export default function Dashboard() {
 
   const handleViewMedicalData = () => {
     setCurrentView('medical-data');
+  };
+
+  const handleNewMedicalCertificate = (patient = null) => {
+    setSelectedPatient(patient);
+    setCurrentView('medical-certificate');
   };
 
   const handlePatientUpdate = async (updatedPatients) => {
@@ -365,7 +371,7 @@ export default function Dashboard() {
 
                     <button
                       onClick={handleViewMedicalData}
-                      className="p-3 sm:p-4 bg-gradient-to-r from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-xl border border-orange-200 transition-all duration-200 group sm:col-span-2 lg:col-span-1"
+                      className="p-3 sm:p-4 bg-gradient-to-r from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-xl border border-orange-200 transition-all duration-200 group"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-1.5 sm:p-2 bg-orange-600 rounded-lg group-hover:scale-110 transition-transform">
@@ -374,6 +380,21 @@ export default function Dashboard() {
                         <div className="text-left">
                           <p className="text-sm sm:text-base font-semibold text-gray-900">Medical Data</p>
                           <p className="text-xs sm:text-sm text-gray-600">Manage symptoms & diagnoses</p>
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => handleNewMedicalCertificate()}
+                      className="p-3 sm:p-4 bg-gradient-to-r from-cyan-50 to-cyan-100 hover:from-cyan-100 hover:to-cyan-200 rounded-xl border border-cyan-200 transition-all duration-200 group sm:col-span-2 lg:col-span-1"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="p-1.5 sm:p-2 bg-cyan-600 rounded-lg group-hover:scale-110 transition-transform">
+                          <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm sm:text-base font-semibold text-gray-900">Medical Certificate</p>
+                          <p className="text-xs sm:text-sm text-gray-600">Generate fitness certificate</p>
                         </div>
                       </div>
                     </button>
@@ -558,6 +579,15 @@ export default function Dashboard() {
         {/* Add templates view */}
         {currentView === 'templates' && (
           <PrescriptionTemplates onBack={handleBackToDashboard} />
+        )}
+
+        {currentView === 'medical-certificate' && (
+          <MedicalCertificate
+            patient={selectedPatient}
+            patients={patients}
+            onBack={handleBackToDashboard}
+            onPatientUpdate={handlePatientUpdate}
+          />
         )}
 
         {currentView === 'medical-data' && (

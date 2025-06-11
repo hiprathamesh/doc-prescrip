@@ -33,15 +33,36 @@ export async function GET(request) {
  */
 export async function POST(request) {
   try {
-    const { prescriptions } = await request.json();
-    const success = await databaseService.savePrescriptions(prescriptions);
+    const body = await request.json();
     
-    if (success) {
-      return NextResponse.json({ success: true });
+    if (body.prescriptions) {
+      // Save multiple prescriptions
+      const success = await databaseService.savePrescriptions(body.prescriptions);
+      
+      if (success) {
+        return NextResponse.json({ success: true });
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Failed to save prescriptions' },
+          { status: 500 }
+        );
+      }
+    } else if (body.prescription) {
+      // Save single prescription
+      const savedPrescription = await databaseService.savePrescription(body.prescription);
+      
+      if (savedPrescription) {
+        return NextResponse.json({ success: true, data: savedPrescription });
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Failed to save prescription' },
+          { status: 500 }
+        );
+      }
     } else {
       return NextResponse.json(
-        { success: false, error: 'Failed to save prescriptions' },
-        { status: 500 }
+        { success: false, error: 'Invalid request body' },
+        { status: 400 }
       );
     }
   } catch (error) {

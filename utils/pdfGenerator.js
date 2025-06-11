@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import { formatDate } from './dateUtils';
 
-export const generatePDF = async (prescription, patient) => {
+export const generatePDF = async (prescription, patient, autoDownload = true) => {
   const pdf = new jsPDF();
   const pageWidth = pdf.internal.pageSize.width;
   let yPosition = 20;
@@ -165,14 +165,17 @@ export const generatePDF = async (prescription, patient) => {
 
   // Save the PDF
   const pdfBlob = pdf.output('blob');
-  const url = URL.createObjectURL(pdfBlob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  
+  if (autoDownload) {
+    const url = URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
   return pdfBlob;
 };

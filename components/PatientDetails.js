@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, FileText, DollarSign, Calendar, Phone, User, Trash2, MoreVertical, Pill } from 'lucide-react';
+import { ArrowLeft, FileText, DollarSign, Calendar, Phone, User, Trash2, MoreVertical, Pill, Download, Share2 } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
+import SharePDFButton from './SharePDFButton';
 
 export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   const [prescriptions, setPrescriptions] = useState([]);
@@ -73,6 +74,32 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
     if (timing.evening) timings.push('E');
     if (timing.night) timings.push('N');
     return timings.length > 0 ? timings.join('-') : 'As prescribed';
+  };
+
+  const downloadPrescription = (prescription) => {
+    if (prescription.pdfUrl) {
+      const a = document.createElement('a');
+      a.href = prescription.pdfUrl;
+      a.download = `prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      alert('PDF not available for download');
+    }
+  };
+
+  const downloadBill = (bill) => {
+    if (bill.pdfUrl) {
+      const a = document.createElement('a');
+      a.href = bill.pdfUrl;
+      a.download = `bill-${patient.name}-${formatDate(bill.createdAt)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      alert('PDF not available for download');
+    }
   };
 
   const totalBills = bills.reduce((sum, bill) => sum + bill.amount, 0);
@@ -214,6 +241,31 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       {dropdownOpen === `prescription-${prescription.id}` && (
                         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                           <div className="py-1">
+                            {prescription.pdfUrl && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    downloadPrescription(prescription);
+                                    setDropdownOpen(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center space-x-2"
+                                >
+                                  <Download className="w-4 h-4" />
+                                  <span>Download Prescription</span>
+                                </button>
+                                <SharePDFButton
+                                  pdfUrl={prescription.pdfUrl}
+                                  filename={`prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`}
+                                  phone={patient.phone}
+                                  type="prescription"
+                                  patientName={patient.name}
+                                  visitDate={formatDate(prescription.visitDate)}
+                                  className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center space-x-2"
+                                  variant="dropdown"
+                                  onShare={() => setDropdownOpen(null)}
+                                />
+                              </>
+                            )}
                             <button
                               onClick={() => deletePrescription(prescription.id)}
                               className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
@@ -351,6 +403,33 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                           {dropdownOpen === `bill-${bill.id}` && (
                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                               <div className="py-1">
+                                {bill.pdfUrl && (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        downloadBill(bill);
+                                        setDropdownOpen(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center space-x-2"
+                                    >
+                                      <Download className="w-4 h-4" />
+                                      <span>Download Bill</span>
+                                    </button>
+                                    <SharePDFButton
+                                      pdfUrl={bill.pdfUrl}
+                                      filename={`bill-${patient.name}-${formatDate(bill.createdAt)}.pdf`}
+                                      phone={patient.phone}
+                                      type="bill"
+                                      patientName={patient.name}
+                                      billDate={formatDate(bill.createdAt)}
+                                      amount={bill.amount}
+                                      isPaid={bill.isPaid}
+                                      className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center space-x-2"
+                                      variant="dropdown"
+                                      onShare={() => setDropdownOpen(null)}
+                                    />
+                                  </>
+                                )}
                                 <button
                                   onClick={() => deleteBill(bill.id)}
                                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"

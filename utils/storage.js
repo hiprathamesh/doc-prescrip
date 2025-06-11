@@ -93,6 +93,30 @@ export const storage = {
     }
   },
 
+  // Add new function for saving single prescription
+  savePrescription: async (prescription) => {
+    try {
+      // Validate prescription data before sending
+      if (!prescription.patientId) {
+        throw new Error('Patient ID is required');
+      }
+
+      const response = await apiCall(`${API_ENDPOINTS.PRESCRIPTIONS}/single`, {
+        method: 'POST',
+        body: JSON.stringify({ prescription })
+      });
+      
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to save prescription');
+      }
+      
+      return response.data || prescription;
+    } catch (error) {
+      console.error('Error saving prescription:', error);
+      throw error; // Re-throw the error so the calling code can handle it
+    }
+  },
+
   getPrescriptionsByPatient: async (patientId) => {
     try {
       // Ensure patientId is always a string for consistency

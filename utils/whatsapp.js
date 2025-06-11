@@ -23,3 +23,17 @@ If you have any questions, please feel free to contact us.
 Best regards,
 Dr. Prashant Nikam`;
 };
+
+export const generateBillWhatsAppMessage = (patientName, billDate, amount, isPaid) => {
+  return `Hello ${patientName},
+
+Your bill for the consultation on ${billDate} is ready.
+
+Amount: ₹${amount}
+Status: ${isPaid ? 'Paid' : 'Pending'}
+
+Thank you for visiting us.
+
+Best regards,
+Dr. Prashant Nikam`;
+};
