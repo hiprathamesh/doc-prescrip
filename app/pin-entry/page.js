@@ -22,8 +22,8 @@ export default function PinEntry() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (pin.length !== 6) {
-      setError('PIN must be 6 digits');
+    if (pin.length < 4 || pin.length > 10) {
+      setError('PIN must be between 4 and 10 digits');
       return;
     }
     
@@ -67,7 +67,7 @@ export default function PinEntry() {
   };
 
   const handlePinChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
     setPin(value);
     if (error) setError('');
   };
@@ -78,6 +78,8 @@ export default function PinEntry() {
       inputRef.current.focus();
     }
   };
+
+  const isValidLength = pin.length >= 4 && pin.length <= 10;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 flex items-center justify-center p-4">
@@ -91,7 +93,7 @@ export default function PinEntry() {
             Secure Access
           </h1>
           <p className="text-gray-600 text-sm sm:text-base">
-            Enter your 6-digit PIN to access the medical practice system
+            Enter your PIN (4-10 digits) to access the medical practice system
           </p>
         </div>
 
@@ -116,7 +118,7 @@ export default function PinEntry() {
                   value={pin}
                   onChange={handlePinChange}
                   className="absolute opacity-0 w-full h-full cursor-default"
-                  maxLength={6}
+                  maxLength={10}
                   disabled={isLoading}
                   autoFocus
                   onBlur={() => {
@@ -134,24 +136,29 @@ export default function PinEntry() {
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 
-                {/* PIN Dots */}
-                <div className="flex justify-center space-x-4">
-                  {[...Array(6)].map((_, index) => (
-                    <div
-                      key={index}
-                      className={`w-6 h-6 rounded-full border-1 transition-all duration-300 flex items-center justify-center ${
-                        index < pin.length
-                          ? 'bg-blue-600 border-blue-600 scale-110 shadow-lg'
-                          : 'bg-gray-100 border-gray-300 hover:border-gray-400'
-                      }`}
-                    >
-                      {showPin && index < pin.length && (
-                        <span className="text-white text-sm font-bold">
-                          {pin[index]}
+                {/* PIN Display */}
+                <div className="flex items-center justify-center min-h-[40px] px-12">
+                  {pin.length === 0 ? (
+                    <div className="text-gray-400 text-lg">••••</div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      {showPin ? (
+                        <span className="text-2xl font-mono tracking-wider text-gray-800">
+                          {pin}
                         </span>
+                      ) : (
+                        <div className="flex space-x-1">
+                          {pin.split('').map((_, index) => (
+                            <div
+                              key={index}
+                              className="w-3 h-3 rounded-full bg-blue-600 animate-pulse"
+                              style={{ animationDelay: `${index * 100}ms` }}
+                            />
+                          ))}
+                        </div>
                       )}
                     </div>
-                  ))}
+                  )}
                 </div>
                 
                 {/* Eye Icon */}
@@ -159,7 +166,7 @@ export default function PinEntry() {
                   type="button"
                   onClick={() => setShowPin(!showPin)}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2"
-                  disabled={isLoading}
+                  disabled={isLoading || pin.length === 0}
                 >
                   {showPin ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
@@ -168,7 +175,38 @@ export default function PinEntry() {
                   )}
                 </button>
               </div>
+
+              {/* PIN Length Indicator */}
+              <div className="flex items-center justify-between mt-2 px-2">
+                <div className="text-xs text-gray-500">
+                  {pin.length}/10 digits
+                </div>
+                <div className="flex space-x-1">
+                  {[4, 5, 6, 7, 8, 9, 10].map((length) => (
+                    <div
+                      key={length}
+                      className={`w-2 h-1 rounded-full transition-all duration-200 ${
+                        pin.length >= length
+                          ? 'bg-blue-600'
+                          : pin.length >= 4
+                          ? 'bg-green-400'
+                          : 'bg-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
+
+            {/* Status Message */}
+            {pin.length > 0 && pin.length < 4 && (
+              <div className="flex items-center space-x-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
+                <p className="text-yellow-700 text-sm">
+                  Enter at least 4 digits ({4 - pin.length} more needed)
+                </p>
+              </div>
+            )}
 
             {/* Error Message */}
             {error && (
@@ -181,7 +219,7 @@ export default function PinEntry() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={pin.length !== 6 || isLoading}
+              disabled={!isValidLength || isLoading}
               className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none disabled:shadow-md"
             >
               {isLoading ? (

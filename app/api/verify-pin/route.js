@@ -3,6 +3,22 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
   try {
     const { pin } = await request.json();
+    
+    // Validate PIN format and length
+    if (!pin || typeof pin !== 'string' || !/^\d+$/.test(pin)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid PIN format' },
+        { status: 400 }
+      );
+    }
+    
+    if (pin.length < 4 || pin.length > 10) {
+      return NextResponse.json(
+        { success: false, error: 'PIN must be between 4 and 10 digits' },
+        { status: 400 }
+      );
+    }
+    
     const correctPin = process.env.SITE_PIN || '123456';
     
     if (pin === correctPin) {
