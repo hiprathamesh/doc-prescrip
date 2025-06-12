@@ -12,8 +12,12 @@ import MedicationSelector from './MedicationSelector';
 import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from '../lib/medicalData';
 import ConfirmationDialog from './ConfirmationDialog';
 import PrescriptionSuccess from './PrescriptionSuccess';
+import CustomSelect from './CustomSelect';
+import CustomDropdown from './CustomDropdown';
 
 export default function NewPrescription({ patient, patients, onBack, onPatientUpdate }) {
+  console.log('[NewPrescription] Component rendering/re-rendering. Selected patient:', patient ? patient.id : 'none'); // TOP-LEVEL LOG
+
   const [selectedPatient, setSelectedPatient] = useState(patient);
   const [isNewPatient, setIsNewPatient] = useState(false);
   const [newPatientData, setNewPatientData] = useState({
@@ -66,6 +70,15 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   const [savedPrescription, setSavedPrescription] = useState(null);
   const [savedBill, setSavedBill] = useState(null);
 
+  const presHeaderRef = useRef(null);
+  const [isPresHeaderVisible, setIsPresHeaderVisible] = useState(true);
+
+  // Refs for new patient form fields
+  const nameRef = useRef(null);
+  const ageRef = useRef(null);
+  const genderRef = useRef(null);
+  const phoneRef = useRef(null);
+
   useEffect(() => {
     if (selectedPatient) {
       const prescriptions = storage.getPrescriptionsByPatient(selectedPatient.id);
@@ -91,6 +104,61 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   useEffect(() => {
     loadCustomData();
   }, []);
+
+  // Intersection Observer for pres-header visibility
+  useEffect(() => {
+    console.log('[IntersectionObserver Effect] Hook execution started.');
+
+    const presHeaderElement = presHeaderRef.current;
+    console.log('[IntersectionObserver Effect] presHeaderRef.current:', presHeaderElement);
+
+    if (!presHeaderElement) {
+      console.log('[IntersectionObserver Effect] presHeaderRef.current is null or undefined. Observer not set.');
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      console.warn('[IntersectionObserver Effect] IntersectionObserver API not available in this browser.');
+      setIsPresHeaderVisible(true); // Fallback
+      return;
+    }
+
+    console.log('[IntersectionObserver Effect] Setting up IntersectionObserver...');
+    
+    // Assuming your main fixed/sticky dashboard header is 64px tall.
+    // This margin means the intersection is calculated relative to a viewport
+    // whose top edge is effectively 64px lower.
+    const rootMarginTop = "-64px"; // Adjust if your main header height is different
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        console.log('[IntersectionObserver Callback] Fired. Entries:', entries);
+        if (entries && entries.length > 0 && entries[0]) {
+          const entry = entries[0];
+          console.log('[IntersectionObserver Callback] entry.isIntersecting:', entry.isIntersecting, 'entry.boundingClientRect.top:', entry.boundingClientRect.top);
+          // When entry.isIntersecting is false, it means the element is no longer intersecting the (modified) root.
+          // For scrolling up, this means it has gone above the -64px margin line.
+          setIsPresHeaderVisible(entry.isIntersecting);
+        } else {
+          console.warn('[IntersectionObserver Callback] Received no entries or undefined entry.');
+        }
+      },
+      {
+        root: null, // Observe intersections relative to the viewport.
+        rootMargin: `${rootMarginTop} 0px 0px 0px`, // Top margin adjusted for the main header
+        threshold: [0, 0.01], // Trigger when even a tiny part enters/leaves the adjusted viewport boundary.
+                               // Using an array can sometimes be more reliable. 0 means it's out, >0 means it's in.
+      }
+    );
+
+    observer.observe(presHeaderElement);
+    console.log('[IntersectionObserver Effect] Observer is now observing:', presHeaderElement, `with rootMarginTop: ${rootMarginTop}`);
+
+    return () => {
+      console.log('[IntersectionObserver Cleanup] Unobserving:', presHeaderElement);
+      observer.unobserve(presHeaderElement);
+    };
+  }, []); // Empty dependency array: runs once on mount and cleans up on unmount.
 
   const loadCustomData = async () => {
     try {
@@ -609,70 +677,119 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     );
   }
 
+  // Handle Enter key press for form navigation
+  const handleKeyPress = (e, nextRef) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
+
+  // Handle last field Enter press
+  const handleLastFieldKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleCreateNewPatient();
+    }
+  };
+
+  // Handle gender dropdown Enter press
+  const handleGenderEnterPress = () => {
+    if (phoneRef.current) {
+      phoneRef.current.focus();
+    }
+  };
+
   return (
     <>
-      <div className="space-y-6 sm:space-y-8 bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen">
-        {/* Enhanced Header */}
-        <div className="bg-white shadow-lg border-gray-200 sticky top-0 z-40 rounded-b-xl">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <div className="flex items-center space-x-3 sm:space-x-4">
+      {/* Floating header */}
+      <div
+        className={`fixed left-0 right-0 z-30 transition-transform duration-300 ease-in-out
+          ${isPresHeaderVisible ? '-translate-y-full' : 'translate-y-0'}
+        `}
+        style={{ top: '81px' }}
+      >
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-6 py-3">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-4 h-4 text-gray-600" />
+                </button>
+                <span className="text-md font-semibold text-gray-900">New Prescription</span>
+              </div>
+              <button
+                onClick={handleSavePrescription}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save & Send</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-6 min-h-screen">
+        {/* Enhanced Header */}
+        <div ref={presHeaderRef} className="pres-header">
+          <div className="max-w-5xl mx-auto px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onBack}
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">New Prescription</h1>
+                <span className="text-xl font-semibold text-gray-900">New Prescription</span>
               </div>
               <div className="flex space-x-3">
                 <button
                   onClick={handleSavePrescription}
-                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl flex items-center justify-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium"
                 >
                   <Save className="w-4 h-4" />
-                  <span className="font-medium">Save & Send</span>
+                  <span>Save & Send</span>
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+        <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Patient Selection */}
           {!selectedPatient && (
-            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Select Patient</h2>
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="bg-white p-6 rounded-xl border border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 mb-5">Select Patient</h2>
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
                   <div className="flex-1 relative">
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value === 'new') {
+                    <CustomSelect
+                      options={patients.map(p => ({ value: p.id, label: `${p.name} (${p.id}) - ${p.phone}` }))}
+                      value={selectedPatient?.id || ''}
+                      onChange={(patientId) => {
+                        if (patientId === 'new') {
                           setIsNewPatient(true);
+                          setSelectedPatient(null);
                         } else {
-                          const patient = patients.find(p => p.id === e.target.value);
+                          const patient = patients.find(p => p.id === patientId);
                           setSelectedPatient(patient || null);
+                          setIsNewPatient(false);
                         }
                       }}
-                      className="w-full p-4 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-base sm:text-lg bg-white shadow-sm hover:shadow-md appearance-none"
-                    >
-                      <option value="">Select patient...</option>
-                      {patients.map(patient => (
-                        <option key={patient.id} value={patient.id}>
-                          {patient.name} ({patient.id}) - {patient.phone}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                      <svg className="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </div>
+                      placeholder="Select or search patient..."
+                      onAddNew={() => setIsNewPatient(true)}
+                    />
                   </div>
                   <button
                     onClick={() => toggleNewPatient()}
-                    className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-4 rounded-xl flex items-center justify-center space-x-2 font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-medium transition-colors duration-200"
                   >
                     <Plus className="w-5 h-5" />
                     <span>Add Patient</span>
@@ -680,53 +797,70 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                 </div>
 
                 {isNewPatient && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 animate-in slide-in-from-top duration-300">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 p-5 bg-gray-50 rounded-xl border border-gray-200">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Name *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Name *</label>
                       <input
+                        ref={nameRef}
                         type="text"
                         value={newPatientData.name}
                         onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
-                        className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        onKeyPress={(e) => handleKeyPress(e, ageRef)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                        placeholder="Enter patient name"
+                        autoFocus
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Age *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Age *</label>
                       <input
+                        ref={ageRef}
                         type="number"
                         value={newPatientData.age}
                         onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
-                        className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        onKeyPress={(e) => handleKeyPress(e, genderRef)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                        placeholder="Enter age"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Gender</label>
-                      <select
-                        value={newPatientData.gender}
-                        onChange={(e) => setNewPatientData({ ...newPatientData, gender: e.target.value })}
-                        className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      >
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </select>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Gender</label>
+                      <div ref={genderRef} tabIndex={0}>
+                        <CustomDropdown
+                          options={[
+                            { value: 'male', label: 'Male' },
+                            { value: 'female', label: 'Female' },
+                            { value: 'other', label: 'Other' }
+                          ]}
+                          value={newPatientData.gender}
+                          onChange={(value) => setNewPatientData({ ...newPatientData, gender: value })}
+                          placeholder="Select gender..."
+                          onEnterPress={handleGenderEnterPress}
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Phone *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone *</label>
                       <input
+                        ref={phoneRef}
                         type="tel"
                         value={newPatientData.phone}
                         onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
-                        className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        onKeyPress={handleLastFieldKeyPress}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                        placeholder="Enter phone number"
                       />
                     </div>
                     <div className="col-span-1 sm:col-span-2">
                       <button
                         onClick={handleCreateNewPatient}
-                        className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                        className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors duration-200"
                       >
                         Create Patient
                       </button>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Tip: Press Enter on any field to move to the next one, or Enter on the last field to create patient
+                      </p>
                     </div>
                   </div>
                 )}
@@ -735,68 +869,68 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
           )}
 
           {selectedPatient && (
-            <div className="space-y-6 sm:space-y-8">
+            <div className="space-y-6">
               {/* Patient Info */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Patient Information</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-sm">
-                  <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900 mb-5">Patient Information</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                  <div className="bg-gray-50 p-3 rounded-lg">
                     <span className="font-semibold text-gray-700 block mb-1">Name</span>
                     <span className="text-gray-900 font-medium">{selectedPatient.name}</span>
                   </div>
-                  <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
+                  <div className="bg-gray-50 p-3 rounded-lg">
                     <span className="font-semibold text-gray-700 block mb-1">ID</span>
                     <span className="text-gray-900 font-medium">{selectedPatient.id}</span>
                   </div>
-                  <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
+                  <div className="bg-gray-50 p-3 rounded-lg">
                     <span className="font-semibold text-gray-700 block mb-1">Age</span>
                     <span className="text-gray-900 font-medium">{selectedPatient.age} years</span>
                   </div>
-                  <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
+                  <div className="bg-gray-50 p-3 rounded-lg">
                     <span className="font-semibold text-gray-700 block mb-1">Phone</span>
                     <span className="text-gray-900 font-medium">{selectedPatient.phone}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Previous Visit Reference - responsive */}
+              {/* Previous Visit Reference */}
               {previousPrescription && (
-                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 sm:p-8 rounded-2xl border-2 border-blue-200 shadow-lg">
-                  <h3 className="text-lg sm:text-xl font-bold text-blue-900 mb-6">Previous Visit Reference</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
-                    <div className="bg-white p-4 rounded-xl shadow-sm">
-                      <h4 className="font-semibold text-blue-800 mb-3">Medications</h4>
-                      <ul className="space-y-2">
+                <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
+                  <h3 className="text-lg font-semibold text-blue-800 mb-5">Previous Visit Reference</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 text-sm">
+                    <div className="bg-white p-4 rounded-lg">
+                      <h4 className="font-semibold text-blue-700 mb-2.5">Medications</h4>
+                      <ul className="space-y-1.5">
                         {previousPrescription.medications.map(med => (
-                          <li key={med.id} className="text-blue-700 bg-blue-50 p-2 rounded-lg">
+                          <li key={med.id} className="text-blue-700 bg-blue-50 p-2 rounded-md">
                             {med.name} - {med.dosage}
                           </li>
                         ))}
                       </ul>
                     </div>
-                    <div className="bg-white p-4 rounded-xl shadow-sm">
-                      <h4 className="font-semibold text-blue-800 mb-3">Diagnosis</h4>
-                      <ul className="space-y-2">
+                    <div className="bg-white p-4 rounded-lg">
+                      <h4 className="font-semibold text-blue-700 mb-2.5">Diagnosis</h4>
+                      <ul className="space-y-1.5">
                         {previousPrescription.diagnosis.map(diag => (
-                          <li key={diag.id} className="text-blue-700 bg-blue-50 p-2 rounded-lg">{diag.name}</li>
+                          <li key={diag.id} className="text-blue-700 bg-blue-50 p-2 rounded-md">{diag.name}</li>
                         ))}
                       </ul>
                     </div>
-                    <div className="bg-white p-4 rounded-xl shadow-sm">
-                      <h4 className="font-semibold text-blue-800 mb-3">Previous Advice</h4>
-                      <p className="text-blue-700 bg-blue-50 p-3 rounded-lg">{previousPrescription.advice}</p>
+                    <div className="bg-white p-4 rounded-lg">
+                      <h4 className="font-semibold text-blue-700 mb-2.5">Previous Advice</h4>
+                      <p className="text-blue-700 bg-blue-50 p-3 rounded-md">{previousPrescription.advice}</p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Prescription Templates Section - responsive */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900">Prescription Templates</h3>
+              {/* Prescription Templates Section */}
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-5 space-y-3 sm:space-y-0">
+                  <h3 className="text-lg font-semibold text-gray-900">Prescription Templates</h3>
                   <button
                     onClick={() => setShowTemplates(!showTemplates)}
-                    className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 py-2 rounded-xl flex items-center justify-center space-x-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 text-sm font-medium transition-colors duration-200"
                   >
                     <FileText className="w-4 h-4" />
                     <span>{showTemplates ? 'Hide Templates' : 'Browse Templates'}</span>
@@ -804,34 +938,31 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                 </div>
 
                 {showTemplates && (
-                  <div className="space-y-4 animate-in slide-in-from-top duration-300">
-                    {/* Template Search */}
+                  <div className="space-y-4">
                     <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <input
                         type="text"
                         placeholder="Search templates..."
                         value={templateSearch}
                         onChange={(e) => setTemplateSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-colors h-11"
                       />
                     </div>
 
-                    {/* Templates Grid - responsive */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto">
                       {filteredTemplates.length > 0 ? (
                         filteredTemplates.map((template) => (
                           <div
                             key={template.id}
                             onClick={() => applyTemplate(template)}
-                            className="p-4 border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 cursor-pointer group"
+                            className="p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 cursor-pointer group"
                           >
-                            <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-purple-800">
+                            <h4 className="font-semibold text-gray-800 mb-1.5 group-hover:text-purple-700">
                               {template.name}
                             </h4>
-                            <p className="text-sm text-gray-600 mb-3">{template.description}</p>
-
-                            {/* Quick preview */}
+                            <p className="text-sm text-gray-600 mb-2.5">{template.description}</p>
+                            
                             <div className="space-y-2">
                               {(template.diagnosis || []).length > 0 && (
                                 <div className="flex flex-wrap gap-1">
@@ -847,7 +978,6 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                                   )}
                                 </div>
                               )}
-
                               <div className="text-xs text-gray-500">
                                 {(template.medications || []).length} medications • {(template.symptoms || []).length} symptoms
                               </div>
@@ -867,17 +997,16 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                 )}
               </div>
 
-              {/* Enhanced Medical History - responsive */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Medical History</h3>
-                <div className="flex flex-wrap gap-2 sm:gap-3">
-                  {/* Predefined conditions */}
+              {/* Enhanced Medical History */}
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-5">Medical History</h3>
+                <div className="flex flex-wrap gap-2.5">
                   {MEDICAL_CONDITIONS.map((condition) => (
                     <button
                       key={condition}
                       onClick={() => toggleMedicalCondition(condition)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105 ${selectedMedicalHistory.has(condition)
-                        ? 'bg-blue-600 text-white shadow-lg hover:bg-blue-700'
+                      className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${selectedMedicalHistory.has(condition)
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
                         }`}
                     >
@@ -885,13 +1014,12 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     </button>
                   ))}
 
-                  {/* Custom conditions */}
                   {customMedicalHistory.map((condition) => (
                     <div key={condition} className="relative group">
                       <button
                         onClick={() => toggleMedicalCondition(condition)}
-                        className={`px-4 py-2 pr-8 rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105 ${selectedMedicalHistory.has(condition)
-                          ? 'bg-blue-600 text-white shadow-lg hover:bg-blue-700'
+                        className={`px-3.5 py-1.5 pr-7 rounded-full text-sm font-medium transition-colors duration-200 ${selectedMedicalHistory.has(condition)
+                          ? 'bg-blue-600 text-white hover:bg-blue-700'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
                           }`}
                       >
@@ -906,17 +1034,16 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     </div>
                   ))}
 
-                  {/* Add custom condition */}
                   {!isAddingCustom ? (
                     <button
                       onClick={() => setIsAddingCustom(true)}
-                      className="px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-700 hover:bg-green-200 border border-green-300 transition-all duration-200 transform hover:scale-105 flex items-center space-x-1"
+                      className="px-3.5 py-1.5 rounded-full text-sm font-medium bg-green-100 text-green-600 hover:bg-green-200 border border-green-300 transition-colors duration-200 flex items-center space-x-1"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Add Custom</span>
                     </button>
                   ) : (
-                    <div className="flex items-center space-x-2 animate-in slide-in-from-left duration-300">
+                    <div className="flex items-center space-x-2">
                       <input
                         ref={customInputRef}
                         type="text"
@@ -924,7 +1051,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                         onChange={(e) => setCustomInput(e.target.value)}
                         onKeyDown={handleCustomInputKeyPress}
                         placeholder="Enter condition..."
-                        className="px-4 py-2 border border-gray-300 rounded-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[150px]"
+                        className="px-3 py-1.5 border border-gray-300 rounded-full text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[140px] h-9"
                       />
                       <button
                         onClick={handleCustomMedicalHistoryAdd}
@@ -946,9 +1073,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                 </div>
 
                 {selectedMedicalHistory.size > 0 && (
-                  <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                    <h4 className="text-sm font-semibold text-blue-800 mb-2">Selected Conditions:</h4>
-                    <div className="text-sm text-blue-700">
+                  <div className="mt-5 p-3.5 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="text-sm font-medium text-blue-700 mb-1.5">Selected Conditions:</h4>
+                    <div className="text-sm text-blue-600">
                       {Array.from(selectedMedicalHistory).join(', ')}
                     </div>
                   </div>
@@ -956,8 +1083,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
 
               {/* Symptoms */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-                <div className="space-y-6">
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
+                <div className="space-y-5">
                   <PillSelector
                     title="Select Symptoms"
                     items={[...PREDEFINED_SYMPTOMS, ...customSymptoms]}
@@ -973,7 +1100,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     searchPlaceholder="Search symptoms..."
                     onAddCustom={async (symptom) => {
                       await storage.addCustomSymptom(symptom);
-                      await loadCustomData(); // Reload custom data
+                      await loadCustomData();
                       const newSymptom = {
                         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                         name: symptom,
@@ -984,17 +1111,16 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     }}
                   />
 
-                  {/* Selected symptoms with details */}
                   {symptoms.length > 0 && (
                     <div className="space-y-4">
-                      <h4 className="text-base sm:text-lg font-semibold text-gray-800">Selected Symptoms</h4>
+                      <h4 className="text-base font-medium text-gray-800">Selected Symptoms</h4>
                       {symptoms.map((symptom) => (
-                        <div key={symptom.id} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-                          <div className="font-medium text-gray-900 sm:mb-0 mb-2">{symptom.name}</div>
+                        <div key={symptom.id} className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-center p-3.5 bg-gray-50 rounded-lg">
+                          <div className="font-medium text-gray-800 sm:mb-0 mb-1.5">{symptom.name}</div>
                           <select
                             value={symptom.severity}
                             onChange={(e) => updateSymptom(symptom.id, 'severity', e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white h-11"
                           >
                             {SEVERITY_OPTIONS.map(option => (
                               <option key={option.value} value={option.value}>{option.label}</option>
@@ -1003,7 +1129,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                           <select
                             value={symptom.duration}
                             onChange={(e) => updateSymptom(symptom.id, 'duration', e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white h-11"
                           >
                             <option value="">Select duration</option>
                             {DURATION_OPTIONS.map(duration => (
@@ -1012,7 +1138,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                           </select>
                           <button
                             onClick={() => removeSymptom(symptom.id)}
-                            className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors sm:justify-self-end"
+                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-md transition-colors sm:justify-self-end"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1024,8 +1150,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
 
               {/* Diagnosis */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-                <div className="space-y-6">
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
+                <div className="space-y-5">
                   <PillSelector
                     title="Select Diagnosis"
                     items={[...PREDEFINED_DIAGNOSES, ...customDiagnoses]}
@@ -1040,7 +1166,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     searchPlaceholder="Search diagnoses..."
                     onAddCustom={async (diagnosis) => {
                       await storage.addCustomDiagnosis(diagnosis);
-                      await loadCustomData(); // Reload custom data
+                      await loadCustomData();
                       const newDiagnosis = {
                         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                         name: diagnosis,
@@ -1050,23 +1176,22 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     }}
                   />
 
-                  {/* Selected diagnoses with details */}
                   {diagnoses.length > 0 && (
                     <div className="space-y-4">
-                      <h4 className="text-base sm:text-lg font-semibold text-gray-800">Selected Diagnoses</h4>
+                      <h4 className="text-base font-medium text-gray-800">Selected Diagnoses</h4>
                       {diagnoses.map((diagnosis) => (
-                        <div key={diagnosis.id} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-                          <div className="font-medium text-gray-900 sm:mb-0 mb-2">{diagnosis.name}</div>
+                        <div key={diagnosis.id} className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center p-3.5 bg-gray-50 rounded-lg">
+                          <div className="font-medium text-gray-800 sm:mb-0 mb-1.5">{diagnosis.name}</div>
                           <input
                             type="text"
                             placeholder="Description (optional)"
                             value={diagnosis.description}
                             onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
                           />
                           <button
                             onClick={() => removeDiagnosis(diagnosis.id)}
-                            className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors sm:justify-self-end"
+                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-md transition-colors sm:justify-self-end"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1077,11 +1202,11 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                 </div>
               </div>
 
-              {/* Medications section with responsive medication details */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-                <div className="space-y-6">
+              {/* Medications section */}
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
+                <div className="space-y-5">
                   {isLoadingCustomData ? (
-                    <div className="text-center py-8">
+                    <div className="text-center py-6">
                       <RotateCw className="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2" />
                       <p className="text-gray-500">Loading medications...</p>
                     </div>
@@ -1106,7 +1231,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       }}
                       onAddCustom={async (medication) => {
                         await storage.addCustomMedication(medication);
-                        await loadCustomData(); // Reload custom data
+                        await loadCustomData();
                         const newMedication = {
                           id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                           name: medication,
@@ -1126,59 +1251,55 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     />
                   )}
 
-                  {/* Selected medications with details */}
                   {medications.length > 0 && (
                     <div className="space-y-4">
-                      <h4 className="text-base sm:text-lg font-semibold text-gray-800">Selected Medications</h4>
+                      <h4 className="text-base font-medium text-gray-800">Selected Medications</h4>
                       {medications.map((medication) => (
-                        <div key={medication.id} className="p-4 bg-gray-50 rounded-xl space-y-4">
-                          {/* Medication name and timing - responsive */}
-                          <div className="grid grid-cols-1 sm:grid-cols-6 gap-4 items-center">
-                            <div className="font-medium text-gray-900 sm:mb-0 mb-2">{medication.name}</div>
+                        <div key={medication.id} className="p-3.5 bg-gray-50 rounded-lg space-y-3.5">
+                          <div className="grid grid-cols-1 sm:grid-cols-6 gap-3 items-center">
+                            <div className="font-medium text-gray-800 sm:mb-0 mb-1.5">{medication.name}</div>
                             
-                            {/* Timing checkboxes - responsive */}
-                            <div className="col-span-1 sm:col-span-4 flex items-center space-x-3 justify-center sm:justify-start">
+                            <div className="col-span-1 sm:col-span-4 flex items-center space-x-2.5 justify-center sm:justify-start">
                               {Object.entries(medication.timing).map(([key, value]) => (
                                 <div key={key} className="flex flex-col items-center space-y-1">
                                   <button
                                     type="button"
                                     onClick={() => updateMedication(medication.id, `timing.${key}`, !value)}
-                                    className={`w-8 h-8 rounded-lg border-2 transition-all duration-200 flex items-center justify-center ${
+                                    className={`w-7 h-7 rounded-md border-2 transition-all duration-200 flex items-center justify-center ${
                                       value
-                                        ? 'border-green-300 bg-green-100'
+                                        ? 'border-green-400 bg-green-100'
                                         : 'border-gray-300 hover:border-gray-400'
                                     }`}
                                   >
                                     {value && (
-                                      <div className="w-5 h-5 bg-green-500 rounded-md"></div>
+                                      <div className="w-4 h-4 bg-green-500 rounded-sm"></div>
                                     )}
                                   </button>
-                                  <span className="text-xs text-gray-600 font-medium">{key.charAt(0).toUpperCase()}</span>
+                                  <span className="text-xs text-gray-500 font-medium">{key.charAt(0).toUpperCase()}</span>
                                 </div>
                               ))}
                             </div>
                             
                             <button
                               onClick={() => removeMedication(medication.id)}
-                              className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors sm:justify-self-end"
+                              className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-md transition-colors sm:justify-self-end"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
 
-                          {/* Dosage, meal timing, and duration - responsive */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-center">
                             <input
                               type="text"
                               placeholder="Dosage (e.g., 500mg)"
                               value={medication.dosage}
                               onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
-                              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
                             />
                             <select
                               value={medication.mealTiming}
                               onChange={(e) => updateMedication(medication.id, 'mealTiming', e.target.value)}
-                              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white h-11"
                             >
                               {MEDICATION_TIMING.map(option => (
                                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -1187,7 +1308,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                             <select
                               value={medication.duration}
                               onChange={(e) => updateMedication(medication.id, 'duration', e.target.value)}
-                              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white h-11"
                             >
                               <option value="">Select duration</option>
                               {MEDICATION_DURATION_OPTIONS.map(duration => (
@@ -1199,7 +1320,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                               placeholder="Remarks"
                               value={medication.remarks}
                               onChange={(e) => updateMedication(medication.id, 'remarks', e.target.value)}
-                              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
                             />
                           </div>
                         </div>
@@ -1210,8 +1331,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
 
               {/* Lab Results */}
-              <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-                <div className="space-y-6">
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
+                <div className="space-y-5">
                   <PillSelector
                     title="Select Lab Tests"
                     items={[...PREDEFINED_LAB_TESTS, ...customLabTests]}
@@ -1225,7 +1346,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     searchPlaceholder="Search lab tests..."
                     onAddCustom={async (labTest) => {
                       await storage.addCustomLabTest(labTest);
-                      await loadCustomData(); // Reload custom data
+                      await loadCustomData();
                       const newLabResult = {
                         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                         testName: labTest
@@ -1234,16 +1355,15 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     }}
                   />
 
-                  {/* Selected lab results */}
                   {labResults.length > 0 && (
                     <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-gray-800">Selected Lab Tests</h4>
+                      <h4 className="text-base font-medium text-gray-800">Selected Lab Tests</h4>
                       {labResults.map((lab) => (
-                        <div key={lab.id} className="grid grid-cols-2 gap-4 items-center p-4 bg-gray-50 rounded-xl">
-                          <div className="font-medium text-gray-900">{lab.testName}</div>
+                        <div key={lab.id} className="grid grid-cols-2 gap-3 items-center p-3.5 bg-gray-50 rounded-lg">
+                          <div className="font-medium text-gray-800">{lab.testName}</div>
                           <button
                             onClick={() => removeLabResult(lab.id)}
-                            className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors justify-self-end"
+                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-md transition-colors justify-self-end"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1255,11 +1375,10 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
 
               {/* Enhanced Doctor Notes and Advice */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-                  <h3 className="text-xl font-bold text-gray-900 mb-6">Doctor's Notes</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-xl border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-5">Doctor's Notes</h3>
 
-                  {/* Input field */}
                   <div className="mb-4">
                     <input
                       type="text"
@@ -1267,26 +1386,25 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       onChange={(e) => setDoctorNotesInput(e.target.value)}
                       onKeyDown={handleDoctorNotesKeyPress}
                       placeholder="Add a note and press Enter..."
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm h-11"
                     />
                   </div>
 
-                  {/* Notes list */}
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                  <div className="space-y-2.5 max-h-60 overflow-y-auto">
                     {doctorNotesList.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
+                      <div className="text-center py-6 text-gray-500">
                         <p className="text-sm">No notes added yet</p>
                         <p className="text-xs text-gray-400">Type a note and press Enter to add</p>
                       </div>
                     ) : (
                       doctorNotesList.map((note) => (
-                        <div key={note.id} className="flex items-start justify-between p-4 bg-gray-50 rounded-xl group hover:bg-gray-100 transition-colors border border-gray-200">
-                          <p className="text-sm text-gray-800 flex-1 mr-3 leading-relaxed">{note.text}</p>
+                        <div key={note.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg group hover:bg-gray-100 transition-colors border border-gray-200">
+                          <p className="text-sm text-gray-700 flex-1 mr-2.5 leading-relaxed">{note.text}</p>
                           <button
                             onClick={() => removeDoctorNote(note.id)}
-                            className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1.5 hover:bg-red-50 rounded-lg"
+                            className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 hover:bg-red-50 rounded-md"
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       ))
@@ -1294,10 +1412,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   </div>
                 </div>
 
-                <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-                  <h3 className="text-xl font-bold text-gray-900 mb-6">Advice to Patient</h3>
+                <div className="bg-white p-6 rounded-xl border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-5">Advice to Patient</h3>
 
-                  {/* Input field */}
                   <div className="mb-4">
                     <input
                       type="text"
@@ -1305,26 +1422,25 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       onChange={(e) => setAdviceInput(e.target.value)}
                       onKeyDown={handleAdviceKeyPress}
                       placeholder="Add advice and press Enter..."
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm h-11"
                     />
                   </div>
 
-                  {/* Advice list */}
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                  <div className="space-y-2.5 max-h-60 overflow-y-auto">
                     {adviceList.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
+                      <div className="text-center py-6 text-gray-500">
                         <p className="text-sm">No advice added yet</p>
                         <p className="text-xs text-gray-400">Type advice and press Enter to add</p>
                       </div>
                     ) : (
                       adviceList.map((advice) => (
-                        <div key={advice.id} className="flex items-start justify-between p-4 bg-gray-50 rounded-xl group hover:bg-gray-100 transition-colors border border-gray-200">
-                          <p className="text-sm text-gray-800 flex-1 mr-3 leading-relaxed">{advice.text}</p>
+                        <div key={advice.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg group hover:bg-gray-100 transition-colors border border-gray-200">
+                          <p className="text-sm text-gray-700 flex-1 mr-2.5 leading-relaxed">{advice.text}</p>
                           <button
                             onClick={() => removeAdvice(advice.id)}
-                            className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1.5 hover:bg-red-50 rounded-lg"
+                            className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 hover:bg-red-50 rounded-md"
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       ))
@@ -1334,28 +1450,28 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
 
               {/* Follow-up and Consultation Fee */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-                  <h3 className="text-xl font-bold text-gray-900 mb-6">Follow-up Date</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-xl border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-5">Follow-up Date</h3>
                   <input
                     type="date"
                     value={followUpDate}
                     onChange={(e) => setFollowUpDate(e.target.value)}
                     min={getTodayString()}
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
                   />
                 </div>
 
-                <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Consultation Fee</h3>
-                  <div className="flex items-center space-x-3">
-                    <span className="text-gray-600 font-medium text-lg">₹</span>
+                <div className="bg-white p-6 rounded-xl border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-5">Consultation Fee</h3>
+                  <div className="flex items-center space-x-2.5">
+                    <span className="text-gray-500 font-medium text-md">₹</span>
                     <input
                       type="number"
                       value={consultationFee}
                       onChange={(e) => setConsultationFee(e.target.value)}
                       placeholder="500"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
                     />
                   </div>
                 </div>
