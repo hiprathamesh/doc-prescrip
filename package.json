@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@upstash/redis": "^1.35.0",
     "date-fns": "^4.1.0",
     "googleapis": "^150.0.1",
     "html2canvas": "^1.4.1",
