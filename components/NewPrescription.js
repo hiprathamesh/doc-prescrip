@@ -486,8 +486,31 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     setLabResults(labResults.filter(l => l.id !== id));
   };
 
+  const [isAnimating, setIsAnimating] = useState(false);
+
   const toggleNewPatient = () => {
-    setIsNewPatient(!isNewPatient);
+    if (isNewPatient) {
+      // When closing, animate first then hide
+      setIsAnimating(true);
+      setTimeout(() => {
+        setIsNewPatient(false);
+        setIsAnimating(false);
+        // Reset form data when closing
+        setNewPatientData({
+          name: '',
+          gender: 'male',
+          age: '',
+          phone: ''
+        });
+      }, 300); // Match the animation duration
+    } else {
+      // When opening, show first then animate
+      setIsNewPatient(true);
+      setIsAnimating(true);
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 50); // Small delay to ensure DOM is ready
+    }
   }
 
   const handleSavePrescription = async () => {
@@ -788,82 +811,99 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     />
                   </div>
                   <button
-                    onClick={() => toggleNewPatient()}
-                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-medium transition-colors duration-200"
+                    onClick={toggleNewPatient}
+                    className={`w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-medium transition-all duration-200 ${
+                      isNewPatient ? 'bg-gray-600 hover:bg-gray-700' : ''
+                    }`}
                   >
-                    <Plus className="w-5 h-5" />
-                    <span>Add Patient</span>
+                    <Plus className={`w-5 h-5 transition-transform duration-300 ease-out ${
+                      isNewPatient ? 'rotate-45' : 'rotate-0'
+                    }`} />
+                    <span>{isNewPatient ? 'Cancel' : 'Add Patient'}</span>
                   </button>
                 </div>
 
-                {isNewPatient && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 p-5 bg-gray-50 rounded-xl border border-gray-200">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Name *</label>
-                      <input
-                        ref={nameRef}
-                        type="text"
-                        value={newPatientData.name}
-                        onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
-                        onKeyPress={(e) => handleKeyPress(e, ageRef)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
-                        placeholder="Enter patient name"
-                        autoFocus
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Age *</label>
-                      <input
-                        ref={ageRef}
-                        type="number"
-                        value={newPatientData.age}
-                        onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
-                        onKeyPress={(e) => handleKeyPress(e, genderRef)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
-                        placeholder="Enter age"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Gender</label>
-                      <div ref={genderRef} tabIndex={0}>
-                        <CustomDropdown
-                          options={[
-                            { value: 'male', label: 'Male' },
-                            { value: 'female', label: 'Female' },
-                            { value: 'other', label: 'Other' }
-                          ]}
-                          value={newPatientData.gender}
-                          onChange={(value) => setNewPatientData({ ...newPatientData, gender: value })}
-                          placeholder="Select gender..."
-                          onEnterPress={handleGenderEnterPress}
+                {/* Animated patient creation form */}
+                <div className={`transition-all duration-300 ease-out ${
+                  isNewPatient 
+                    ? 'max-h-96 opacity-100 transform translate-y-0' 
+                    : 'max-h-0 opacity-0 transform -translate-y-4'
+                }`}>
+                  <div className={`transition-all duration-300 ease-out delay-75 ${
+                    isNewPatient && !isAnimating
+                      ? 'opacity-100 transform translate-y-0'
+                      : 'opacity-0 transform translate-y-2'
+                  }`}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 p-5 bg-gray-50 rounded-xl border border-gray-200 mt-5">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Name *</label>
+                        <input
+                          ref={nameRef}
+                          type="text"
+                          value={newPatientData.name}
+                          onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
+                          onKeyPress={(e) => handleKeyPress(e, ageRef)}
+                          className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                          placeholder="Enter patient name"
+                          autoFocus={isNewPatient && !isAnimating}
                         />
                       </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone *</label>
-                      <input
-                        ref={phoneRef}
-                        type="tel"
-                        value={newPatientData.phone}
-                        onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
-                        onKeyPress={handleLastFieldKeyPress}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
-                        placeholder="Enter phone number"
-                      />
-                    </div>
-                    <div className="col-span-1 sm:col-span-2">
-                      <button
-                        onClick={handleCreateNewPatient}
-                        className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors duration-200"
-                      >
-                        Create Patient
-                      </button>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Tip: Press Enter on any field to move to the next one, or Enter on the last field to create patient
-                      </p>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Age *</label>
+                        <input
+                          ref={ageRef}
+                          type="number"
+                          value={newPatientData.age}
+                          onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
+                          onKeyPress={(e) => handleKeyPress(e, genderRef)}
+                          className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                          placeholder="Enter age"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Gender</label>
+                        <div ref={genderRef} tabIndex={0}>
+                          <CustomDropdown
+                            options={[
+                              { value: 'male', label: 'Male' },
+                              { value: 'female', label: 'Female' },
+                              { value: 'other', label: 'Other' }
+                            ]}
+                            value={newPatientData.gender}
+                            onChange={(value) => setNewPatientData({ ...newPatientData, gender: value })}
+                            placeholder="Select gender..."
+                            onEnterPress={handleGenderEnterPress}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone *</label>
+                        <input
+                          ref={phoneRef}
+                          type="tel"
+                          value={newPatientData.phone}
+                          onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
+                          onKeyPress={handleLastFieldKeyPress}
+                          className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                          placeholder="Enter phone number"
+                        />
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                          <button
+                            onClick={handleCreateNewPatient}
+                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors duration-200"
+                          >
+                            Create Patient
+                          </button>
+                          <p className="text-xs text-gray-500">
+                            Tip: Press Enter on any field to move to the next one, or Enter on the last field to create patient
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
           )}

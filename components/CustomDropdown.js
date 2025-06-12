@@ -110,25 +110,27 @@ export default function CustomDropdown({ options, value, onChange, placeholder, 
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} ${disabled ? 'opacity-50' : ''}`} />
       </button>
 
-      {isOpen && !disabled && (
-        <div className="absolute z-20 mt-2 w-full bg-white max-h-60 rounded-xl p-2 overflow-auto focus:outline-none text-sm border border-gray-200">
-          {options.map((option, index) => (
-            <div
-              key={option.value}
-              onClick={() => handleSelect(option.value)}
-              onMouseEnter={() => setHighlightedIndex(index)}
-              className={`cursor-pointer mb-1 rounded-lg select-none relative py-2.5 px-3 font-medium transition-colors ${index === highlightedIndex
-                  ? 'bg-blue-50 text-blue-600'
-                  : option.value === value ? 'bg-[#EFF6FF] text-[#1D4ED8]' : 'text-[#374151] hover:bg-[#F3F4F6]'
-                }`}
-            >
-              <span className="block truncate">
-                {option.label}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className={`absolute z-20 mt-2 w-full bg-white max-h-60 rounded-xl p-2 overflow-auto focus:outline-none text-sm border border-gray-200 transition-all duration-300 ease-out origin-top ${
+        isOpen && !disabled 
+          ? 'opacity-100 scale-y-100 translate-y-0 pointer-events-auto' 
+          : 'opacity-0 scale-y-95 -translate-y-2 pointer-events-none'
+      }`}>
+        {options.map((option, index) => (
+          <div
+            key={option.value}
+            onClick={() => handleSelect(option.value)}
+            onMouseEnter={() => setHighlightedIndex(index)}
+            className={`cursor-pointer mb-1 rounded-lg select-none relative py-2.5 px-3 font-medium transition-colors ${index === highlightedIndex
+                ? 'bg-blue-50 text-blue-600'
+                : option.value === value ? 'bg-[#EFF6FF] text-[#1D4ED8]' : 'text-[#374151] hover:bg-[#F3F4F6]'
+              }`}
+          >
+            <span className="block truncate">
+              {option.label}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
