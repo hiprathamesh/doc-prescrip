@@ -255,7 +255,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       </button>
                       
                       {dropdownOpen === `prescription-${prescription.id}` && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                        <div className="absolute right-0 mt-2 w-60 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                           <div className="py-1">
                             {prescription.pdfUrl && (
                               <>
@@ -419,7 +419,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                           </button>
                           
                           {dropdownOpen === `bill-${bill.id}` && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                            <div className="absolute right-0 mt-2 w-60 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                               <div className="py-1">
                                 {bill.pdfUrl && (
                                   <>
