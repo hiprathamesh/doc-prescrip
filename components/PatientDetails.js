@@ -391,6 +391,28 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                           </div>
                         </div>
                       )}
+
+                      {/* Lab Tests */}
+                      {prescription.labResults?.length > 0 && (
+                        <div className="col-span-1 md:col-span-1">
+                          <h5 className="font-semibold text-gray-700 mb-2 flex items-center">
+                            <FileText className="w-4 h-4 mr-2" />
+                            Lab Tests
+                          </h5>
+                          <div className="space-y-2">
+                            {prescription.labResults.map((lab, index) => (
+                              <div key={index} className="bg-purple-50 p-2 sm:p-3 rounded-lg border border-purple-200">
+                                <div className="font-medium text-purple-800 text-xs sm:text-sm">{lab.testName}</div>
+                                {lab.remarks && (
+                                  <div className="text-xs text-purple-700 mt-1">
+                                    Remarks: {lab.remarks}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {prescription.doctorNotes && (

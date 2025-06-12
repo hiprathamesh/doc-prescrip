@@ -267,6 +267,23 @@ Dr. Prashant Nikam`;
                 </div>
               </div>
             )}
+
+            {/* Lab Tests */}
+            {prescription.labResults?.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-3">Lab Tests</h3>
+                <div className="space-y-2">
+                  {prescription.labResults.map((lab, index) => (
+                    <div key={index} className="text-sm text-gray-700 bg-purple-50 p-2 rounded-lg border border-purple-200">
+                      <div className="font-medium">{lab.testName}</div>
+                      {lab.remarks && (
+                        <div className="text-xs text-gray-600 mt-1">Remarks: {lab.remarks}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Doctor Notes and Advice */}

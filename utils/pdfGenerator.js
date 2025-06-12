@@ -129,6 +129,10 @@ export const generatePDF = async (prescription, patient, autoDownload = true) =>
     prescription.labResults.forEach(lab => {
       pdf.text(`• ${lab.testName}`, 25, yPosition);
       yPosition += 6;
+      if (lab.remarks) {
+        pdf.text(`  Remarks: ${lab.remarks}`, 30, yPosition);
+        yPosition += 6;
+      }
     });
     yPosition += 5;
   }

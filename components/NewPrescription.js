@@ -473,7 +473,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   const addLabResult = () => {
     const newLabResult = {
       id: Date.now().toString(),
-      testName: ''
+      testName: '',
+      remarks: ''
     };
     setLabResults([...labResults, newLabResult]);
   };
@@ -990,18 +991,18 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto">
+                    <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                       {filteredTemplates.length > 0 ? (
                         filteredTemplates.map((template) => (
                           <div
                             key={template.id}
                             onClick={() => applyTemplate(template)}
-                            className="p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 cursor-pointer group"
+                            className="flex-shrink-0 w-80 p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 cursor-pointer group"
                           >
                             <h4 className="font-semibold text-gray-800 mb-1.5 group-hover:text-purple-700">
                               {template.name}
                             </h4>
-                            <p className="text-sm text-gray-600 mb-2.5">{template.description}</p>
+                            <p className="text-sm text-gray-600 mb-2.5 line-clamp-2">{template.description}</p>
                             
                             <div className="space-y-2">
                               {(template.diagnosis || []).length > 0 && (
@@ -1025,7 +1026,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                           </div>
                         ))
                       ) : (
-                        <div className="col-span-full text-center py-8 text-gray-500">
+                        <div className="flex-shrink-0 w-full text-center py-8 text-gray-500">
                           <FileText className="mx-auto h-8 w-8 text-gray-300 mb-2" />
                           <p>
                             {templateSearch ? 'No templates match your search.' : 'No templates available.'}
@@ -1157,25 +1158,21 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       {symptoms.map((symptom) => (
                         <div key={symptom.id} className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-center p-3.5 bg-gray-50 rounded-lg">
                           <div className="font-medium text-gray-800 sm:mb-0 mb-1.5">{symptom.name}</div>
-                          <select
+                          <CustomDropdown
+                            options={SEVERITY_OPTIONS.map(option => ({ value: option.value, label: option.label }))}
                             value={symptom.severity}
-                            onChange={(e) => updateSymptom(symptom.id, 'severity', e.target.value)}
-                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white h-11"
-                          >
-                            {SEVERITY_OPTIONS.map(option => (
-                              <option key={option.value} value={option.value}>{option.label}</option>
-                            ))}
-                          </select>
-                          <select
+                            onChange={(value) => updateSymptom(symptom.id, 'severity', value)}
+                            placeholder="Select severity"
+                          />
+                          <CustomDropdown
+                            options={[
+                              { value: '', label: 'Select duration' },
+                              ...DURATION_OPTIONS.map(duration => ({ value: duration, label: duration }))
+                            ]}
                             value={symptom.duration}
-                            onChange={(e) => updateSymptom(symptom.id, 'duration', e.target.value)}
-                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white h-11"
-                          >
-                            <option value="">Select duration</option>
-                            {DURATION_OPTIONS.map(duration => (
-                              <option key={duration} value={duration}>{duration}</option>
-                            ))}
-                          </select>
+                            onChange={(value) => updateSymptom(symptom.id, 'duration', value)}
+                            placeholder="Select duration"
+                          />
                           <button
                             onClick={() => removeSymptom(symptom.id)}
                             className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-md transition-colors sm:justify-self-end"
@@ -1336,25 +1333,21 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                               onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
                               className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
                             />
-                            <select
+                            <CustomDropdown
+                              options={MEDICATION_TIMING.map(option => ({ value: option.value, label: option.label }))}
                               value={medication.mealTiming}
-                              onChange={(e) => updateMedication(medication.id, 'mealTiming', e.target.value)}
-                              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white h-11"
-                            >
-                              {MEDICATION_TIMING.map(option => (
-                                <option key={option.value} value={option.value}>{option.label}</option>
-                              ))}
-                            </select>
-                            <select
+                              onChange={(value) => updateMedication(medication.id, 'mealTiming', value)}
+                              placeholder="Select meal timing"
+                            />
+                            <CustomDropdown
+                              options={[
+                                { value: '', label: 'Select duration' },
+                                ...MEDICATION_DURATION_OPTIONS.map(duration => ({ value: duration, label: duration }))
+                              ]}
                               value={medication.duration}
-                              onChange={(e) => updateMedication(medication.id, 'duration', e.target.value)}
-                              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white h-11"
-                            >
-                              <option value="">Select duration</option>
-                              {MEDICATION_DURATION_OPTIONS.map(duration => (
-                                <option key={duration} value={duration}>{duration}</option>
-                              ))}
-                            </select>
+                              onChange={(value) => updateMedication(medication.id, 'duration', value)}
+                              placeholder="Select duration"
+                            />
                             <input
                               type="text"
                               placeholder="Remarks"
@@ -1379,7 +1372,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     onSelect={(labTest) => {
                       const newLabResult = {
                         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                        testName: labTest
+                        testName: labTest,
+                        remarks: ''
                       };
                       setLabResults([...labResults, newLabResult]);
                     }}
@@ -1389,7 +1383,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       await loadCustomData();
                       const newLabResult = {
                         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                        testName: labTest
+                        testName: labTest,
+                        remarks: ''
                       };
                       setLabResults([...labResults, newLabResult]);
                     }}
@@ -1399,8 +1394,15 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     <div className="space-y-4">
                       <h4 className="text-base font-medium text-gray-800">Selected Lab Tests</h4>
                       {labResults.map((lab) => (
-                        <div key={lab.id} className="grid grid-cols-2 gap-3 items-center p-3.5 bg-gray-50 rounded-lg">
-                          <div className="font-medium text-gray-800">{lab.testName}</div>
+                        <div key={lab.id} className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center p-3.5 bg-gray-50 rounded-lg">
+                          <div className="font-medium text-gray-800 sm:mb-0 mb-1.5">{lab.testName}</div>
+                          <input
+                            type="text"
+                            placeholder="Remarks (optional)"
+                            value={lab.remarks}
+                            onChange={(e) => updateLabResult(lab.id, 'remarks', e.target.value)}
+                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                          />
                           <button
                             onClick={() => removeLabResult(lab.id)}
                             className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-md transition-colors justify-self-end"
