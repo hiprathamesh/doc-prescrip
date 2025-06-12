@@ -36,6 +36,7 @@ export default function Dashboard() {
   const [currentView, setCurrentView] = useState('dashboard'); // Add 'templates' to possible values
   const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState({});
+  const [isStatsHovered, setIsStatsHovered] = useState(false);
 
   useEffect(() => {
     loadAllData();
@@ -219,44 +220,41 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Enhanced Header */}
-      <header className="bg-white shadow-lg border border-gray-200 sticky top-0 z-40 rounded-b-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+    <div className="min-h-screen bg-white">
+      {/* Minimal Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div
-              className="flex items-center space-x-2 cursor-pointer"
+              className="flex items-center space-x-3 cursor-pointer"
               onClick={() => setCurrentView('dashboard')}
             >
-              <div className="flex items-center space-x-2">
-                <div className="p-1.5 sm:p-2 bg-blue-600 rounded-lg">
-                  <Stethoscope className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-base sm:text-2xl font-bold text-gray-900">
-                    Dr. Prashant Nikam
-                  </h1>
-                  <p className="text-xs text-gray-600 hidden sm:block">Practice Management System</p>
-                </div>
+              <div className="p-2 bg-blue-600 rounded">
+                <Stethoscope className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">
+                  Dr. Prashant Nikam
+                </h1>
+                <p className="text-sm text-gray-500">Practice Management</p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              {/* Logout button - always visible */}
+            <div className="flex items-center space-x-3">
               <button
                 onClick={handleLogout}
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all duration-200 flex items-center space-x-2"
+                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded hover:bg-gray-100 transition-all duration-200 flex items-center space-x-2 text-sm"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Logout</span>
+                <span>Logout</span>
               </button>
 
               <button
                 onClick={() => handleNewPrescription()}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-3 sm:px-6 py-2.5 sm:py-3 rounded-xl flex items-center justify-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center space-x-2 transition-all duration-200"
               >
-                <Plus className="w-5 h-5 flex-shrink-0" />
-                <span className="font-medium hidden sm:inline">New Prescription</span>
+                <Plus className="w-4 h-4" />
+                <span>New Prescription</span>
               </button>
             </div>
           </div>
@@ -264,166 +262,232 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+      <main className="max-w-5xl mx-auto px-6 py-8">
         {currentView === 'dashboard' && (
-          <div className="space-y-6 sm:space-y-8">
+          <div className="space-y-8">
             {/* Welcome Section */}
-            <div className="text-center py-4 sm:py-8">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                Welcome back, Dr. Nikam
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                Dashboard
               </h2>
-              <p className="text-base sm:text-lg text-gray-600">
-                Here's what's happening in your practice today
+              <p className="text-gray-600">
+                Overview of your practice today
               </p>
             </div>
 
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-              {/* Total Patients */}
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div className="mb-3 sm:mb-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Total Patients</p>
-                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats.totalPatients || 0}</p>
-                    <p className="text-xs sm:text-sm text-green-600 font-medium mt-1">
-                      +{stats.newPatientsThisMonth || 0} this month
-                    </p>
+            {/* Stats Grid with Hover Expansion */}
+            <div 
+              className={`bg-gray-100 rounded-2xl p-4 transition-all duration-500 ease-out `}
+              onMouseEnter={() => setIsStatsHovered(true)}
+              onMouseLeave={() => setIsStatsHovered(false)}
+            >
+              <div className="grid grid-cols-4 gap-4">
+                {/* Total Patients */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-blue-50 rounded">
+                      <Users className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <span className="text-xs text-gray-500 font-medium">PATIENTS</span>
                   </div>
-                  <div className="p-2 sm:p-3 bg-blue-100 rounded-xl self-end sm:self-auto">
-                    <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+                  <div className="space-y-1">
+                    <p className="text-2xl font-semibold text-gray-900">{stats.totalPatients || 0}</p>
+                    <p className="text-sm text-gray-600">Total registered</p>
                   </div>
-                </div>
-              </div>
-
-              {/* This Week's Visits */}
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div className="mb-3 sm:mb-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Visits This Week</p>
-                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats.visitsThisWeek || 0}</p>
-                    <p className="text-xs sm:text-sm text-blue-600 font-medium mt-1">
-                      {stats.visitsThisMonth || 0} this month
-                    </p>
-                  </div>
-                  <div className="p-2 sm:p-3 bg-green-100 rounded-xl self-end sm:self-auto">
-                    <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Revenue */}
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div className="mb-3 sm:mb-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Revenue (Paid)</p>
-                    <p className="text-xl sm:text-3xl font-bold text-gray-900">₹{stats.paidRevenue || 0}</p>
-                    <p className="text-xs sm:text-sm text-orange-600 font-medium mt-1">
-                      ₹{stats.pendingRevenue || 0} pending
-                    </p>
-                  </div>
-                  <div className="p-2 sm:p-3 bg-green-100 rounded-xl self-end sm:self-auto">
-                    <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
+                  
+                  {/* Expanded content on hover */}
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
+                    <div className="flex justify-between items-center text-[13px]">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                        <span className="text-gray-600">New this month</span>
+                      </div>
+                      <span className="font-medium text-gray-600">+{stats.newPatientsThisMonth || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[13px] mt-1">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                        <span className="text-gray-600">New this week</span>
+                      </div>
+                      <span className="font-medium text-gray-600">+{stats.newPatientsThisWeek || 0}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Follow-ups */}
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div className="mb-3 sm:mb-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Upcoming Follow-ups</p>
-                    <p className="text-xl sm:text-3xl font-bold text-gray-900">{stats.upcomingFollowUps?.length || 0}</p>
-                    <p className="text-xs sm:text-sm text-purple-600 font-medium mt-1">Next 7 days</p>
+                {/* Visits This Week */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-green-50 rounded">
+                      <Calendar className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="text-xs text-gray-500 font-medium">VISITS</span>
                   </div>
-                  <div className="p-2 sm:p-3 bg-purple-100 rounded-xl self-end sm:self-auto">
-                    <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
+                  <div className="space-y-1">
+                    <p className="text-2xl font-semibold text-gray-900">{stats.visitsThisWeek || 0}</p>
+                    <p className="text-sm text-gray-600">This week</p>
+                  </div>
+                  
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
+                    <div className="flex justify-between items-center text-[13px]">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                        <span className="text-gray-600">This month</span>
+                      </div>
+                      <span className="font-medium text-gray-600">{stats.visitsThisMonth || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[13px] mt-1">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                        <span className="text-gray-600">Average per day</span>
+                      </div>
+                      <span className="font-medium text-gray-600">{Math.round((stats.visitsThisWeek || 0) / 7)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Revenue */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-orange-50 rounded">
+                      <DollarSign className="w-4 h-4 text-orange-600" />
+                    </div>
+                    <span className="text-xs text-gray-500 font-medium">REVENUE</span>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-2xl font-semibold text-gray-900">₹{stats.paidRevenue || 0}</p>
+                    <p className="text-sm text-gray-600">Collected</p>
+                  </div>
+                  
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
+                    <div className="flex justify-between items-center text-[13px]">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+                        <span className="text-gray-600">Pending</span>
+                      </div>
+                      <span className="font-medium text-gray-600">₹{stats.pendingRevenue || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-end text-[13px] mt-1">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                        <span className="text-gray-600">This month</span>
+                      </div>
+                      <span className="font-medium text-gray-600">₹{stats.revenueThisMonth || 0}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Follow-ups */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-purple-50 rounded">
+                      <Clock className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <span className="text-xs text-gray-500 font-medium">FOLLOW-UPS</span>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-2xl font-semibold text-gray-900">{stats.upcomingFollowUps?.length || 0}</p>
+                    <p className="text-sm text-gray-600">Upcoming</p>
+                  </div>
+                  
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
+                    <div className="flex justify-between items-center text-[13px]">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                        <span className="text-gray-600">Next 7 days</span>
+                      </div>
+                      <span className="font-medium text-gray-600">{stats.upcomingFollowUps?.length || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[13px] mt-1">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                        <span className="text-gray-600">Overdue</span>
+                      </div>
+                      <span className="font-medium text-gray-600">{stats.upcomingFollowUps?.filter(f => f.isOverdue).length || 0}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-              {/* Left Column - Recent Activity & Quick Actions */}
-              <div className="lg:col-span-2 space-y-6">
+            <div className="grid grid-cols-3 gap-6">
+              {/* Left Column - Quick Actions & Recent Activity */}
+              <div className="col-span-2 space-y-6">
                 {/* Quick Actions */}
-                <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100">
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                    <TrendingUp className="w-5 h-5 text-blue-600" />
-                    <span>Quick Actions</span>
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                  <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => handleNewPrescription()}
-                      className="p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl border border-blue-200 transition-all duration-200 group"
+                      className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-1.5 sm:p-2 bg-blue-600 rounded-lg group-hover:scale-110 transition-transform">
-                          <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                        <div className="p-2 bg-blue-600 rounded">
+                          <FileText className="w-4 h-4 text-white" />
                         </div>
-                        <div className="text-left">
-                          <p className="text-sm sm:text-base font-semibold text-gray-900">New Prescription</p>
-                          <p className="text-xs sm:text-sm text-gray-600">Create prescription</p>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">New Prescription</p>
+                          <p className="text-xs text-gray-600">Create prescription</p>
                         </div>
                       </div>
                     </button>
 
                     <button
                       onClick={handleViewAllPatients}
-                      className="p-3 sm:p-4 bg-gradient-to-r from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl border border-green-200 transition-all duration-200 group"
+                      className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-1.5 sm:p-2 bg-green-600 rounded-lg group-hover:scale-110 transition-transform">
-                          <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                        <div className="p-2 bg-green-600 rounded">
+                          <Users className="w-4 h-4 text-white" />
                         </div>
-                        <div className="text-left">
-                          <p className="text-sm sm:text-base font-semibold text-gray-900">View Patients</p>
-                          <p className="text-xs sm:text-sm text-gray-600">Manage patient list</p>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">View Patients</p>
+                          <p className="text-xs text-gray-600">Manage patients</p>
                         </div>
                       </div>
                     </button>
 
                     <button
                       onClick={handleViewTemplates}
-                      className="p-3 sm:p-4 bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl border border-purple-200 transition-all duration-200 group"
+                      className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-1.5 sm:p-2 bg-purple-600 rounded-lg group-hover:scale-110 transition-transform">
-                          <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                        <div className="p-2 bg-purple-600 rounded">
+                          <FileText className="w-4 h-4 text-white" />
                         </div>
-                        <div className="text-left">
-                          <p className="text-sm sm:text-base font-semibold text-gray-900">Templates</p>
-                          <p className="text-xs sm:text-sm text-gray-600">Manage templates</p>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">Templates</p>
+                          <p className="text-xs text-gray-600">Manage templates</p>
                         </div>
                       </div>
                     </button>
 
                     <button
                       onClick={handleViewMedicalData}
-                      className="p-3 sm:p-4 bg-gradient-to-r from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-xl border border-orange-200 transition-all duration-200 group"
+                      className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-1.5 sm:p-2 bg-orange-600 rounded-lg group-hover:scale-110 transition-transform">
-                          <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                        <div className="p-2 bg-orange-600 rounded">
+                          <Plus className="w-4 h-4 text-white" />
                         </div>
-                        <div className="text-left">
-                          <p className="text-sm sm:text-base font-semibold text-gray-900">Medical Data</p>
-                          <p className="text-xs sm:text-sm text-gray-600">Manage symptoms & diagnoses</p>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">Medical Data</p>
+                          <p className="text-xs text-gray-600">Symptoms & diagnoses</p>
                         </div>
                       </div>
                     </button>
 
                     <button
                       onClick={() => handleNewMedicalCertificate()}
-                      className="p-3 sm:p-4 bg-gradient-to-r from-cyan-50 to-cyan-100 hover:from-cyan-100 hover:to-cyan-200 rounded-xl border border-cyan-200 transition-all duration-200 group sm:col-span-2 lg:col-span-1"
+                      className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 text-left col-span-2"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-1.5 sm:p-2 bg-cyan-600 rounded-lg group-hover:scale-110 transition-transform">
-                          <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                        <div className="p-2 bg-cyan-600 rounded">
+                          <FileText className="w-4 h-4 text-white" />
                         </div>
-                        <div className="text-left">
-                          <p className="text-sm sm:text-base font-semibold text-gray-900">Medical Certificate</p>
-                          <p className="text-xs sm:text-sm text-gray-600">Generate fitness certificate</p>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">Medical Certificate</p>
+                          <p className="text-xs text-gray-600">Generate fitness certificate</p>
                         </div>
                       </div>
                     </button>
@@ -431,82 +495,81 @@ export default function Dashboard() {
                 </div>
 
                 {/* Recent Activity */}
-                <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100">
-                  <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center space-x-2">
-                      <Activity className="w-5 h-5 text-green-600" />
-                      <span>Recent Activity</span>
-                    </h3>
+                <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
                     <button
                       onClick={handleViewAllPatients}
-                      className="text-blue-600 hover:text-blue-800 font-medium text-xs sm:text-sm transition-colors"
+                      className="text-blue-600 hover:text-blue-800 font-medium text-sm"
                     >
                       View All
                     </button>
                   </div>
 
-                  <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-0">
                     {stats.recentPrescriptions?.length > 0 ? (
-                      stats.recentPrescriptions.map((prescription) => (
-                        <div key={prescription.id} className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
-                          onClick={() => handlePatientSelect(prescription.patient)}>
-                          <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
-                            <FileText className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm sm:text-base font-medium text-gray-900 truncate">{prescription.patient?.name || 'Unknown Patient'}</p>
-                            <p className="text-xs sm:text-sm text-gray-600">
-                              Prescription created • {formatTimeAgo(prescription.createdAt)}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs sm:text-sm font-medium text-gray-900">
-                              {formatDate(prescription.visitDate)}
-                            </p>
-                            {prescription.followUpDate && (
-                              <p className="text-xs text-orange-600">
-                                Follow-up: {formatDate(prescription.followUpDate)}
+                      stats.recentPrescriptions.map((prescription, index) => (
+                        <div key={prescription.id}>
+                          <div className="flex items-center space-x-3 py-3 hover:bg-gray-50 transition-colors cursor-pointer rounded-lg px-2 -mx-2"
+                            onClick={() => handlePatientSelect(prescription.patient)}>
+                            <div className="p-2 bg-blue-50 rounded">
+                              <FileText className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">{prescription.patient?.name || 'Unknown Patient'}</p>
+                              <p className="text-xs text-gray-600">
+                                Prescription created • {formatTimeAgo(prescription.createdAt)}
                               </p>
-                            )}
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-medium text-gray-900">
+                                {formatDate(prescription.visitDate)}
+                              </p>
+                              {prescription.followUpDate && (
+                                <p className="text-xs text-orange-600">
+                                  Follow-up: {formatDate(prescription.followUpDate)}
+                                </p>
+                              )}
+                            </div>
                           </div>
+                          {index < stats.recentPrescriptions.length - 1 && (
+                            <div className="border-b border-gray-100"></div>
+                          )}
                         </div>
                       ))
                     ) : (
-                      <div className="text-center py-6 sm:py-8">
-                        <FileText className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-300 mb-3" />
-                        <p className="text-gray-500 text-sm sm:text-base">No recent activity</p>
-                        <p className="text-xs sm:text-sm text-gray-400">Recent prescriptions will appear here</p>
+                      <div className="text-center py-8">
+                        <FileText className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                        <p className="text-gray-500">No recent activity</p>
+                        <p className="text-sm text-gray-400">Recent prescriptions will appear here</p>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Right Column - Upcoming Follow-ups & Insights */}
+              {/* Right Column - Follow-ups & Monthly Overview */}
               <div className="space-y-6">
                 {/* Upcoming Follow-ups */}
-                <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100">
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                    <CalendarDays className="w-5 h-5 text-purple-600" />
-                    <span>Upcoming Follow-ups</span>
-                  </h3>
+                <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Follow-ups</h3>
 
                   <div className="space-y-3">
                     {stats.upcomingFollowUps?.length > 0 ? (
                       stats.upcomingFollowUps.slice(0, 5).map((prescription) => {
                         const patient = patients.find(p => p.id === prescription.patientId);
                         return (
-                          <div key={prescription.id} className={`flex items-center space-x-3 p-2 sm:p-3 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer ${
-                            prescription.isOverdue ? 'bg-red-50 border border-red-200' : 'bg-purple-50'
+                          <div key={prescription.id} className={`flex items-center space-x-3 p-3 rounded-lg transition-colors cursor-pointer ${
+                            prescription.isOverdue ? 'bg-red-50 border border-red-200' : 'bg-gray-50 hover:bg-gray-100'
                           }`}
                             onClick={() => patient && handlePatientSelect(patient)}>
-                            <div className={`p-1 sm:p-1.5 rounded-full ${
+                            <div className={`p-1.5 rounded-full ${
                               prescription.isOverdue ? 'bg-red-600' : 'bg-purple-600'
                             }`}>
-                              <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
+                              <Clock className="w-3 h-3 text-white" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{patient?.name}</p>
+                              <p className="text-sm font-medium text-gray-900 truncate">{patient?.name}</p>
                               <p className={`text-xs ${prescription.isOverdue ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
                                 {prescription.isOverdue ? 'Overdue: ' : ''}{formatDate(prescription.followUpDate)}
                               </p>
@@ -515,52 +578,38 @@ export default function Dashboard() {
                         );
                       })
                     ) : (
-                      <div className="text-center py-4 sm:py-6">
-                        <Calendar className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-gray-300 mb-2" />
-                        <p className="text-gray-500 text-xs sm:text-sm">No upcoming follow-ups</p>
+                      <div className="text-center py-6">
+                        <Calendar className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+                        <p className="text-gray-500 text-sm">No upcoming follow-ups</p>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Monthly Overview */}
-                <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100">
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
-                    <BarChart3 className="w-5 h-5 text-orange-600" />
-                    <span>This Month</span>
-                  </h3>
+                <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">This Month</h3>
 
-                  <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">New Patients</span>
-                      <span className="text-sm sm:text-base font-semibold text-gray-900">{stats.newPatientsThisMonth || 0}</span>
+                      <span className="text-sm text-gray-600">New Patients</span>
+                      <span className="text-sm font-semibold text-gray-900">{stats.newPatientsThisMonth || 0}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">Total Visits</span>
-                      <span className="text-sm sm:text-base font-semibold text-gray-900">{stats.visitsThisMonth || 0}</span>
+                      <span className="text-sm text-gray-600">Total Visits</span>
+                      <span className="text-sm font-semibold text-gray-900">{stats.visitsThisMonth || 0}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">Revenue</span>
-                      <span className="text-sm sm:text-base font-semibold text-green-600">₹{stats.revenueThisMonth || 0}</span>
+                      <span className="text-sm text-gray-600">Revenue</span>
+                      <span className="text-sm font-semibold text-green-600">₹{stats.revenueThisMonth || 0}</span>
                     </div>
-                    <div className="pt-2 border-t border-gray-200">
+                    <div className="pt-3 border-t border-gray-200">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs sm:text-sm font-medium text-gray-700">Pending Payments</span>
-                        <span className="text-sm sm:text-base font-semibold text-orange-600">₹{stats.pendingRevenue || 0}</span>
+                        <span className="text-sm font-medium text-gray-700">Pending Payments</span>
+                        <span className="text-sm font-semibold text-orange-600">₹{stats.pendingRevenue || 0}</span>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Health Tips Card */}
-                <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
-                  <h3 className="text-base sm:text-lg font-bold mb-3 flex items-center space-x-2">
-                    <AlertCircle className="w-5 h-5" />
-                    <span>Practice Tip</span>
-                  </h3>
-                  <p className="text-blue-100 text-xs sm:text-sm leading-relaxed">
-                    Remember to follow up with patients who have pending payments. Good financial health keeps your practice running smoothly.
-                  </p>
                 </div>
               </div>
             </div>
