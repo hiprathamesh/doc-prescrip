@@ -9,6 +9,7 @@ export default function PinEntry() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPin, setShowPin] = useState(false);
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const router = useRouter();
   const inputRef = useRef(null);
 
@@ -21,6 +22,8 @@ export default function PinEntry() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    setAttemptedSubmit(true);
     
     if (pin.length < 4 || pin.length > 10) {
       setError('PIN must be between 4 and 10 digits');
@@ -70,6 +73,7 @@ export default function PinEntry() {
     const value = e.target.value.replace(/\D/g, '').slice(0, 10);
     setPin(value);
     if (error) setError('');
+    if (attemptedSubmit) setAttemptedSubmit(false);
   };
 
   const handleContainerClick = () => {
@@ -199,7 +203,7 @@ export default function PinEntry() {
             </div>
 
             {/* Status Message */}
-            {pin.length > 0 && pin.length < 4 && (
+            {attemptedSubmit && pin.length > 0 && pin.length < 4 && (
               <div className="flex items-center space-x-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0" />
                 <p className="text-yellow-700 text-sm">
