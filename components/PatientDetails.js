@@ -76,29 +76,45 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
     return timings.length > 0 ? timings.join('-') : 'As prescribed';
   };
 
-  const downloadPrescription = (prescription) => {
-    if (prescription.pdfUrl) {
-      const a = document.createElement('a');
-      a.href = prescription.pdfUrl;
-      a.download = `prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } else {
-      alert('PDF not available for download');
+  const downloadPrescription = async (prescription) => {
+    try {
+      // Check if PDF URL is valid and regenerate if needed
+      const validUrl = await storage.regeneratePDFIfNeeded(prescription, patient, 'prescription');
+      
+      if (validUrl) {
+        const a = document.createElement('a');
+        a.href = validUrl;
+        a.download = `prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        alert('Failed to generate PDF for download');
+      }
+    } catch (error) {
+      console.error('Error downloading prescription:', error);
+      alert('Failed to download prescription');
     }
   };
 
-  const downloadBill = (bill) => {
-    if (bill.pdfUrl) {
-      const a = document.createElement('a');
-      a.href = bill.pdfUrl;
-      a.download = `bill-${patient.name}-${formatDate(bill.createdAt)}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } else {
-      alert('PDF not available for download');
+  const downloadBill = async (bill) => {
+    try {
+      // Check if PDF URL is valid and regenerate if needed
+      const validUrl = await storage.regeneratePDFIfNeeded(bill, patient, 'bill');
+      
+      if (validUrl) {
+        const a = document.createElement('a');
+        a.href = validUrl;
+        a.download = `bill-${patient.name}-${formatDate(bill.createdAt)}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        alert('Failed to generate PDF for download');
+      }
+    } catch (error) {
+      console.error('Error downloading bill:', error);
+      alert('Failed to download bill');
     }
   };
 
@@ -263,6 +279,8 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                   className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center space-x-2"
                                   variant="dropdown"
                                   onShare={() => setDropdownOpen(null)}
+                                  prescription={prescription}
+                                  patient={patient}
                                 />
                               </>
                             )}
@@ -427,6 +445,8 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                       className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center space-x-2"
                                       variant="dropdown"
                                       onShare={() => setDropdownOpen(null)}
+                                      bill={bill}
+                                      patient={patient}
                                     />
                                   </>
                                 )}

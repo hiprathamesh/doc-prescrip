@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useSession, signIn } from 'next-auth/react'
 import { Share2, Loader2 } from 'lucide-react'
+import { storage } from '../utils/storage'
 
 export default function SharePDFButton({ 
   pdfUrl, 
@@ -18,7 +19,11 @@ export default function SharePDFButton({
   certificateFor,
   className,
   variant = 'button', // 'button' or 'dropdown'
-  onShare
+  onShare,
+  // Add these props for regeneration
+  prescription,
+  patient,
+  bill
 }) {
   const { data: session, status } = useSession()
   const [isUploading, setIsUploading] = useState(false)
@@ -63,11 +68,6 @@ Dr. Prashant Nikam`
   }
 
   const handleClick = async () => {
-    if (!pdfUrl) {
-      alert('PDF is not ready yet. Please wait.')
-      return
-    }
-
     if (status === 'loading') {
       alert('Please wait, checking authentication...')
       return
@@ -96,8 +96,24 @@ Dr. Prashant Nikam`
     setIsUploading(true)
 
     try {
+      let validPdfUrl = pdfUrl
+
+      // If no PDF URL or we suspect it might be invalid, try to regenerate
+      if (!validPdfUrl || validPdfUrl.startsWith('blob:')) {
+        if (type === 'prescription' && prescription && patient) {
+          validPdfUrl = await storage.regeneratePDFIfNeeded(prescription, patient, 'prescription')
+        } else if (type === 'bill' && bill && patient) {
+          validPdfUrl = await storage.regeneratePDFIfNeeded(bill, patient, 'bill')
+        }
+      }
+
+      if (!validPdfUrl) {
+        alert('PDF is not available. Please try regenerating the document.')
+        return
+      }
+
       // Convert blob URL to blob
-      const response = await fetch(pdfUrl)
+      const response = await fetch(validPdfUrl)
       if (!response.ok) {
         throw new Error('Failed to fetch PDF')
       }

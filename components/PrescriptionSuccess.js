@@ -48,25 +48,53 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
     }
   };
 
-  const downloadPrescription = () => {
-    if (prescriptionPdfUrl) {
-      const a = document.createElement('a');
-      a.href = prescriptionPdfUrl;
-      a.download = `prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+  const downloadPrescription = async () => {
+    try {
+      let validUrl = prescriptionPdfUrl
+      
+      // If blob URL is invalid, regenerate
+      if (!validUrl || validUrl.startsWith('blob:')) {
+        validUrl = await storage.regeneratePDFIfNeeded(prescription, patient, 'prescription')
+      }
+      
+      if (validUrl) {
+        const a = document.createElement('a');
+        a.href = validUrl;
+        a.download = `prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        alert('Failed to generate PDF for download');
+      }
+    } catch (error) {
+      console.error('Error downloading prescription:', error);
+      alert('Failed to download prescription');
     }
   };
 
-  const downloadBill = () => {
-    if (billPdfUrl) {
-      const a = document.createElement('a');
-      a.href = billPdfUrl;
-      a.download = `bill-${patient.name}-${formatDate(bill.createdAt)}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+  const downloadBill = async () => {
+    try {
+      let validUrl = billPdfUrl
+      
+      // If blob URL is invalid, regenerate
+      if (!validUrl || validUrl.startsWith('blob:')) {
+        validUrl = await storage.regeneratePDFIfNeeded(bill, patient, 'bill')
+      }
+      
+      if (validUrl) {
+        const a = document.createElement('a');
+        a.href = validUrl;
+        a.download = `bill-${patient.name}-${formatDate(bill.createdAt)}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        alert('Failed to generate PDF for download');
+      }
+    } catch (error) {
+      console.error('Error downloading bill:', error);
+      alert('Failed to download bill');
     }
   };
 
@@ -249,6 +277,8 @@ Dr. Prashant Nikam`;
                   type="prescription"
                   patientName={patient.name}
                   visitDate={formatDate(prescription.visitDate)}
+                  prescription={prescription}
+                  patient={patient}
                 />
               </div>
             </div>
@@ -300,6 +330,8 @@ Dr. Prashant Nikam`;
                     billDate={formatDate(bill.createdAt)}
                     amount={bill.amount}
                     isPaid={bill.isPaid}
+                    bill={bill}
+                    patient={patient}
                   />
                 </div>
               </div>

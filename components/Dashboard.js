@@ -22,7 +22,8 @@ import {
   CalendarDays,
   Stethoscope,
   PieChart,
-  BarChart3
+  BarChart3,
+  LogOut
 } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, formatTimeAgo } from '../utils/dateUtils';
@@ -187,6 +188,32 @@ export default function Dashboard() {
     loadAllData();
   };
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        // Force a page reload to ensure middleware takes effect
+        window.location.href = '/pin-entry';
+      } else {
+        console.error('Logout failed');
+        // Fallback: try client-side cookie clearing
+        document.cookie = 'pin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        window.location.href = '/pin-entry';
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback: try client-side cookie clearing
+      document.cookie = 'pin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      window.location.href = '/pin-entry';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Enhanced Header */}
@@ -211,16 +238,14 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center space-x-2 sm:space-x-4">
-              {/* Dashboard button - hidden on mobile */}
-              {currentView !== 'dashboard' && (
-                <button
-                  onClick={handleBackToDashboard}
-                  className="hidden lg:flex text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all duration-200 items-center space-x-2"
-                >
-                  <Activity className="w-4 h-4" />
-                  <span>Dashboard</span>
-                </button>
-              )}
+              {/* Logout button - always visible */}
+              <button
+                onClick={handleLogout}
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all duration-200 flex items-center space-x-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
 
               <button
                 onClick={() => handleNewPrescription()}

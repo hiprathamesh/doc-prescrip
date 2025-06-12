@@ -361,5 +361,55 @@ export const storage = {
       console.error('Error adding custom medication:', error);
       return false;
     }
+  },
+
+  // Add new function for regenerating PDFs when blob URLs are invalid
+  regeneratePDFIfNeeded: async (item, patient, type) => {
+    if (!item.pdfUrl) return null;
+    
+    try {
+      // Check if blob URL is still accessible
+      const response = await fetch(item.pdfUrl);
+      if (response.ok) {
+        return item.pdfUrl; // URL is still valid
+      }
+    } catch (error) {
+      // URL is invalid, need to regenerate
+    }
+    
+    try {
+      if (type === 'prescription') {
+        const { generatePDF } = await import('./pdfGenerator');
+        const pdfBlob = await generatePDF(item, patient, false);
+        const newUrl = URL.createObjectURL(pdfBlob);
+        
+        // Update the stored prescription with new URL
+        const prescriptions = await storage.getPrescriptions();
+        const updatedPrescriptions = prescriptions.map(p => 
+          p.id === item.id ? { ...p, pdfUrl: newUrl } : p
+        );
+        await storage.savePrescriptions(updatedPrescriptions);
+        
+        return newUrl;
+      } else if (type === 'bill') {
+        const { generateBillPDF } = await import('./billGenerator');
+        const pdfBlob = await generateBillPDF(item, patient);
+        const newUrl = URL.createObjectURL(pdfBlob);
+        
+        // Update the stored bill with new URL
+        const bills = await storage.getBills();
+        const updatedBills = bills.map(b => 
+          b.id === item.id ? { ...b, pdfUrl: newUrl } : b
+        );
+        await storage.saveBills(updatedBills);
+        
+        return newUrl;
+      }
+    } catch (error) {
+      console.error(`Error regenerating ${type} PDF:`, error);
+      return null;
+    }
   }
 };
+
+export default storage;
