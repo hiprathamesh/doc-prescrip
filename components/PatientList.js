@@ -111,8 +111,21 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                   <div className="font-medium text-gray-900">{formatDate(patient.lastVisited)}</div>
                 </div>
                 <div>
-                  <span className="text-gray-500">Next Expected:</span>
-                  <div className="font-medium text-gray-900">{formatDate(patient.nextExpected)}</div>
+                  <span className="text-gray-500">Follow-up Status:</span>
+                  <div className={`font-medium ${
+                    patient.followUpStatus === 'pending' 
+                      ? 'text-orange-600' 
+                      : patient.followUpStatus === 'overdue'
+                      ? 'text-red-600'
+                      : 'text-green-600'
+                  }`}>
+                    {patient.followUpStatus === 'pending' 
+                      ? `Due: ${formatDate(patient.nextExpected)}`
+                      : patient.followUpStatus === 'overdue'
+                      ? `Overdue: ${formatDate(patient.nextExpected)}`
+                      : 'No pending follow-up'
+                    }
+                  </div>
                 </div>
               </div>
               

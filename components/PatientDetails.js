@@ -324,12 +324,27 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                         <p className="text-xs sm:text-sm text-gray-600">
                           {formatDateTime(prescription.createdAt)}
                         </p>
+                        {prescription.isFollowUpVisit && (
+                          <span className="inline-block mt-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-medium">
+                            Follow-up Visit
+                          </span>
+                        )}
                       </div>
-                      {prescription.followUpDate && (
-                        <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-medium mt-2 sm:mt-0 self-start">
-                          Follow-up: {formatDate(prescription.followUpDate)}
-                        </span>
-                      )}
+                      <div className="flex flex-col items-end space-y-2">
+                        {prescription.followUpDate && (
+                          <span className={`text-xs px-2 py-1 rounded font-medium ${
+                            prescription.followUpStatus === 'completed'
+                              ? 'bg-green-100 text-green-800'
+                              : prescription.followUpStatus === 'overdue'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            Follow-up: {formatDate(prescription.followUpDate)}
+                            {prescription.followUpStatus === 'completed' && ' ✓'}
+                            {prescription.followUpStatus === 'overdue' && ' (Overdue)'}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">

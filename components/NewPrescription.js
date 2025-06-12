@@ -450,6 +450,24 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         )
       };
 
+      // Get existing prescriptions for this patient to check for pending follow-ups
+      const existingPrescriptions = await storage.getPrescriptionsByPatient(selectedPatient.id);
+      
+      // Find the most recent prescription with a pending follow-up
+      let completedFollowUpPrescription = null;
+      if (existingPrescriptions.length > 0) {
+        // Sort by visit date (most recent first)
+        const sortedPrescriptions = existingPrescriptions.sort((a, b) => 
+          new Date(b.visitDate) - new Date(a.visitDate)
+        );
+        
+        // Find the most recent prescription with a pending follow-up
+        completedFollowUpPrescription = sortedPrescriptions.find(p => 
+          p.followUpDate && 
+          (!p.followUpStatus || p.followUpStatus === 'pending' || p.followUpStatus === 'overdue')
+        );
+      }
+
       const prescription = {
         id: Date.now().toString(),
         patientId: selectedPatient.id?.toString(),
@@ -462,6 +480,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         doctorNotes: doctorNotesList.map(note => note.text).join('\n'),
         advice: adviceList.map(advice => advice.text).join('\n'),
         followUpDate: followUpDate ? new Date(followUpDate) : undefined,
+        followUpStatus: followUpDate ? 'pending' : undefined,
+        isFollowUpVisit: !!completedFollowUpPrescription, // Mark this visit as a follow-up if there was a pending one
+        completedFollowUpFor: completedFollowUpPrescription?.id, // Reference to the prescription this visit completes
         createdAt: new Date()
       };
 
@@ -497,6 +518,23 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         bill.pdfUrl = billUrl;
       }
 
+      // If this visit completes a follow-up, update the previous prescription
+      if (completedFollowUpPrescription) {
+        const allPrescriptions = await storage.getPrescriptions();
+        const updatedPrescriptions = allPrescriptions.map(p => {
+          if (p.id === completedFollowUpPrescription.id) {
+            return {
+              ...p,
+              followUpStatus: 'completed',
+              followUpCompletedDate: new Date(),
+              followUpCompletedBy: prescription.id
+            };
+          }
+          return p;
+        });
+        await storage.savePrescriptions(updatedPrescriptions);
+      }
+
       // Save prescription with PDF URL
       const savedPrescriptionData = await storage.savePrescription(prescription);
       if (!savedPrescriptionData) {
@@ -510,13 +548,25 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         await storage.saveBills(updatedBills);
       }
 
-      // Update patient's last visited date
+      // Update patient's information with follow-up status
+      const today = new Date();
+      let patientFollowUpStatus = 'none';
+      let nextExpectedDate = null;
+
+      if (prescription.followUpDate) {
+        const followUpDate = new Date(prescription.followUpDate);
+        patientFollowUpStatus = followUpDate < today ? 'overdue' : 'pending';
+        nextExpectedDate = followUpDate;
+      }
+
+      // Update patient's last visited date and follow-up status
       const updatedPatients = patients.map(p =>
         p.id === selectedPatient.id
           ? {
             ...p,
             lastVisited: new Date(),
-            nextExpected: followUpDate ? new Date(followUpDate) : undefined,
+            nextExpected: nextExpectedDate,
+            followUpStatus: patientFollowUpStatus,
             updatedAt: new Date()
           }
           : p

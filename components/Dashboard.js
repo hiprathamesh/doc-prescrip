@@ -84,12 +84,16 @@ export default function Dashboard() {
       new Date(p.visitDate) >= oneMonthAgo
     ).length;
 
-    // Follow-up stats
+    // Follow-up stats - only include pending/overdue follow-ups
     const upcomingFollowUps = prescriptions.filter(p =>
       p.followUpDate &&
-      new Date(p.followUpDate) <= oneWeekFromNow &&
-      new Date(p.followUpDate) >= now
-    );
+      (!p.followUpStatus || p.followUpStatus === 'pending' || p.followUpStatus === 'overdue') &&
+      new Date(p.followUpDate) <= oneWeekFromNow
+    ).map(p => ({
+      ...p,
+      patient: patients.find(patient => patient.id === p.patientId),
+      isOverdue: new Date(p.followUpDate) < now
+    })).sort((a, b) => new Date(a.followUpDate) - new Date(b.followUpDate));
 
     // Revenue stats
     const totalRevenue = bills.reduce((sum, bill) => sum + bill.amount, 0);
@@ -492,14 +496,20 @@ export default function Dashboard() {
                       stats.upcomingFollowUps.slice(0, 5).map((prescription) => {
                         const patient = patients.find(p => p.id === prescription.patientId);
                         return (
-                          <div key={prescription.id} className="flex items-center space-x-3 p-2 sm:p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer"
+                          <div key={prescription.id} className={`flex items-center space-x-3 p-2 sm:p-3 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer ${
+                            prescription.isOverdue ? 'bg-red-50 border border-red-200' : 'bg-purple-50'
+                          }`}
                             onClick={() => patient && handlePatientSelect(patient)}>
-                            <div className="p-1 sm:p-1.5 bg-purple-600 rounded-full">
+                            <div className={`p-1 sm:p-1.5 rounded-full ${
+                              prescription.isOverdue ? 'bg-red-600' : 'bg-purple-600'
+                            }`}>
                               <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{patient?.name}</p>
-                              <p className="text-xs text-gray-600">{formatDate(prescription.followUpDate)}</p>
+                              <p className={`text-xs ${prescription.isOverdue ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
+                                {prescription.isOverdue ? 'Overdue: ' : ''}{formatDate(prescription.followUpDate)}
+                              </p>
                             </div>
                           </div>
                         );

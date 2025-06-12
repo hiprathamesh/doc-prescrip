@@ -151,7 +151,19 @@ export const generatePDF = async (prescription, patient, autoDownload = true) =>
   if (prescription.followUpDate) {
     pdf.setFontSize(12);
     pdf.setFont(undefined, 'bold');
-    pdf.text(`Next Visit: ${formatDate(prescription.followUpDate)}`, 20, yPosition);
+    
+    // Show follow-up status if available
+    let followUpText = `Next Visit: ${formatDate(prescription.followUpDate)}`;
+    if (prescription.followUpStatus === 'completed') {
+      followUpText += ' (Completed)';
+      pdf.setTextColor(0, 128, 0); // Green color for completed
+    } else if (prescription.followUpStatus === 'overdue') {
+      followUpText += ' (Overdue)';
+      pdf.setTextColor(255, 0, 0); // Red color for overdue
+    }
+    
+    pdf.text(followUpText, 20, yPosition);
+    pdf.setTextColor(0, 0, 0); // Reset to black
     yPosition += 15;
   }
 

@@ -430,10 +430,33 @@ Dr. Prashant Nikam`;
 
         {/* Follow-up Information */}
         {prescription.followUpDate && (
-          <div className="mt-8 bg-yellow-50 p-6 rounded-2xl border border-yellow-200">
-            <h3 className="text-lg font-semibold text-yellow-800 mb-2">Follow-up Scheduled</h3>
-            <p className="text-yellow-700">
-              Next appointment: {formatDate(prescription.followUpDate)}
+          <div className={`mt-8 p-6 rounded-2xl border-2 ${
+            prescription.followUpStatus === 'completed' 
+              ? 'bg-green-50 border-green-200' 
+              : prescription.followUpStatus === 'overdue'
+              ? 'bg-red-50 border-red-200'
+              : 'bg-yellow-50 border-yellow-200'
+          }`}>
+            <h3 className={`text-lg font-semibold mb-2 ${
+              prescription.followUpStatus === 'completed' 
+                ? 'text-green-800' 
+                : prescription.followUpStatus === 'overdue'
+                ? 'text-red-800'
+                : 'text-yellow-800'
+            }`}>
+              Follow-up {prescription.followUpStatus === 'completed' ? 'Completed' : 'Scheduled'}
+            </h3>
+            <p className={`${
+              prescription.followUpStatus === 'completed' 
+                ? 'text-green-700' 
+                : prescription.followUpStatus === 'overdue'
+                ? 'text-red-700'
+                : 'text-yellow-700'
+            }`}>
+              {prescription.followUpStatus === 'completed' 
+                ? `Follow-up was completed on: ${formatDate(prescription.followUpCompletedDate)}`
+                : `Next appointment: ${formatDate(prescription.followUpDate)}`
+              }
             </p>
           </div>
         )}
