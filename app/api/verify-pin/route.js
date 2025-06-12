@@ -13,12 +13,11 @@ const MAX_REQUESTS_PER_WINDOW = 10;
 function getClientIP(request) {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
-  const remoteAddr = request.headers.get('x-vercel-forwarded-for') || 
-                    request.headers.get('cf-connecting-ip') ||
-                    forwarded?.split(',')[0] ||
-                    realIP ||
-                    'unknown';
-  return remoteAddr;
+  const vercelIP = request.headers.get('x-vercel-forwarded-for');
+  const cfIP = request.headers.get('cf-connecting-ip');
+
+  const ip = (vercelIP || cfIP || (forwarded?.split(',')[0] ?? realIP)) ?? 'unknown';
+  return ip;
 }
 
 function getAttemptData(ip) {
