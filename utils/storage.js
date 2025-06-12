@@ -153,6 +153,21 @@ export const storage = {
     }
   },
 
+  // Add new function for updating single bill
+  updateBill: async (billId, updates) => {
+    try {
+      const bills = await storage.getBills();
+      const updatedBills = bills.map(bill => 
+        bill.id === billId ? { ...bill, ...updates } : bill
+      );
+      const success = await storage.saveBills(updatedBills);
+      return success ? updatedBills.find(b => b.id === billId) : null;
+    } catch (error) {
+      console.error('Error updating bill:', error);
+      return null;
+    }
+  },
+
   getBillsByPatient: async (patientId) => {
     try {
       // Ensure patientId is always a string for consistency

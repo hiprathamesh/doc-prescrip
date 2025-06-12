@@ -524,12 +524,12 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       await storage.savePatients(updatedPatients);
       onPatientUpdate(updatedPatients);
 
-      // Set data for success page
+      // Set data for success page with current bill state
       setSavedPrescription({
         ...prescription,
         pdfUrl: prescriptionUrl
       });
-      setSavedBill(bill);
+      setSavedBill(bill ? { ...bill } : null);
       setShowSuccess(true);
 
     } catch (error) {

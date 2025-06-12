@@ -37,14 +37,34 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   };
 
   const toggleBillPayment = async (billId) => {
-    const allBills = await storage.getBills();
-    const updatedBills = allBills.map(bill => 
-      bill.id === billId 
-        ? { ...bill, isPaid: !bill.isPaid, paidAt: !bill.isPaid ? new Date() : null }
-        : bill
-    );
-    await storage.saveBills(updatedBills);
-    loadPatientData();
+    try {
+      const allBills = await storage.getBills();
+      const billToUpdate = allBills.find(b => b.id === billId);
+      
+      if (!billToUpdate) return;
+
+      const updatedBill = {
+        ...billToUpdate,
+        isPaid: !billToUpdate.isPaid,
+        paidAt: !billToUpdate.isPaid ? new Date() : null
+      };
+
+      // Regenerate bill PDF with new status
+      const { generateBillPDF } = await import('../utils/billGenerator');
+      const newBillBlob = await generateBillPDF(updatedBill, patient);
+      const newBillUrl = URL.createObjectURL(newBillBlob);
+      updatedBill.pdfUrl = newBillUrl;
+
+      const updatedBills = allBills.map(bill => 
+        bill.id === billId ? updatedBill : bill
+      );
+      
+      await storage.saveBills(updatedBills);
+      loadPatientData();
+    } catch (error) {
+      console.error('Error updating bill payment status:', error);
+      alert('Failed to update payment status');
+    }
   };
 
   const deletePrescription = async (prescriptionId) => {

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Download, FileText, DollarSign, CheckCircle } from 'lucide-react';
 import { generatePDF } from '../utils/pdfGenerator';
+import { storage } from '../utils/storage';
 import { generateBillPDF } from '../utils/billGenerator';
 import { sendWhatsApp, generateWhatsAppMessage } from '../utils/whatsapp';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
@@ -12,6 +13,7 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
   const [prescriptionPdfUrl, setPrescriptionPdfUrl] = useState(null);
   const [billPdfUrl, setBillPdfUrl] = useState(null);
   const [isGeneratingPdfs, setIsGeneratingPdfs] = useState(true);
+  const [currentBill, setCurrentBill] = useState(bill);
 
   useEffect(() => {
     // Since PDFs are already generated, just set the URLs
@@ -73,19 +75,63 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
     }
   };
 
+  const toggleBillPayment = async () => {
+    if (!currentBill) return;
+    
+    try {
+      setIsGeneratingPdfs(true);
+      
+      // Update bill status
+      const updatedBill = {
+        ...currentBill,
+        isPaid: !currentBill.isPaid,
+        paidAt: !currentBill.isPaid ? new Date() : null
+      };
+
+      // Update bill in storage
+      const allBills = await storage.getBills();
+      const updatedBills = allBills.map(b => 
+        b.id === currentBill.id ? updatedBill : b
+      );
+      await storage.saveBills(updatedBills);
+
+      // Regenerate bill PDF with new status
+      const { generateBillPDF } = await import('../utils/billGenerator');
+      const newBillBlob = await generateBillPDF(updatedBill, patient);
+      const newBillUrl = URL.createObjectURL(newBillBlob);
+
+      // Update the bill with new PDF URL in storage
+      updatedBill.pdfUrl = newBillUrl;
+      const finalUpdatedBills = allBills.map(b => 
+        b.id === currentBill.id ? updatedBill : b
+      );
+      await storage.saveBills(finalUpdatedBills);
+
+      // Update local state
+      setCurrentBill(updatedBill);
+      setBillPdfUrl(newBillUrl);
+      
+    } catch (error) {
+      console.error('Error updating bill payment status:', error);
+      alert('Failed to update payment status');
+    } finally {
+      setIsGeneratingPdfs(false);
+    }
+  };
+
   const downloadBill = async () => {
     try {
       let validUrl = billPdfUrl
       
       // If blob URL is invalid, regenerate
       if (!validUrl || validUrl.startsWith('blob:')) {
-        validUrl = await storage.regeneratePDFIfNeeded(bill, patient, 'bill')
+        validUrl = await storage.regeneratePDFIfNeeded(currentBill, patient, 'bill')
       }
       
       if (validUrl) {
         const a = document.createElement('a');
         a.href = validUrl;
-        a.download = `bill-${patient.name}-${formatDate(bill.createdAt)}.pdf`;
+        a.download = `bill-${patient.name}-${formatDate(currentBill.createdAt)}.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -304,7 +350,7 @@ Dr. Prashant Nikam`;
           </div>
 
           {/* Bill PDF */}
-          {bill && (
+          {currentBill && (
             <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
@@ -322,15 +368,15 @@ Dr. Prashant Nikam`;
                   </button>
                   <SharePDFButton
                     pdfUrl={billPdfUrl}
-                    filename={`bill-${patient.name}-${formatDate(bill.createdAt)}.pdf`}
+                    filename={`bill-${patient.name}-${formatDate(currentBill.createdAt)}.pdf`}
                     phone={patient.phone}
                     disabled={!billPdfUrl || isGeneratingPdfs}
                     type="bill"
                     patientName={patient.name}
-                    billDate={formatDate(bill.createdAt)}
-                    amount={bill.amount}
-                    isPaid={bill.isPaid}
-                    bill={bill}
+                    billDate={formatDate(currentBill.createdAt)}
+                    amount={currentBill.amount}
+                    isPaid={currentBill.isPaid}
+                    bill={currentBill}
                     patient={patient}
                   />
                 </div>
@@ -340,7 +386,7 @@ Dr. Prashant Nikam`;
                 <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
                   <div className="text-center">
                     <div className="w-8 h-8 animate-spin mx-auto border-4 border-green-500 border-t-transparent rounded-full mb-2"></div>
-                    <p className="text-gray-500">Generating Bill...</p>
+                    <p className="text-gray-500">Updating Bill...</p>
                   </div>
                 </div>
               ) : billPdfUrl ? (
@@ -355,17 +401,28 @@ Dr. Prashant Nikam`;
                 </div>
               )}
 
-              {/* Bill Summary */}
+              {/* Bill Summary with Payment Toggle */}
               <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold text-green-800">Amount: ₹{bill.amount}</span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    bill.isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    {bill.isPaid ? 'Paid' : 'Pending'}
-                  </span>
+                  <span className="font-semibold text-green-800">Amount: ₹{currentBill.amount}</span>
+                  <button
+                    onClick={toggleBillPayment}
+                    disabled={isGeneratingPdfs}
+                    className={`px-3 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                      currentBill.isPaid
+                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                        : 'bg-red-100 text-red-800 hover:bg-red-200'
+                    }`}
+                  >
+                    {currentBill.isPaid ? 'Paid' : 'Pending'}
+                  </button>
                 </div>
-                <p className="text-sm text-green-700 mt-1">{bill.description}</p>
+                <p className="text-sm text-green-700 mt-1">{currentBill.description}</p>
+                {currentBill.isPaid && currentBill.paidAt && (
+                  <p className="text-xs text-green-600 mt-1">
+                    Paid: {formatDateTime(currentBill.paidAt)}
+                  </p>
+                )}
               </div>
             </div>
           )}
