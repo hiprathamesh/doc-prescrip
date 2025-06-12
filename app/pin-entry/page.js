@@ -46,9 +46,21 @@ export default function PinEntry() {
       } else {
         setError('Invalid PIN. Please try again.');
         setPin('');
+        // Restore focus after clearing PIN
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        }, 10);
       }
     } catch (error) {
       setError('Connection error. Please try again.');
+      // Restore focus after error
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 10);
     } finally {
       setIsLoading(false);
     }
