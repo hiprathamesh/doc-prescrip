@@ -6,6 +6,7 @@ const attemptStore = new Map();
 // Configuration
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+const MAX_LOCKOUT_DURATION = 24 * 60 * 60 * 1000; // 24 hours maximum
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 10;
 
@@ -68,46 +69,11 @@ function isLockedOut(ip) {
   return { locked: false, remainingTime: 0 };
 }
 
-function recordFailedAttempt(ip) {
-  const data = getAttemptData(ip);
-  const now = Date.now();
-  
-  data.failedAttempts++;
-  data.lastAttempt = now;
-  
-  // Progressive lockout
-  if (data.failedAttempts >= MAX_ATTEMPTS) {
-    // Exponential backoff: 15 min, 30 min, 1 hour, 2 hours, etc.
-    const lockoutMultiplier = Math.pow(2, Math.floor(data.failedAttempts / MAX_ATTEMPTS) - 1);
-    data.lockedUntil = now + (LOCKOUT_DURATION * lockoutMultiplier);
-  }
-  
-  return data.failedAttempts;
-}
-
-function recordSuccessfulAttempt(ip) {
-  if (attemptStore.has(ip)) {
-    attemptStore.delete(ip);
-  }
-}
-
 export async function POST(request) {
   try {
     const clientIP = getClientIP(request);
     
-    // Check rate limiting
-    if (isRateLimited(clientIP)) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Too many requests. Please wait before trying again.',
-          rateLimited: true 
-        },
-        { status: 429 }
-      );
-    }
-    
-    // Check if IP is locked out
+    // Check if IP is locked out FIRST
     const lockoutStatus = isLockedOut(clientIP);
     if (lockoutStatus.locked) {
       const minutes = Math.ceil(lockoutStatus.remainingTime / 60);
@@ -122,22 +88,26 @@ export async function POST(request) {
       );
     }
     
-    const { pin } = await request.json();
-    
-    // Validate PIN format and length
-    if (!pin || typeof pin !== 'string' || !/^\d+$/.test(pin)) {
-      recordFailedAttempt(clientIP);
+    // Only check rate limiting if NOT locked out
+    if (isRateLimited(clientIP)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid PIN format' },
-        { status: 400 }
+        { 
+          success: false, 
+          error: 'Too many requests. Please wait before trying again.',
+          rateLimited: true 
+        },
+        { status: 429 }
       );
     }
     
-    if (pin.length < 4 || pin.length > 10) {
+    const { pin } = await request.json();
+    
+    // Validate PIN format and length - but return generic error
+    if (!pin || typeof pin !== 'string' || !/^\d+$/.test(pin) || pin.length < 4 || pin.length > 10) {
       recordFailedAttempt(clientIP);
       return NextResponse.json(
-        { success: false, error: 'PIN must be between 4 and 10 digits' },
-        { status: 400 }
+        { success: false, error: 'Invalid PIN. Please try again.' },
+        { status: 401 }
       );
     }
     
@@ -179,9 +149,37 @@ export async function POST(request) {
     const clientIP = getClientIP(request);
     recordFailedAttempt(clientIP);
     
+    // Return generic error message
     return NextResponse.json(
-      { success: false, error: 'Server error' },
-      { status: 500 }
+      { success: false, error: 'Invalid PIN. Please try again.' },
+      { status: 401 }
     );
+  }
+}
+
+function recordFailedAttempt(ip) {
+  const data = getAttemptData(ip);
+  const now = Date.now();
+  
+  data.failedAttempts++;
+  data.lastAttempt = now;
+  
+  // Progressive lockout with maximum cap
+  if (data.failedAttempts >= MAX_ATTEMPTS) {
+    // Exponential backoff: 15 min, 30 min, 1 hour, 2 hours, etc.
+    const lockoutMultiplier = Math.pow(2, Math.floor(data.failedAttempts / MAX_ATTEMPTS) - 1);
+    const calculatedLockout = LOCKOUT_DURATION * lockoutMultiplier;
+    
+    // Cap the lockout duration to prevent extremely long lockouts
+    const lockoutDuration = Math.min(calculatedLockout, MAX_LOCKOUT_DURATION);
+    data.lockedUntil = now + lockoutDuration;
+  }
+  
+  return data.failedAttempts;
+}
+
+function recordSuccessfulAttempt(ip) {
+  if (attemptStore.has(ip)) {
+    attemptStore.delete(ip);
   }
 }
