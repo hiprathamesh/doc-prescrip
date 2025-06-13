@@ -48,6 +48,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [savedCertificate, setSavedCertificate] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Update form when patient is selected
   useEffect(() => {
@@ -115,7 +116,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
   };
 
   const handleConfirmSave = async () => {
-    setShowConfirmation(false);
+    setIsProcessing(true);
     
     try {
       const certificate = {
@@ -148,16 +149,21 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
       }
 
       setSavedCertificate(certificate);
+      setShowConfirmation(false);
       setShowSuccess(true);
 
     } catch (error) {
       console.error('Error saving medical certificate:', error);
       alert('Failed to save medical certificate. Please try again.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleCancelSave = () => {
-    setShowConfirmation(false);
+    if (!isProcessing) {
+      setShowConfirmation(false);
+    }
   };
 
   const handleBackFromSuccess = () => {
@@ -610,6 +616,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
         message="Are you sure you want to save this medical certificate? This will generate the certificate document."
         onConfirm={handleConfirmSave}
         onCancel={handleCancelSave}
+        isLoading={isProcessing}
       />
     </>
   );

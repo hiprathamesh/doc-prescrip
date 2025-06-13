@@ -1,38 +1,49 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 
-export default function ConfirmationDialog({ isOpen, title, message, onConfirm, onCancel }) {
+export default function ConfirmationDialog({ isOpen, title, message, onConfirm, onCancel, isLoading = false }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-            <button
-              onClick={onCancel}
-              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-xl max-w-sm w-full mx-auto border border-gray-200">
+        <div className="p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+            {!isLoading && (
+              <button
+                onClick={onCancel}
+                className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            )}
           </div>
           
-          <p className="text-gray-600 mb-6">{message}</p>
+          <p className="text-sm text-gray-600 mb-5 leading-relaxed">{message}</p>
           
-          <div className="flex space-x-3">
+          <div className="flex space-x-2.5">
             <button
               onClick={onCancel}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              disabled={isLoading}
+              className="flex-1 px-3 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               onClick={onConfirm}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              disabled={isLoading}
+              className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
-              Okay
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <span>Confirm</span>
+              )}
             </button>
           </div>
         </div>

@@ -69,6 +69,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   const [showSuccess, setShowSuccess] = useState(false);
   const [savedPrescription, setSavedPrescription] = useState(null);
   const [savedBill, setSavedBill] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const presHeaderRef = useRef(null);
   const [isPresHeaderVisible, setIsPresHeaderVisible] = useState(true);
@@ -525,7 +526,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   };
 
   const handleConfirmSave = async () => {
-    setShowConfirmation(false);
+    setIsProcessing(true);
     
     try {
       // Convert medical history to the expected format
@@ -672,16 +673,23 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         pdfUrl: prescriptionUrl
       });
       setSavedBill(bill ? { ...bill } : null);
+      
+      // Close confirmation and show success
+      setShowConfirmation(false);
       setShowSuccess(true);
 
     } catch (error) {
       console.error('Error saving prescription:', error);
       alert('Failed to save prescription. Please try again.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleCancelSave = () => {
-    setShowConfirmation(false);
+    if (!isProcessing) {
+      setShowConfirmation(false);
+    }
   };
 
   const handleBackFromSuccess = () => {
@@ -1530,6 +1538,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         message="Are you sure you want to save this prescription? This will generate the prescription and bill documents."
         onConfirm={handleConfirmSave}
         onCancel={handleCancelSave}
+        isLoading={isProcessing}
       />
     </>
   );
