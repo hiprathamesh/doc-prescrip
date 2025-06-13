@@ -151,7 +151,7 @@ export default function PillSelector({
             <button
               key={index}
               onClick={() => handleSelect(item)}
-              className="flex-shrink-0 px-3 sm:px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-800 rounded-full text-sm font-medium transition-all duration-200 border border-gray-300 hover:border-blue-300 transform hover:scale-105 whitespace-nowrap"
+              className="flex-shrink-0 px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-700 rounded-full text-sm font-medium transition-colors duration-200 border border-gray-300 hover:border-gray-300 whitespace-nowrap"
             >
               {item}
             </button>

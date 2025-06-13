@@ -999,7 +999,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       />
                     </div>
 
-                    <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                       {filteredTemplates.length > 0 ? (
                         filteredTemplates.map((template) => (
                           <div

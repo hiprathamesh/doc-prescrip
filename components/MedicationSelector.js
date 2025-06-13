@@ -174,10 +174,10 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
       </div>
 
       {/* Category Filter */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         <button
           onClick={() => setSelectedCategory('all')}
-          className={`px-3 py-1 rounded-full text-sm transition-colors ${
+          className={`flex-shrink-0 px-3 py-1 rounded-full text-sm transition-colors ${
             selectedCategory === 'all' 
               ? 'bg-blue-600 text-white' 
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -189,7 +189,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
           <button
             key={category}
             onClick={() => setSelectedCategory(category)}
-            className={`px-3 py-1 rounded-full text-sm transition-colors whitespace-nowrap ${
+            className={`flex-shrink-0 px-3 py-1 rounded-full text-sm transition-colors whitespace-nowrap ${
               selectedCategory === category 
                 ? 'bg-blue-600 text-white' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -288,7 +288,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
             <button
               key={index}
               onClick={() => handleSelect(medication)}
-              className="flex-shrink-0 px-3 sm:px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-800 rounded-full text-sm font-medium transition-all duration-200 border border-gray-300 hover:border-blue-300 transform hover:scale-105 whitespace-nowrap"
+              className="flex-shrink-0 px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-700 rounded-full text-sm font-medium transition-colors duration-200 border border-gray-300 hover:border-gray-300 whitespace-nowrap"
             >
               {medication}
             </button>
