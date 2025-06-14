@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
 import SessionWrapper from '../components/SessionWrapper';
+import { ToastProvider } from '../contexts/ToastContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -14,7 +15,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         <SessionWrapper>
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </SessionWrapper>
       </body>
     </html>

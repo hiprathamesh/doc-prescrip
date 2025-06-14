@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useSession, signIn } from 'next-auth/react'
 import { Share2, Loader2 } from 'lucide-react'
 import { storage } from '../utils/storage'
+import { useToast } from '../contexts/ToastContext'
 
 export default function SharePDFButton({ 
   pdfUrl, 
@@ -27,6 +28,7 @@ export default function SharePDFButton({
 }) {
   const { data: session, status } = useSession()
   const [isUploading, setIsUploading] = useState(false)
+  const { addToast } = useToast()
 
   const generateMessage = () => {
     if (type === 'prescription') {
@@ -151,6 +153,14 @@ Dr. Prashant Nikam`
         
         window.open(`https://wa.me/${formattedPhone}?text=${encoded}`, '_blank')
         
+        // Show success toast instead of alert
+        addToast({
+          title: 'Document Shared',
+          description: `${type === 'prescription' ? 'Prescription' : type === 'bill' ? 'Bill' : 'Certificate'} shared via WhatsApp successfully`,
+          type: 'success',
+          duration: 4000
+        });
+        
         // Call onShare callback if provided (for dropdown variant)
         if (onShare) {
           onShare()
@@ -161,10 +171,20 @@ Dr. Prashant Nikam`
     } catch (error) {
       console.error('Error sharing PDF:', error)
       if (error.message.includes('Unauthorized') || error.message.includes('authentication')) {
-        alert('Please sign in with Google to share documents.')
+        addToast({
+          title: 'Authentication Required',
+          description: 'Please sign in with Google to share documents',
+          type: 'warning',
+          duration: 5000
+        });
         signIn('google', { callbackUrl: window.location.href })
       } else {
-        alert(`Failed to share PDF: ${error.message}`)
+        addToast({
+          title: 'Share Failed',
+          description: `Failed to share PDF: ${error.message}`,
+          type: 'error',
+          duration: 5000
+        });
       }
     } finally {
       setIsUploading(false)

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Trash2, Search, Save } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from '../lib/medicalData';
+import { useToast } from '../contexts/ToastContext';
 
 export default function MedicalDataManager({ onBack }) {
   const [activeTab, setActiveTab] = useState('symptoms');
@@ -12,6 +13,7 @@ export default function MedicalDataManager({ onBack }) {
   const [customLabTests, setCustomLabTests] = useState([]);
   const [newItem, setNewItem] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const { addToast } = useToast();
 
   useEffect(() => {
     loadData();
@@ -44,19 +46,38 @@ export default function MedicalDataManager({ onBack }) {
         const updated = [...customSymptoms, newItem.trim()];
         setCustomSymptoms(updated);
         await storage.saveCustomSymptoms(updated);
+        addToast({
+          title: 'Symptom Added',
+          description: `"${newItem.trim()}" added to custom symptoms`,
+          type: 'success'
+        });
       } else if (activeTab === 'diagnoses') {
         const updated = [...customDiagnoses, newItem.trim()];
         setCustomDiagnoses(updated);
         await storage.saveCustomDiagnoses(updated);
+        addToast({
+          title: 'Diagnosis Added',
+          description: `"${newItem.trim()}" added to custom diagnoses`,
+          type: 'success'
+        });
       } else if (activeTab === 'lab-tests') {
         const updated = [...customLabTests, newItem.trim()];
         setCustomLabTests(updated);
         await storage.saveCustomLabTests(updated);
+        addToast({
+          title: 'Lab Test Added',
+          description: `"${newItem.trim()}" added to custom lab tests`,
+          type: 'success'
+        });
       }
       setNewItem('');
     } catch (error) {
       console.error('Error adding item:', error);
-      alert('Failed to add item. Please try again.');
+      addToast({
+        title: 'Error',
+        description: 'Failed to add item. Please try again.',
+        type: 'error'
+      });
     }
   };
 

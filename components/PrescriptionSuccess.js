@@ -8,12 +8,14 @@ import { generateBillPDF } from '../utils/billGenerator';
 import { sendWhatsApp, generateWhatsAppMessage } from '../utils/whatsapp';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import SharePDFButton from './SharePDFButton';
+import { useToast } from '../contexts/ToastContext';
 
 export default function PrescriptionSuccess({ prescription, patient, bill, onBack }) {
   const [prescriptionPdfUrl, setPrescriptionPdfUrl] = useState(null);
   const [billPdfUrl, setBillPdfUrl] = useState(null);
   const [isGeneratingPdfs, setIsGeneratingPdfs] = useState(true);
   const [currentBill, setCurrentBill] = useState(bill);
+  const { addToast } = useToast();
 
   useEffect(() => {
     // Since PDFs are already generated, just set the URLs
@@ -50,28 +52,21 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
     }
   };
 
-  const downloadPrescription = async () => {
-    try {
-      let validUrl = prescriptionPdfUrl
+  const downloadPrescription = () => {
+    if (prescriptionPdfUrl) {
+      const a = document.createElement('a');
+      a.href = prescriptionPdfUrl;
+      a.download = `prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       
-      // If blob URL is invalid, regenerate
-      if (!validUrl || validUrl.startsWith('blob:')) {
-        validUrl = await storage.regeneratePDFIfNeeded(prescription, patient, 'prescription')
-      }
-      
-      if (validUrl) {
-        const a = document.createElement('a');
-        a.href = validUrl;
-        a.download = `prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      } else {
-        alert('Failed to generate PDF for download');
-      }
-    } catch (error) {
-      console.error('Error downloading prescription:', error);
-      alert('Failed to download prescription');
+      addToast({
+        title: 'Download Started',
+        description: 'Prescription PDF download has started',
+        type: 'success',
+        duration: 3000
+      });
     }
   };
 
@@ -119,28 +114,21 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
     }
   };
 
-  const downloadBill = async () => {
-    try {
-      let validUrl = billPdfUrl
+  const downloadBill = () => {
+    if (billPdfUrl) {
+      const a = document.createElement('a');
+      a.href = billPdfUrl;
+      a.download = `bill-${patient.name}-${formatDate(currentBill.createdAt)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       
-      // If blob URL is invalid, regenerate
-      if (!validUrl || validUrl.startsWith('blob:')) {
-        validUrl = await storage.regeneratePDFIfNeeded(currentBill, patient, 'bill')
-      }
-      
-      if (validUrl) {
-        const a = document.createElement('a');
-        a.href = validUrl;
-        a.download = `bill-${patient.name}-${formatDate(currentBill.createdAt)}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      } else {
-        alert('Failed to generate PDF for download');
-      }
-    } catch (error) {
-      console.error('Error downloading bill:', error);
-      alert('Failed to download bill');
+      addToast({
+        title: 'Download Started',
+        description: 'Bill PDF download has started',
+        type: 'success',
+        duration: 3000
+      });
     }
   };
 

@@ -14,6 +14,7 @@ import ConfirmationDialog from './ConfirmationDialog';
 import PrescriptionSuccess from './PrescriptionSuccess';
 import CustomSelect from './CustomSelect';
 import CustomDropdown from './CustomDropdown';
+import { useToast } from '../contexts/ToastContext';
 
 export default function NewPrescription({ patient, patients, onBack, onPatientUpdate }) {
   console.log('[NewPrescription] Component rendering/re-rendering. Selected patient:', patient ? patient.id : 'none'); // TOP-LEVEL LOG
@@ -79,6 +80,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   const ageRef = useRef(null);
   const genderRef = useRef(null);
   const phoneRef = useRef(null);
+
+  const { addToast } = useToast();
 
   useEffect(() => {
     if (selectedPatient) {
@@ -251,6 +254,16 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   const applyTemplate = (template) => {
     if (!template) return;
 
+    // Store previous state for undo functionality
+    const previousState = {
+      symptoms,
+      diagnoses,
+      medications,
+      labResults,
+      doctorNotesList,
+      adviceList
+    };
+
     // Apply symptoms with proper structure
     if (template.symptoms && Array.isArray(template.symptoms) && template.symptoms.length > 0) {
       setSymptoms(template.symptoms.map(symptom => ({
@@ -304,8 +317,30 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     setShowTemplates(false);
     setTemplateSearch('');
 
-    // Show success message
-    alert(`Template "${template.name}" applied successfully!`);
+    // Show success toast with undo functionality
+    addToast({
+      title: 'Template Applied',
+      description: `"${template.name}" has been applied successfully`,
+      type: 'success',
+      duration: 6000,
+      onUndo: () => {
+        // Restore previous state
+        setSymptoms(previousState.symptoms);
+        setDiagnoses(previousState.diagnoses);
+        setMedications(previousState.medications);
+        setLabResults(previousState.labResults);
+        setDoctorNotesList(previousState.doctorNotesList);
+        setAdviceList(previousState.adviceList);
+        
+        // Show undo confirmation
+        addToast({
+          title: 'Template Undone',
+          description: `"${template.name}" has been removed`,
+          type: 'info',
+          duration: 3000
+        });
+      }
+    });
   };
 
   // Medical History Functions
