@@ -386,23 +386,30 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         ) : (
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+            <div className="absolute left-6 top-6 bottom-0 w-0.5 bg-gray-200"></div>
 
             <div className="space-y-8">
               {visits.map((visit, index) => (
-                <div key={visit.id} className="relative flex items-start space-x-4">
-                  {/* Timeline circle */}
-                  <div className="relative flex-shrink-0">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm">
-                      <Calendar className="w-5 h-5 text-blue-600" />
+                <div key={visit.id} className="relative">
+                  {/* Timeline circle and date row */}
+                  <div className="flex items-center space-x-4 mb-4">
+                    <div className="relative flex-shrink-0">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm">
+                        <Calendar className="w-5 h-5 text-blue-600" />
+                      </div>
                     </div>
-                    <div className="absolute top-14 left-1/2 transform -translate-x-1/2 text-xs text-gray-600 font-medium whitespace-nowrap">
-                      {formatDate(visit.visitDate)}
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900">
+                        {formatDate(visit.visitDate)}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {formatDateTime(visit.createdAt)}
+                      </div>
                     </div>
                   </div>
 
                   {/* Visit Card */}
-                  <div className="flex-1 bg-gray-50 rounded-lg p-4 relative">
+                  <div className="ml-16 bg-gray-50 rounded-lg p-4 relative">
                     {/* More options */}
                     <div className="absolute top-3 right-3">
                       <button
@@ -505,9 +512,6 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                             </button>
                           </div>
                         )}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {formatDateTime(visit.createdAt)}
                       </div>
                     </div>
 
