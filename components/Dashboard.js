@@ -617,30 +617,13 @@ export default function Dashboard() {
         )}
 
         {currentView === 'list' && (
-          <div>
-            {/* Enhanced Search Bar for Patient List */}
-            <div className="mb-6 sm:mb-8">
-              <div className="max-w-2xl mx-auto">
-                <div className="relative">
-                  <Search className="absolute left-3 sm:left-4 top-3 sm:top-4 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search patients by name, ID, or phone number..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 border border-gray-300 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-base sm:text-lg shadow-lg"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <PatientList
-              patients={filteredPatients}
-              onPatientSelect={handlePatientSelect}
-              onNewPrescription={handleNewPrescription}
-              onPatientDelete={handlePatientDelete}
-            />
-          </div>
+          <PatientList
+            patients={filteredPatients}
+            onPatientSelect={handlePatientSelect}
+            onNewPrescription={handleNewPrescription}
+            onPatientDelete={handlePatientDelete}
+            onBack={handleBackToDashboard}
+          />
         )}
 
         {currentView === 'details' && selectedPatient && (
