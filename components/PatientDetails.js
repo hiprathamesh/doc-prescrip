@@ -221,13 +221,19 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   };
 
   const formatMedicationTiming = (timing) => {
-    if (!timing) return 'As prescribed';
-    const timings = [];
-    if (timing.morning) timings.push('Morning');
-    if (timing.afternoon) timings.push('Afternoon');
-    if (timing.evening) timings.push('Evening');
-    if (timing.night) timings.push('Night');
-    return timings.length > 0 ? timings.join(', ') : 'As prescribed';
+    if (!timing) return '1-0-1-0'; // Default pattern
+    
+    const morning = timing.morning ? '1' : '0';
+    const afternoon = timing.afternoon ? '1' : '0';
+    const evening = timing.evening ? '1' : '0';
+    const night = timing.night ? '1' : '0';
+    
+    return `${morning}-${afternoon}-${evening}-${night}`;
+  };
+
+  const formatListAsText = (items, keyField = 'name') => {
+    if (!items || items.length === 0) return '';
+    return items.map(item => typeof item === 'string' ? item : item[keyField]).join(', ');
   };
 
   const getMedicalHistory = () => {
@@ -533,12 +539,8 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       {/* Diagnosis */}
                       <div>
                         <h4 className="font-medium text-gray-800 mb-2">Diagnosis</h4>
-                        <div className="space-y-1">
-                          {visit.diagnosis.map((diag) => (
-                            <span key={diag.id} className="inline-block bg-red-50 text-red-800 text-xs px-2 py-1 rounded-full mr-1 mb-1 border border-red-200">
-                              {diag.name}
-                            </span>
-                          ))}
+                        <div className="text-xs text-gray-700">
+                          {formatListAsText(visit.diagnosis)}
                         </div>
                       </div>
 
@@ -549,15 +551,12 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                             <Pill className="w-4 h-4 mr-1" />
                             Medications
                           </h4>
-                          <div className="space-y-2">
+                          <div className="space-y-1">
                             {visit.medications.map((med, medIndex) => (
-                              <div key={medIndex} className="bg-green-50 p-2 rounded border border-green-200">
-                                <div className="font-medium text-green-800 text-xs">{med.name}</div>
-                                <div className="text-xs text-green-700 space-y-0.5">
-                                  <div>{med.dosage} • {formatMedicationTiming(med.timing)}</div>
-                                  <div>{med.mealTiming?.replace('_', ' ') || 'after meal'}</div>
-                                  {med.duration && <div>{med.duration}</div>}
-                                </div>
+                              <div key={medIndex} className="text-gray-700 text-xs">
+                                <span className="font-medium">{med.name}</span>
+                                <span className="text-gray-500"> • {med.dosage} • {formatMedicationTiming(med.timing)}</span>
+                                {med.duration && <span className="text-gray-500"> • {med.duration}</span>}
                               </div>
                             ))}
                           </div>
@@ -568,15 +567,8 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       {visit.labResults?.length > 0 && (
                         <div>
                           <h4 className="font-medium text-gray-800 mb-2">Lab Tests</h4>
-                          <div className="space-y-1">
-                            {visit.labResults.map((lab, labIndex) => (
-                              <div key={labIndex} className="bg-purple-50 p-2 rounded border border-purple-200">
-                                <div className="font-medium text-purple-800 text-xs">{lab.testName}</div>
-                                {lab.remarks && (
-                                  <div className="text-xs text-purple-700 mt-1">{lab.remarks}</div>
-                                )}
-                              </div>
-                            ))}
+                          <div className="text-xs text-gray-700">
+                            {formatListAsText(visit.labResults, 'testName')}
                           </div>
                         </div>
                       )}
