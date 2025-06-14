@@ -125,7 +125,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     }
 
     console.log('[IntersectionObserver Effect] Setting up IntersectionObserver...');
-    
+
     // Assuming your main fixed/sticky dashboard header is 64px tall.
     // This margin means the intersection is calculated relative to a viewport
     // whose top edge is effectively 64px lower.
@@ -148,7 +148,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         root: null, // Observe intersections relative to the viewport.
         rootMargin: `${rootMarginTop} 0px 0px 0px`, // Top margin adjusted for the main header
         threshold: [0, 0.01], // Trigger when even a tiny part enters/leaves the adjusted viewport boundary.
-                               // Using an array can sometimes be more reliable. 0 means it's out, >0 means it's in.
+        // Using an array can sometimes be more reliable. 0 means it's out, >0 means it's in.
       }
     );
 
@@ -166,11 +166,11 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       setIsLoadingCustomData(true);
       const [symptoms, diagnoses, labTests, medications] = await Promise.all([
         storage.getCustomSymptoms(),
-        storage.getCustomDiagnoses(), 
+        storage.getCustomDiagnoses(),
         storage.getCustomLabTests(),
         storage.getCustomMedications()
       ]);
-      
+
       setCustomSymptoms(symptoms || []);
       setCustomDiagnoses(diagnoses || []);
       setCustomLabTests(labTests || []);
@@ -211,7 +211,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
       const updatedPatients = [...patients, newPatient];
       const success = await storage.savePatients(updatedPatients);
-      
+
       if (success) {
         onPatientUpdate(updatedPatients);
         setSelectedPatient(newPatient);
@@ -238,13 +238,13 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   // Fix the filter function with better safety checks
   const filteredTemplates = (templates || []).filter(template => {
     if (!template) return false;
-    
+
     const nameMatch = template.name?.toLowerCase().includes(templateSearch.toLowerCase());
     const descMatch = template.description?.toLowerCase().includes(templateSearch.toLowerCase());
-    const diagMatch = (template.diagnosis || []).some(d => 
+    const diagMatch = (template.diagnosis || []).some(d =>
       d?.name?.toLowerCase().includes(templateSearch.toLowerCase())
     );
-    
+
     return nameMatch || descMatch || diagMatch;
   });
 
@@ -527,7 +527,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
   const handleConfirmSave = async () => {
     setIsProcessing(true);
-    
+
     try {
       // Convert medical history to the expected format
       const medicalHistoryObj = {
@@ -545,18 +545,18 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
       // Get existing prescriptions for this patient to check for pending follow-ups
       const existingPrescriptions = await storage.getPrescriptionsByPatient(selectedPatient.id);
-      
+
       // Find the most recent prescription with a pending follow-up
       let completedFollowUpPrescription = null;
       if (existingPrescriptions.length > 0) {
         // Sort by visit date (most recent first)
-        const sortedPrescriptions = existingPrescriptions.sort((a, b) => 
+        const sortedPrescriptions = existingPrescriptions.sort((a, b) =>
           new Date(b.visitDate) - new Date(a.visitDate)
         );
-        
+
         // Find the most recent prescription with a pending follow-up
-        completedFollowUpPrescription = sortedPrescriptions.find(p => 
-          p.followUpDate && 
+        completedFollowUpPrescription = sortedPrescriptions.find(p =>
+          p.followUpDate &&
           (!p.followUpStatus || p.followUpStatus === 'pending' || p.followUpStatus === 'overdue')
         );
       }
@@ -673,7 +673,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         pdfUrl: prescriptionUrl
       });
       setSavedBill(bill ? { ...bill } : null);
-      
+
       // Close confirmation and show success
       setShowConfirmation(false);
       setShowSuccess(true);
@@ -821,28 +821,24 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   </div>
                   <button
                     onClick={toggleNewPatient}
-                    className={`w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-medium transition-all duration-200 ${
-                      isNewPatient ? 'bg-gray-600 hover:bg-gray-700' : ''
-                    }`}
+                    className={`w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-medium transition-all duration-200 ${isNewPatient ? 'bg-gray-600 hover:bg-gray-700' : ''
+                      }`}
                   >
-                    <Plus className={`w-5 h-5 transition-transform duration-300 ease-out ${
-                      isNewPatient ? 'rotate-45' : 'rotate-0'
-                    }`} />
+                    <Plus className={`w-5 h-5 transition-transform duration-300 ease-out ${isNewPatient ? 'rotate-45' : 'rotate-0'
+                      }`} />
                     <span>{isNewPatient ? 'Cancel' : 'Add Patient'}</span>
                   </button>
                 </div>
 
                 {/* Animated patient creation form */}
-                <div className={`transition-all duration-300 ease-out ${
-                  isNewPatient 
-                    ? 'max-h-96 opacity-100 transform translate-y-0' 
-                    : 'max-h-0 opacity-0 transform -translate-y-4'
-                }`}>
-                  <div className={`transition-all duration-300 ease-out delay-75 ${
-                    isNewPatient && !isAnimating
-                      ? 'opacity-100 transform translate-y-0'
-                      : 'opacity-0 transform translate-y-2'
+                <div className={`transition-all duration-300 ease-out ${isNewPatient
+                  ? 'max-h-96 opacity-100 transform translate-y-0'
+                  : 'max-h-0 opacity-0 transform -translate-y-4'
                   }`}>
+                  <div className={`transition-all duration-300 ease-out delay-75 ${isNewPatient && !isAnimating
+                    ? 'opacity-100 transform translate-y-0'
+                    : 'opacity-0 transform translate-y-2'
+                    }`}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 p-5 bg-gray-50 rounded-xl border border-gray-200 mt-5">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">Name *</label>
@@ -1011,7 +1007,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                               {template.name}
                             </h4>
                             <p className="text-sm text-gray-600 mb-2.5 line-clamp-2">{template.description}</p>
-                            
+
                             <div className="space-y-2">
                               {(template.diagnosis || []).length > 0 && (
                                 <div className="flex flex-wrap gap-1">
@@ -1161,34 +1157,42 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   />
 
                   {symptoms.length > 0 && (
-                    <div className="space-y-4">
-                      <h4 className="text-base font-medium text-gray-800">Selected Symptoms</h4>
-                      {symptoms.map((symptom) => (
-                        <div key={symptom.id} className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-center p-3.5 bg-gray-50 rounded-lg">
-                          <div className="font-medium text-gray-800 sm:mb-0 mb-1.5">{symptom.name}</div>
-                          <CustomDropdown
-                            options={SEVERITY_OPTIONS.map(option => ({ value: option.value, label: option.label }))}
-                            value={symptom.severity}
-                            onChange={(value) => updateSymptom(symptom.id, 'severity', value)}
-                            placeholder="Select severity"
-                          />
-                          <CustomDropdown
-                            options={[
-                              { value: '', label: 'Select duration' },
-                              ...DURATION_OPTIONS.map(duration => ({ value: duration, label: duration }))
-                            ]}
-                            value={symptom.duration}
-                            onChange={(value) => updateSymptom(symptom.id, 'duration', value)}
-                            placeholder="Select duration"
-                          />
-                          <button
-                            onClick={() => removeSymptom(symptom.id)}
-                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-md transition-colors sm:justify-self-end"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
+                    <div className="space-y-0">
+                      <h4 className="text-base font-medium text-gray-800 mb-4">Selected Symptoms</h4>
+                      <div className="divide-y divide-gray-200">
+                        {symptoms.map((symptom) => (
+                          <div key={symptom.id} className="flex justify-between items-center py-4">
+                            <div className="font-normal text-gray-700">{symptom.name}</div>
+                            <div className="flex w-100 space-x-3 pl-3 items-center">
+
+                              <CustomDropdown
+                                className="flex-1"
+                                options={SEVERITY_OPTIONS.map(option => ({ value: option.value, label: option.label }))}
+                                value={symptom.severity}
+                                onChange={(value) => updateSymptom(symptom.id, 'severity', value)}
+                                placeholder="Select severity"
+                              />
+
+                              <CustomDropdown
+                                options={[
+                                  { value: '', label: 'Select duration' },
+                                  ...DURATION_OPTIONS.map(duration => ({ value: duration, label: duration }))
+                                ]}
+                                value={symptom.duration}
+                                onChange={(value) => updateSymptom(symptom.id, 'duration', value)}
+                                placeholder="Select duration"
+                              />
+
+                              <button
+                                onClick={() => removeSymptom(symptom.id)}
+                                className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-md transition-colors sm:justify-self-end"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1222,26 +1226,32 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   />
 
                   {diagnoses.length > 0 && (
-                    <div className="space-y-4">
-                      <h4 className="text-base font-medium text-gray-800">Selected Diagnoses</h4>
-                      {diagnoses.map((diagnosis) => (
-                        <div key={diagnosis.id} className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center p-3.5 bg-gray-50 rounded-lg">
-                          <div className="font-medium text-gray-800 sm:mb-0 mb-1.5">{diagnosis.name}</div>
-                          <input
-                            type="text"
-                            placeholder="Description (optional)"
-                            value={diagnosis.description}
-                            onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
-                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
-                          />
-                          <button
-                            onClick={() => removeDiagnosis(diagnosis.id)}
-                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-md transition-colors sm:justify-self-end"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
+                    <div className="space-y-0">
+                      <h4 className="text-base font-medium text-gray-800 mb-4">Selected Diagnoses</h4>
+                      <div className="divide-y divide-gray-200">
+                        {diagnoses.map((diagnosis) => (
+                          <div key={diagnosis.id} className="flex justify-between items-center py-4">
+                            <div className="font-normal text-gray-700">{diagnosis.name}</div>
+                            <div className="flex w-100 space-x-3 pl-3 items-center">
+
+                              <input
+                                type="text"
+                                placeholder="Description (optional)"
+                                value={diagnosis.description}
+                                onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
+                                className="text-sm w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                              />
+
+                              <button
+                                onClick={() => removeDiagnosis(diagnosis.id)}
+                                className=" text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-md transition-colors sm:justify-self-end"
+                              >
+                                <Trash2 className="w-4 h-4"></Trash2>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1297,75 +1307,76 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   )}
 
                   {medications.length > 0 && (
-                    <div className="space-y-4">
-                      <h4 className="text-base font-medium text-gray-800">Selected Medications</h4>
-                      {medications.map((medication) => (
-                        <div key={medication.id} className="p-3.5 bg-gray-50 rounded-lg space-y-3.5">
-                          <div className="grid grid-cols-1 sm:grid-cols-6 gap-3 items-center">
-                            <div className="font-medium text-gray-800 sm:mb-0 mb-1.5">{medication.name}</div>
-                            
-                            <div className="col-span-1 sm:col-span-4 flex items-center space-x-2.5 justify-center sm:justify-start">
-                              {Object.entries(medication.timing).map(([key, value]) => (
-                                <div key={key} className="flex flex-col items-center space-y-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => updateMedication(medication.id, `timing.${key}`, !value)}
-                                    className={`w-7 h-7 rounded-md border-2 transition-all duration-200 flex items-center justify-center ${
-                                      value
-                                        ? 'border-green-400 bg-green-100'
-                                        : 'border-gray-300 hover:border-gray-400'
-                                    }`}
-                                  >
-                                    {value && (
-                                      <div className="w-4 h-4 bg-green-500 rounded-sm"></div>
-                                    )}
-                                  </button>
-                                  <span className="text-xs text-gray-500 font-medium">{key.charAt(0).toUpperCase()}</span>
-                                </div>
-                              ))}
-                            </div>
-                            
-                            <button
-                              onClick={() => removeMedication(medication.id)}
-                              className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-md transition-colors sm:justify-self-end"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
+                    <div className="space-y-0">
+                      <h4 className="text-base font-medium text-gray-800 mb-4">Selected Medications</h4>
+                      <div className="divide-y divide-gray-200">
+                        {medications.map((medication) => (
+                          <div key={medication.id} className="py-4 space-y-3.5">
+                            <div className="grid grid-cols-1 sm:grid-cols-6 gap-3 items-center">
+                              <div className="font-normal text-gray-700">{medication.name}</div>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-center">
-                            <input
-                              type="text"
-                              placeholder="Dosage (e.g., 500mg)"
-                              value={medication.dosage}
-                              onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
-                              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
-                            />
-                            <CustomDropdown
-                              options={MEDICATION_TIMING.map(option => ({ value: option.value, label: option.label }))}
-                              value={medication.mealTiming}
-                              onChange={(value) => updateMedication(medication.id, 'mealTiming', value)}
-                              placeholder="Select meal timing"
-                            />
-                            <CustomDropdown
-                              options={[
-                                { value: '', label: 'Select duration' },
-                                ...MEDICATION_DURATION_OPTIONS.map(duration => ({ value: duration, label: duration }))
-                              ]}
-                              value={medication.duration}
-                              onChange={(value) => updateMedication(medication.id, 'duration', value)}
-                              placeholder="Select duration"
-                            />
-                            <input
-                              type="text"
-                              placeholder="Remarks"
-                              value={medication.remarks}
-                              onChange={(e) => updateMedication(medication.id, 'remarks', e.target.value)}
-                              className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
-                            />
+                              <div className="col-span-1 sm:col-span-4 flex items-center space-x-2.5 justify-center sm:justify-start">
+                                {Object.entries(medication.timing).map(([key, value]) => (
+                                  <div key={key} className="flex flex-col items-center space-y-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => updateMedication(medication.id, `timing.${key}`, !value)}
+                                      className={`w-7 h-7 rounded-md border-1 transition-all duration-200 flex items-center justify-center ${value
+                                        ? 'border-blue-400 bg-blue-100'
+                                        : 'border-gray-300 hover:border-gray-400'
+                                        }`}
+                                    >
+                                      {value && (
+                                        <div className="w-5 h-5 bg-blue-400 rounded-sm"></div>
+                                      )}
+                                    </button>
+                                    
+                                  </div>
+                                ))}
+                              </div>
+
+                              <button
+                                onClick={() => removeMedication(medication.id)}
+                                className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-md transition-colors sm:justify-self-end"
+                              >
+                                <Trash2 className="w-4 h-4"></Trash2>
+                              </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-center">
+                              <input
+                                type="text"
+                                placeholder="Dosage (e.g., 500mg)"
+                                value={medication.dosage}
+                                onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
+                                className="text-sm w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                              />
+                              <CustomDropdown
+                                options={MEDICATION_TIMING.map(option => ({ value: option.value, label: option.label }))}
+                                value={medication.mealTiming}
+                                onChange={(value) => updateMedication(medication.id, 'mealTiming', value)}
+                                placeholder="Select meal timing"
+                              />
+                              <CustomDropdown
+                                options={[
+                                  { value: '', label: 'Select duration' },
+                                  ...MEDICATION_DURATION_OPTIONS.map(duration => ({ value: duration, label: duration }))
+                                ]}
+                                value={medication.duration}
+                                onChange={(value) => updateMedication(medication.id, 'duration', value)}
+                                placeholder="Select duration"
+                              />
+                              <input
+                                type="text"
+                                placeholder="Remarks"
+                                value={medication.remarks}
+                                onChange={(e) => updateMedication(medication.id, 'remarks', e.target.value)}
+                                className="text-sm w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                              />
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1399,26 +1410,30 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   />
 
                   {labResults.length > 0 && (
-                    <div className="space-y-4">
-                      <h4 className="text-base font-medium text-gray-800">Selected Lab Tests</h4>
-                      {labResults.map((lab) => (
-                        <div key={lab.id} className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center p-3.5 bg-gray-50 rounded-lg">
-                          <div className="font-medium text-gray-800 sm:mb-0 mb-1.5">{lab.testName}</div>
-                          <input
-                            type="text"
-                            placeholder="Remarks (optional)"
-                            value={lab.remarks}
-                            onChange={(e) => updateLabResult(lab.id, 'remarks', e.target.value)}
-                            className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
-                          />
-                          <button
-                            onClick={() => removeLabResult(lab.id)}
-                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-md transition-colors justify-self-end"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
+                    <div className="space-y-0">
+                      <h4 className="text-base font-medium text-gray-800 mb-4">Selected Lab Tests</h4>
+                      <div className="divide-y divide-gray-200">
+                        {labResults.map((lab) => (
+                          <div key={lab.id} className="flex justify-between items-center py-4">
+                            <div className="font-normal text-gray-700">{lab.testName}</div>
+                            <div className="flex w-100 space-x-3 pl-3 items-center">
+                              <input
+                                type="text"
+                                placeholder="Remarks (optional)"
+                                value={lab.remarks}
+                                onChange={(e) => updateLabResult(lab.id, 'remarks', e.target.value)}
+                                className="text-sm w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                              />
+                              <button
+                                onClick={() => removeLabResult(lab.id)}
+                                className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-md transition-colors sm:justify-self-end"
+                              >
+                                <Trash2 className="w-4 h-4"></Trash2>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1452,9 +1467,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                           <p className="text-sm text-gray-700 flex-1 mr-2.5 leading-relaxed">{note.text}</p>
                           <button
                             onClick={() => removeDoctorNote(note.id)}
-                            className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 hover:bg-red-50 rounded-md"
+                            className="text-blue-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 hover:bg-blue-50 rounded-md"
                           >
-                            <X className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       ))
@@ -1488,9 +1503,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                           <p className="text-sm text-gray-700 flex-1 mr-2.5 leading-relaxed">{advice.text}</p>
                           <button
                             onClick={() => removeAdvice(advice.id)}
-                            className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 hover:bg-red-50 rounded-md"
+                            className="text-blue-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 hover:bg-blue-50 rounded-md"
                           >
-                            <X className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       ))

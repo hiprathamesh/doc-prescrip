@@ -96,7 +96,7 @@ export default function PillSelector({
       {showSearch && (
         <div className="space-y-3 animate-in slide-in-from-top duration-300">
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder={searchPlaceholder}

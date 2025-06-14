@@ -203,7 +203,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
       {showSearch && (
         <div className="space-y-3 animate-in slide-in-from-top duration-300">
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             {isSearching && (
               <RotateCw className="absolute right-3 top-3 h-4 w-4 text-blue-500 animate-spin" />
             )}
@@ -212,7 +212,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
               placeholder="Search medications (API + Local)..."
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              className="w-full pl-10 pr-10 py-3 border border-gray-300 hover:border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors"
               autoFocus
             />
           </div>
