@@ -71,14 +71,16 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
       {
         root: null,
         rootMargin: `${rootMarginTop} 0px 0px 0px`,
-        threshold: [0, 0.01],
+        threshold: 0,
       }
     );
 
     observer.observe(patientHeaderElement);
 
     return () => {
-      observer.unobserve(patientHeaderElement);
+      if (patientHeaderElement) {
+        observer.unobserve(patientHeaderElement);
+      }
     };
   }, []);
 

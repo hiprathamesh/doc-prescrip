@@ -23,6 +23,13 @@ export default function PrescriptionTemplates({ onBack }) {
     loadTemplates();
   }, []);
 
+  // Reset header visibility when returning to list view
+  useEffect(() => {
+    if (currentView === 'list') {
+      setIsTemplatesHeaderVisible(true);
+    }
+  }, [currentView]);
+
   // Intersection Observer for templates header visibility
   useEffect(() => {
     const templatesHeaderElement = templatesHeaderRef.current;
@@ -42,8 +49,10 @@ export default function PrescriptionTemplates({ onBack }) {
       (entries) => {
         if (entries && entries.length > 0 && entries[0]) {
           const entry = entries[0];
-          // More precise logic: header is visible if any part is intersecting
-          setIsTemplatesHeaderVisible(entry.isIntersecting);
+          // Only update state if we're in list view
+          if (currentView === 'list') {
+            setIsTemplatesHeaderVisible(entry.isIntersecting);
+          }
         }
       },
       {
@@ -53,12 +62,17 @@ export default function PrescriptionTemplates({ onBack }) {
       }
     );
 
-    observer.observe(templatesHeaderElement);
+    // Only observe if we're in list view
+    if (currentView === 'list') {
+      observer.observe(templatesHeaderElement);
+    }
 
     return () => {
-      observer.unobserve(templatesHeaderElement);
+      if (templatesHeaderElement) {
+        observer.unobserve(templatesHeaderElement);
+      }
     };
-  }, []);
+  }, [currentView]); // Add currentView as dependency
 
   const loadTemplates = async () => {
     try {

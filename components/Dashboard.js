@@ -219,6 +219,226 @@ export default function Dashboard() {
     }
   };
 
+  // Add function to generate contextual greeting
+  const getContextualGreeting = () => {
+    const now = new Date();
+    const hour = now.getHours();
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const month = now.getMonth(); // 0 = January, 11 = December
+    const date = now.getDate();
+    
+    // Performance metrics for pep talk
+    const hasGoodPerformance = (stats.visitsThisWeek || 0) >= 10 || (stats.newPatientsThisWeek || 0) >= 3;
+    const hasExcellentPerformance = (stats.visitsThisWeek || 0) >= 20 || (stats.newPatientsThisWeek || 0) >= 5;
+    
+    // Indian festivals and special days (approximate dates)
+    const specialDays = {
+      // Diwali (varies each year, but typically October/November)
+      'diwali2024': month === 10 && date >= 1 && date <= 5, // Nov 1-5, 2024
+      // Holi (varies each year, but typically March)
+      'holi2024': month === 2 && date >= 13 && date <= 14, // March 13-14, 2024
+      // Doctors Day (July 1)
+      'doctorsDay': month === 6 && date === 1,
+      // Teachers Day (September 5)
+      'teachersDay': month === 8 && date === 5,
+      // Independence Day (August 15)
+      'independenceDay': month === 7 && date === 15,
+      // Republic Day (January 26)
+      'republicDay': month === 0 && date === 26,
+      // New Year (January 1)
+      'newYear': month === 0 && date === 1,
+      // Christmas (December 25)
+      'christmas': month === 11 && date === 25,
+      // World Health Day (April 7)
+      'worldHealthDay': month === 3 && date === 7,
+    };
+
+    // Festival greetings
+    if (specialDays.diwali2024) {
+      return {
+        title: "✨ Happy Diwali, Dr. Nikam! ✨",
+        subtitle: "May this festival of lights brighten your practice and bring prosperity to all your patients"
+      };
+    }
+    
+    if (specialDays.holi2024) {
+      return {
+        title: "Happy Holi, Dr. Nikam!",
+        subtitle: "Let the colors of joy and healing fill your practice today"
+      };
+    }
+    
+    if (specialDays.doctorsDay) {
+      return {
+        title: "Happy National Doctors' Day, Dr. Nikam!",
+        subtitle: "Thank you for your dedication to healing and caring for the community"
+      };
+    }
+    
+    if (specialDays.worldHealthDay) {
+      return {
+        title: "Happy World Health Day, Dr. Nikam!",
+        subtitle: "Your commitment to health makes the world a better place"
+      };
+    }
+    
+    if (specialDays.independenceDay) {
+      return {
+        title: "Happy Independence Day, Dr. Nikam!",
+        subtitle: "Freedom through health - your service strengthens our nation"
+      };
+    }
+    
+    if (specialDays.republicDay) {
+      return {
+        title: "Happy Republic Day, Dr. Nikam!",
+        subtitle: "Serving the republic with compassion and care"
+      };
+    }
+    
+    if (specialDays.newYear) {
+      return {
+        title: "Happy New Year, Dr. Nikam!",
+        subtitle: "Here's to another year of healing hearts and changing lives"
+      };
+    }
+    
+    if (specialDays.christmas) {
+      return {
+        title: "Merry Christmas, Dr. Nikam!",
+        subtitle: "Spreading joy and wellness this festive season"
+      };
+    }
+
+    // // Performance-based pep talks
+    // if (hasExcellentPerformance) {
+    //   const excellentMessages = [
+    //     {
+    //       title: "🚀 Outstanding work, Dr. Nikam!",
+    //       subtitle: "Your exceptional care is making a real difference in people's lives"
+    //     },
+    //     {
+    //       title: "⭐ Superstar healer, Dr. Nikam!",
+    //       subtitle: "Your dedication to excellence shows in every patient interaction"
+    //     },
+    //     {
+    //       title: "🏆 Phenomenal progress, Dr. Nikam!",
+    //       subtitle: "You're setting new standards in patient care"
+    //     }
+    //   ];
+    //   return excellentMessages[Math.floor(Math.random() * excellentMessages.length)];
+    // }
+    
+    // if (hasGoodPerformance) {
+    //   const goodMessages = [
+    //     {
+    //       title: "💪 Great going, Dr. Nikam!",
+    //       subtitle: "Your consistent care is building a healthier community"
+    //     },
+    //     {
+    //       title: "🌟 Back at it, Dr. Nikam!",
+    //       subtitle: "Every patient you see is a life touched by your expertise"
+    //     },
+    //     {
+    //       title: "📈 Impressive work, Dr. Nikam!",
+    //       subtitle: "Your commitment to healing continues to inspire"
+    //     }
+    //   ];
+    //   return goodMessages[Math.floor(Math.random() * goodMessages.length)];
+    // }
+
+    // Day-specific greetings
+    if (day === 5) { // Friday
+      const fridayMessages = [
+        {
+          title: "Happy Friday, Dr. Nikam!",
+          subtitle: "End the week strong with your healing touch"
+        },
+        {
+          title: "TGIF, Dr. Nikam!",
+          subtitle: "Friday energy for healing and caring"
+        }
+      ];
+      return fridayMessages[Math.floor(Math.random() * fridayMessages.length)];
+    }
+    
+    if (day === 1) { // Monday
+      const mondayMessages = [
+        {
+          title: "Monday motivation, Dr. Nikam!",
+          subtitle: "Start the week with purpose and compassion"
+        },
+        {
+          title: "Fresh start, Dr. Nikam!",
+          subtitle: "New week, new opportunities to heal and help"
+        }
+      ];
+      return mondayMessages[Math.floor(Math.random() * mondayMessages.length)];
+    }
+    
+    if (day === 0 || day === 6) { // Weekend
+      return {
+        title: "Weekend warrior, Dr. Nikam!",
+        subtitle: "Even on weekends, your dedication to care never stops"
+      };
+    }
+
+    // Time-based greetings
+    if (hour >= 5 && hour < 12) {
+      const morningMessages = [
+        {
+          title: "Good morning, Dr. Nikam!",
+          subtitle: "Ready to make a difference in people's lives today"
+        },
+        {
+          title: "Rise and heal, Dr. Nikam!",
+          subtitle: "Another day to spread wellness and hope"
+        },
+        {
+          title: "Morning energy, Dr. Nikam!",
+          subtitle: "Starting the day with purpose and healing"
+        }
+      ];
+      return morningMessages[Math.floor(Math.random() * morningMessages.length)];
+    } else if (hour >= 12 && hour < 17) {
+      const afternoonMessages = [
+        {
+          title: "Good afternoon, Dr. Nikam!",
+          subtitle: "Midday momentum for continued excellent care"
+        },
+        {
+          title: "Afternoon power, Dr. Nikam!",
+          subtitle: "Keeping the healing energy strong"
+        }
+      ];
+      return afternoonMessages[Math.floor(Math.random() * afternoonMessages.length)];
+    } else if (hour >= 17 && hour < 21) {
+      const eveningMessages = [
+        {
+          title: "Good evening, Dr. Nikam!",
+          subtitle: "Winding down another day of compassionate care"
+        },
+        {
+          title: "Evening excellence, Dr. Nikam!",
+          subtitle: "Your dedication brightens even the evening hours"
+        }
+      ];
+      return eveningMessages[Math.floor(Math.random() * eveningMessages.length)];
+    } else {
+      const lateMessages = [
+        {
+          title: "Dedicated healer, Dr. Nikam!",
+          subtitle: "Your commitment to patient care knows no bounds"
+        },
+        {
+          title: "Night owl doctor, Dr. Nikam!",
+          subtitle: "Thank you for your round-the-clock dedication"
+        }
+      ];
+      return lateMessages[Math.floor(Math.random() * lateMessages.length)];
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Minimal Header */}
@@ -234,7 +454,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-lg font-semibold text-gray-900">
-                  Dr. Prashant Nikam
+                  Chaitanya Hospital, Deola
                 </h1>
                 <p className="text-sm text-gray-500">Practice Management</p>
               </div>
@@ -265,14 +485,21 @@ export default function Dashboard() {
       <main className="max-w-5xl mx-auto px-6 py-8">
         {currentView === 'dashboard' && (
           <div className="space-y-8">
-            {/* Welcome Section */}
+            {/* Dynamic Welcome Section */}
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                Dashboard
-              </h2>
-              <p className="text-gray-600">
-                Overview of your practice today
-              </p>
+              {(() => {
+                const greeting = getContextualGreeting();
+                return (
+                  <>
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                      {greeting.title}
+                    </h2>
+                    <p className="text-gray-600">
+                      {greeting.subtitle}
+                    </p>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Stats Grid with Hover Expansion */}

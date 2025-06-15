@@ -56,7 +56,9 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
     observer.observe(headerElement);
 
     return () => {
-      observer.unobserve(headerElement);
+      if (headerElement) {
+        observer.unobserve(headerElement);
+      }
     };
   }, []);
 

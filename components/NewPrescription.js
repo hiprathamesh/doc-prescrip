@@ -109,6 +109,11 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     loadCustomData();
   }, []);
 
+  // Reset header visibility when component mounts or when returning from other views
+  useEffect(() => {
+    setIsPresHeaderVisible(true);
+  }, [selectedPatient]);
+
   // Intersection Observer for pres-header visibility
   useEffect(() => {
     console.log('[IntersectionObserver Effect] Hook execution started.');
@@ -129,9 +134,6 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
     console.log('[IntersectionObserver Effect] Setting up IntersectionObserver...');
 
-    // Assuming your main fixed/sticky dashboard header is 64px tall.
-    // This margin means the intersection is calculated relative to a viewport
-    // whose top edge is effectively 64px lower.
     const rootMarginTop = "-81px"; // Adjust if your main header height is different
 
     const observer = new window.IntersectionObserver(
@@ -140,8 +142,6 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         if (entries && entries.length > 0 && entries[0]) {
           const entry = entries[0];
           console.log('[IntersectionObserver Callback] entry.isIntersecting:', entry.isIntersecting, 'entry.boundingClientRect.top:', entry.boundingClientRect.top);
-          // When entry.isIntersecting is false, it means the element is no longer intersecting the (modified) root.
-          // For scrolling up, this means it has gone above the -64px margin line.
           setIsPresHeaderVisible(entry.isIntersecting);
         } else {
           console.warn('[IntersectionObserver Callback] Received no entries or undefined entry.');
@@ -151,7 +151,6 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         root: null, // Observe intersections relative to the viewport.
         rootMargin: `${rootMarginTop} 0px 0px 0px`, // Top margin adjusted for the main header
         threshold: [0, 0.01], // Trigger when even a tiny part enters/leaves the adjusted viewport boundary.
-        // Using an array can sometimes be more reliable. 0 means it's out, >0 means it's in.
       }
     );
 
@@ -160,7 +159,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
     return () => {
       console.log('[IntersectionObserver Cleanup] Unobserving:', presHeaderElement);
-      observer.unobserve(presHeaderElement);
+      if (presHeaderElement) {
+        observer.unobserve(presHeaderElement);
+      }
     };
   }, []); // Empty dependency array: runs once on mount and cleans up on unmount.
 
