@@ -781,26 +781,33 @@ export default function Dashboard() {
                 <div className="bg-white rounded-2xl border border-gray-200 p-5">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Follow-ups</h3>
 
-                  <div className="space-y-3">
+                  <div className="space-y-0">
                     {stats.upcomingFollowUps?.length > 0 ? (
-                      stats.upcomingFollowUps.slice(0, 5).map((prescription) => {
+                      stats.upcomingFollowUps.slice(0, 5).map((prescription, index) => {
                         const patient = patients.find(p => p.id === prescription.patientId);
                         return (
-                          <div key={prescription.id} className={`flex items-center space-x-3 p-3 rounded-lg transition-colors cursor-pointer ${
-                            prescription.isOverdue ? 'bg-red-50 border border-red-200' : 'bg-gray-50 hover:bg-gray-100'
-                          }`}
-                            onClick={() => patient && handlePatientSelect(patient)}>
-                            <div className={`p-1.5 rounded-full ${
-                              prescription.isOverdue ? 'bg-red-600' : 'bg-purple-600'
-                            }`}>
-                              <Clock className="w-3 h-3 text-white" />
+                          <div key={prescription.id}>
+                            <div className={`flex items-center space-x-3 py-3 transition-colors cursor-pointer rounded-lg px-2 -mx-2 ${
+                              prescription.isOverdue 
+                                ? 'hover:bg-red-50' 
+                                : 'hover:bg-gray-50'
+                            }`}
+                              onClick={() => patient && handlePatientSelect(patient)}>
+                              <div className={`p-1.5 rounded-full ${
+                                prescription.isOverdue ? 'bg-red-600' : 'bg-purple-600'
+                              }`}>
+                                <Clock className="w-3 h-3 text-white" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">{patient?.name}</p>
+                                <p className={`text-xs ${prescription.isOverdue ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
+                                  {prescription.isOverdue ? 'Overdue: ' : ''}{formatDate(prescription.followUpDate)}
+                                </p>
+                              </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate">{patient?.name}</p>
-                              <p className={`text-xs ${prescription.isOverdue ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
-                                {prescription.isOverdue ? 'Overdue: ' : ''}{formatDate(prescription.followUpDate)}
-                              </p>
-                            </div>
+                            {index < stats.upcomingFollowUps.slice(0, 5).length - 1 && (
+                              <div className="border-b border-gray-100"></div>
+                            )}
                           </div>
                         );
                       })
