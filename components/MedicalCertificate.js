@@ -51,6 +51,10 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
   const [savedCertificate, setSavedCertificate] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Add refs and state for floating header
+  const medCertHeaderRef = useRef(null);
+  const [isMedCertHeaderVisible, setIsMedCertHeaderVisible] = useState(true);
+
   // Update form when patient is selected
   useEffect(() => {
     if (selectedPatient) {
@@ -63,9 +67,48 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
     }
   }, [selectedPatient]);
 
-  // Add refs and state for floating header
-  const medCertHeaderRef = useRef(null);
-  const [isMedCertHeaderVisible, setIsMedCertHeaderVisible] = useState(true);
+  // Reset header visibility when component mounts
+  useEffect(() => {
+    setIsMedCertHeaderVisible(true);
+  }, [selectedPatient]);
+
+  // Intersection Observer for medical certificate header visibility
+  useEffect(() => {
+    const medCertHeaderElement = medCertHeaderRef.current;
+
+    if (!medCertHeaderElement) {
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      setIsMedCertHeaderVisible(true);
+      return;
+    }
+
+    const rootMarginTop = "-81px"; // Adjusted to match main header height
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        if (entries && entries.length > 0 && entries[0]) {
+          const entry = entries[0];
+          setIsMedCertHeaderVisible(entry.isIntersecting);
+        }
+      },
+      {
+        root: null,
+        rootMargin: `${rootMarginTop} 0px 0px 0px`,
+        threshold: 0,
+      }
+    );
+
+    observer.observe(medCertHeaderElement);
+
+    return () => {
+      if (medCertHeaderElement) {
+        observer.unobserve(medCertHeaderElement);
+      }
+    };
+  }, []);
 
   const generatePatientId = () => {
     const prefix = 'P';
@@ -190,49 +233,6 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
       />
     );
   }
-
-  // Reset header visibility when component mounts
-  useEffect(() => {
-    setIsMedCertHeaderVisible(true);
-  }, [selectedPatient]);
-
-  // Intersection Observer for medical certificate header visibility
-  useEffect(() => {
-    const medCertHeaderElement = medCertHeaderRef.current;
-
-    if (!medCertHeaderElement) {
-      return;
-    }
-
-    if (!('IntersectionObserver' in window)) {
-      setIsMedCertHeaderVisible(true);
-      return;
-    }
-
-    const rootMarginTop = "-81px"; // Adjusted to match main header height
-
-    const observer = new window.IntersectionObserver(
-      (entries) => {
-        if (entries && entries.length > 0 && entries[0]) {
-          const entry = entries[0];
-          setIsMedCertHeaderVisible(entry.isIntersecting);
-        }
-      },
-      {
-        root: null,
-        rootMargin: `${rootMarginTop} 0px 0px 0px`,
-        threshold: 0,
-      }
-    );
-
-    observer.observe(medCertHeaderElement);
-
-    return () => {
-      if (medCertHeaderElement) {
-        observer.unobserve(medCertHeaderElement);
-      }
-    };
-  }, []);
 
   return (
     <>
