@@ -5,6 +5,7 @@ import { ArrowLeft, Plus, Trash2, Search, Save } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from '../lib/medicalData';
 import { useToast } from '../contexts/ToastContext';
+import { activityLogger } from '../utils/activityLogger';
 
 export default function MedicalDataManager({ onBack }) {
   const [activeTab, setActiveTab] = useState('symptoms');
@@ -46,6 +47,7 @@ export default function MedicalDataManager({ onBack }) {
         const updated = [...customSymptoms, newItem.trim()];
         setCustomSymptoms(updated);
         await storage.saveCustomSymptoms(updated);
+        await activityLogger.logCustomDataAdded('symptom', newItem.trim());
         addToast({
           title: 'Symptom Added',
           description: `"${newItem.trim()}" added to custom symptoms`,
@@ -55,6 +57,7 @@ export default function MedicalDataManager({ onBack }) {
         const updated = [...customDiagnoses, newItem.trim()];
         setCustomDiagnoses(updated);
         await storage.saveCustomDiagnoses(updated);
+        await activityLogger.logCustomDataAdded('diagnosis', newItem.trim());
         addToast({
           title: 'Diagnosis Added',
           description: `"${newItem.trim()}" added to custom diagnoses`,
@@ -64,6 +67,7 @@ export default function MedicalDataManager({ onBack }) {
         const updated = [...customLabTests, newItem.trim()];
         setCustomLabTests(updated);
         await storage.saveCustomLabTests(updated);
+        await activityLogger.logCustomDataAdded('labTest', newItem.trim());
         addToast({
           title: 'Lab Test Added',
           description: `"${newItem.trim()}" added to custom lab tests`,

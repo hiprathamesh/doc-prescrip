@@ -23,10 +23,12 @@ import {
   Stethoscope,
   PieChart,
   BarChart3,
-  LogOut
+  LogOut,
+  Trash2
 } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, formatTimeAgo } from '../utils/dateUtils';
+import { activityLogger, ACTIVITY_ICONS, ACTIVITY_COLORS } from '../utils/activityLogger';
 
 export default function Dashboard() {
   const [patients, setPatients] = useState([]);
@@ -37,9 +39,11 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState({});
   const [isStatsHovered, setIsStatsHovered] = useState(false);
+  const [recentActivities, setRecentActivities] = useState([]);
 
   useEffect(() => {
     loadAllData();
+    loadRecentActivities();
   }, []);
 
   const loadAllData = async () => {
@@ -59,6 +63,16 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error loading data:', error);
       // Handle error - maybe show a notification to user
+    }
+  };
+
+  const loadRecentActivities = async () => {
+    try {
+      const activities = await activityLogger.getActivities();
+      setRecentActivities(activities.slice(0, 10)); // Show last 10 activities
+    } catch (error) {
+      console.error('Error loading recent activities:', error);
+      setRecentActivities([]);
     }
   };
 
@@ -174,6 +188,7 @@ export default function Dashboard() {
   };
 
   const handlePatientDelete = async (patientId) => {
+    const patientToDelete = patients.find(p => p.id === patientId);
     const updatedPatients = patients.filter(p => p.id !== patientId);
     setPatients(updatedPatients);
     await storage.savePatients(updatedPatients);
@@ -185,6 +200,12 @@ export default function Dashboard() {
     const allBills = await storage.getBills();
     const updatedBills = allBills.filter(b => b.patientId !== patientId);
     await storage.saveBills(updatedBills);
+
+    // Log activity
+    if (patientToDelete) {
+      await activityLogger.logPatientDeleted(patientToDelete.name);
+      await loadRecentActivities();
+    }
 
     if (selectedPatient && selectedPatient.id === patientId) {
       handleBackToDashboard();
@@ -437,6 +458,40 @@ export default function Dashboard() {
       ];
       return lateMessages[Math.floor(Math.random() * lateMessages.length)];
     }
+  };
+
+  const getActivityIcon = (activityType) => {
+    const iconName = ACTIVITY_ICONS[activityType] || 'Activity';
+    const iconMap = {
+      FileText,
+      UserPlus: Plus, // Using Plus as UserPlus might not be available
+      Plus,
+      Edit: FileText, // Using FileText as Edit might not be available
+      Trash2,
+      Award: FileText, // Using FileText as Award might not be available
+      CreditCard: DollarSign,
+      UserMinus: Trash2, // Using Trash2 as UserMinus might not be available
+      Activity
+    };
+    
+    const IconComponent = iconMap[iconName] || Activity;
+    return IconComponent;
+  };
+
+  const getActivityColor = (activityType) => {
+    const colorName = ACTIVITY_COLORS[activityType] || 'gray';
+    const colorMap = {
+      blue: 'bg-blue-50 text-blue-600',
+      green: 'bg-green-50 text-green-600',
+      purple: 'bg-purple-50 text-purple-600',
+      orange: 'bg-orange-50 text-orange-600',
+      red: 'bg-red-50 text-red-600',
+      cyan: 'bg-cyan-50 text-cyan-600',
+      yellow: 'bg-yellow-50 text-yellow-600',
+      indigo: 'bg-indigo-50 text-indigo-600',
+      gray: 'bg-gray-50 text-gray-600'
+    };
+    return colorMap[colorName] || colorMap.gray;
   };
 
   return (
@@ -734,41 +789,40 @@ export default function Dashboard() {
                   </div>
 
                   <div className="space-y-0">
-                    {stats.recentPrescriptions?.length > 0 ? (
-                      stats.recentPrescriptions.map((prescription, index) => (
-                        <div key={prescription.id}>
-                          <div className="flex items-center space-x-3 py-3 hover:bg-gray-50 transition-colors cursor-pointer rounded-lg px-2 -mx-2"
-                            onClick={() => handlePatientSelect(prescription.patient)}>
-                            <div className="p-2 bg-blue-50 rounded">
-                              <FileText className="w-4 h-4 text-blue-600" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate">{prescription.patient?.name || 'Unknown Patient'}</p>
-                              <p className="text-xs text-gray-600">
-                                Prescription created • {formatTimeAgo(prescription.createdAt)}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-medium text-gray-900">
-                                {formatDate(prescription.visitDate)}
-                              </p>
-                              {prescription.followUpDate && (
-                                <p className="text-xs text-orange-600">
-                                  Follow-up: {formatDate(prescription.followUpDate)}
+                    {recentActivities.length > 0 ? (
+                      recentActivities.map((activity, index) => {
+                        const IconComponent = getActivityIcon(activity.type);
+                        const colorClass = getActivityColor(activity.type);
+                        
+                        return (
+                          <div key={activity.id}>
+                            <div className="flex items-center space-x-3 py-3 hover:bg-gray-50 transition-colors cursor-pointer rounded-lg px-2 -mx-2">
+                              <div className={`p-2 rounded ${colorClass}`}>
+                                <IconComponent className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">{activity.description}</p>
+                                <p className="text-xs text-gray-600">
+                                  {formatTimeAgo(activity.timestamp)}
                                 </p>
-                              )}
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-gray-500">
+                                  {formatDate(activity.timestamp)}
+                                </p>
+                              </div>
                             </div>
+                            {index < recentActivities.length - 1 && (
+                              <div className="border-b border-gray-100"></div>
+                            )}
                           </div>
-                          {index < stats.recentPrescriptions.length - 1 && (
-                            <div className="border-b border-gray-100"></div>
-                          )}
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       <div className="text-center py-8">
-                        <FileText className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                        <Activity className="mx-auto h-12 w-12 text-gray-300 mb-3" />
                         <p className="text-gray-500">No recent activity</p>
-                        <p className="text-sm text-gray-400">Recent prescriptions will appear here</p>
+                        <p className="text-sm text-gray-400">Your activities will appear here</p>
                       </div>
                     )}
                   </div>

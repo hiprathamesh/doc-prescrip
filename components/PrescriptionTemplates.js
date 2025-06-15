@@ -8,6 +8,7 @@ import { MEDICAL_CONDITIONS, SEVERITY_OPTIONS, DURATION_OPTIONS, MEDICATION_TIMI
 import PillSelector from './PillSelector';
 import MedicationSelector from './MedicationSelector';
 import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from '../lib/medicalData';
+import { activityLogger } from '../utils/activityLogger';
 
 export default function PrescriptionTemplates({ onBack }) {
   const [templates, setTemplates] = useState([]);
@@ -101,10 +102,16 @@ export default function PrescriptionTemplates({ onBack }) {
   };
 
   const handleDelete = async (templateId) => {
+    const templateToDelete = templates.find(t => t.id === templateId);
     if (confirm('Are you sure you want to delete this template?')) {
       try {
         const success = await storage.deleteTemplate(templateId);
         if (success) {
+          // Log activity
+          if (templateToDelete) {
+            await activityLogger.logTemplateDeleted(templateToDelete.name);
+          }
+          
           await loadTemplates(); // Reload templates after deletion
         } else {
           alert('Failed to delete template');
@@ -127,6 +134,13 @@ export default function PrescriptionTemplates({ onBack }) {
 
       const savedTemplate = await storage.saveTemplate(template);
       if (savedTemplate) {
+        // Log activity
+        if (selectedTemplate) {
+          await activityLogger.logTemplateEdited(template);
+        } else {
+          await activityLogger.logTemplateCreated(template);
+        }
+        
         await loadTemplates(); // Reload templates after saving
         setCurrentView('list');
         setSelectedTemplate(null);

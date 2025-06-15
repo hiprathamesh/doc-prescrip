@@ -15,6 +15,7 @@ import PrescriptionSuccess from './PrescriptionSuccess';
 import CustomSelect from './CustomSelect';
 import CustomDropdown from './CustomDropdown';
 import { useToast } from '../contexts/ToastContext';
+import { activityLogger } from '../utils/activityLogger';
 
 export default function NewPrescription({ patient, patients, onBack, onPatientUpdate }) {
   console.log('[NewPrescription] Component rendering/re-rendering. Selected patient:', patient ? patient.id : 'none'); // TOP-LEVEL LOG
@@ -217,6 +218,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       const success = await storage.savePatients(updatedPatients);
 
       if (success) {
+        // Log activity
+        await activityLogger.logPatientCreated(newPatient);
+        
         onPatientUpdate(updatedPatients);
         setSelectedPatient(newPatient);
         setIsNewPatient(false);
@@ -669,6 +673,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       if (!savedPrescriptionData) {
         throw new Error('Failed to save prescription');
       }
+
+      // Log activity
+      await activityLogger.logPrescriptionCreated(selectedPatient, prescription.id);
 
       // Save bill with PDF URL if exists
       if (bill) {

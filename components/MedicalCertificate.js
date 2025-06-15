@@ -6,6 +6,7 @@ import { storage } from '../utils/storage';
 import { formatDate, getTodayString } from '../utils/dateUtils';
 import ConfirmationDialog from './ConfirmationDialog';
 import MedicalCertificateSuccess from './MedicalCertificateSuccess';
+import { activityLogger } from '../utils/activityLogger';
 
 export default function MedicalCertificate({ patient, patients, onBack, onPatientUpdate }) {
   const [selectedPatient, setSelectedPatient] = useState(patient);
@@ -149,6 +150,10 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
       }
 
       setSavedCertificate(certificate);
+      
+      // Log activity
+      await activityLogger.logMedicalCertificateCreated(selectedPatient, certificateData.certificateFor);
+      
       setShowConfirmation(false);
       setShowSuccess(true);
 

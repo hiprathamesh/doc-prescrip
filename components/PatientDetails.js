@@ -6,6 +6,7 @@ import { storage } from '../utils/storage';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import SharePDFButton from './SharePDFButton';
 import { useToast } from '../contexts/ToastContext';
+import { activityLogger } from '../utils/activityLogger';
 
 export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   const [visits, setVisits] = useState([]);
@@ -111,6 +112,10 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       );
 
       await storage.saveBills(updatedBills);
+      
+      // Log activity
+      await activityLogger.logBillPaymentUpdated(patient, updatedBill.amount, updatedBill.isPaid);
+      
       loadPatientData();
 
       addToast({
@@ -142,6 +147,9 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
           const updatedBills = allBills.filter(b => b.id !== billId);
           await storage.saveBills(updatedBills);
         }
+
+        // Log activity
+        await activityLogger.logVisitDeleted(patient.name);
 
         loadPatientData();
         setDropdownOpen(null);
