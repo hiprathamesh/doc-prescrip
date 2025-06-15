@@ -373,6 +373,10 @@ function TemplateEditor({ template, onSave, onCancel }) {
     advice: template?.advice || ''
   });
 
+  // Add refs and state for floating header
+  const templateEditorHeaderRef = useRef(null);
+  const [isTemplateEditorHeaderVisible, setIsTemplateEditorHeaderVisible] = useState(true);
+
   // Custom data states
   const [customSymptoms, setCustomSymptoms] = useState([]);
   const [customDiagnoses, setCustomDiagnoses] = useState([]);
@@ -382,6 +386,49 @@ function TemplateEditor({ template, onSave, onCancel }) {
 
   useEffect(() => {
     loadCustomData();
+  }, []);
+
+  // Reset header visibility when component mounts
+  useEffect(() => {
+    setIsTemplateEditorHeaderVisible(true);
+  }, []);
+
+  // Intersection Observer for template editor header visibility
+  useEffect(() => {
+    const templateEditorHeaderElement = templateEditorHeaderRef.current;
+
+    if (!templateEditorHeaderElement) {
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      setIsTemplateEditorHeaderVisible(true);
+      return;
+    }
+
+    const rootMarginTop = "-81px"; // Adjusted to match main header height
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        if (entries && entries.length > 0 && entries[0]) {
+          const entry = entries[0];
+          setIsTemplateEditorHeaderVisible(entry.isIntersecting);
+        }
+      },
+      {
+        root: null,
+        rootMargin: `${rootMarginTop} 0px 0px 0px`,
+        threshold: 0,
+      }
+    );
+
+    observer.observe(templateEditorHeaderElement);
+
+    return () => {
+      if (templateEditorHeaderElement) {
+        observer.unobserve(templateEditorHeaderElement);
+      }
+    };
   }, []);
 
   const loadCustomData = async () => {
@@ -551,420 +598,464 @@ function TemplateEditor({ template, onSave, onCancel }) {
   };
 
   return (
-    <div className="space-y-6 min-h-screen">
-      {/* Header */}
-      <div className="max-w-5xl mx-auto px-6 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={onCancel}
-              className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </button>
-            <span className="text-xl font-semibold text-gray-900">
-              {template ? 'Edit Template' : 'Create New Template'}
-            </span>
-          </div>
-          <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-            <button
-              onClick={onCancel}
-              className="w-full sm:w-auto px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 text-sm font-medium"
-            >
-              <span>Save Template</span>
-            </button>
+    <>
+      {/* Floating header */}
+      <div
+        className={`fixed left-0 right-0 z-30 transition-transform duration-300 ease-in-out
+          ${isTemplateEditorHeaderVisible ? '-translate-y-full' : 'translate-y-0'}
+        `}
+        style={{ top: '81px' }}
+      >
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-6 py-3">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onCancel}
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-4 h-4 text-gray-600" />
+                </button>
+                <span className="text-md font-semibold text-gray-900">
+                  {template ? 'Edit Template' : 'Create New Template'}
+                </span>
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={onCancel}
+                  className="px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+                >
+                  <span>Save Template</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 space-y-6">
-        {/* Template Basic Info */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h3 className="text-base font-semibold text-gray-900 mb-4">Template Information</h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-800 mb-2">Template Name *</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Common Cold, Hypertension, Diabetes Follow-up"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-              />
+      <div className="space-y-6 min-h-screen">
+        {/* Header */}
+        <div ref={templateEditorHeaderRef} className="template-editor-header">
+          <div className="max-w-5xl mx-auto px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onCancel}
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <span className="text-xl font-semibold text-gray-900">
+                  {template ? 'Edit Template' : 'Create New Template'}
+                </span>
+              </div>
+              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                <button
+                  onClick={onCancel}
+                  className="w-full sm:w-auto px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 text-sm font-medium"
+                >
+                  <span>Save Template</span>
+                </button>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-800 mb-2">Description</label>
-              <input
-                type="text"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Brief description of when to use this template"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-              />
+          </div>
+        </div>
+
+        <div className="max-w-5xl mx-auto px-6 space-y-6">
+          {/* Template Basic Info */}
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
+            <h3 className="text-base font-semibold text-gray-900 mb-4">Template Information</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-2">Template Name *</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g., Common Cold, Hypertension, Diabetes Follow-up"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-2">Description</label>
+                <input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Brief description of when to use this template"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Symptoms Section */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <div className="space-y-4">
-            <PillSelector
-              title="Select Symptoms"
-              items={[...PREDEFINED_SYMPTOMS, ...customSymptoms]}
-              onSelect={(symptom) => {
-                const newSymptom = {
-                  id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                  name: symptom,
-                  severity: 'mild',
-                  duration: ''
-                };
-                setFormData({
-                  ...formData,
-                  symptoms: [...formData.symptoms, newSymptom]
-                });
-              }}
-              searchPlaceholder="Search symptoms..."
-              onAddCustom={async (symptom) => {
-                await storage.addCustomSymptom(symptom);
-                await loadCustomData();
-                const newSymptom = {
-                  id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                  name: symptom,
-                  severity: 'mild',
-                  duration: ''
-                };
-                setFormData({
-                  ...formData,
-                  symptoms: [...formData.symptoms, newSymptom]
-                });
-              }}
-            />
-
-            {/* Selected symptoms with details */}
-            {formData.symptoms.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-gray-800">Selected Symptoms</h4>
-                {formData.symptoms.map((symptom) => (
-                  <div key={symptom.id} className="grid grid-cols-4 gap-3 items-center p-3 bg-gray-50 rounded-lg">
-                    <div className="text-sm text-gray-900">{symptom.name}</div>
-                    <select
-                      value={symptom.severity}
-                      onChange={(e) => updateSymptom(symptom.id, 'severity', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-                    >
-                      {SEVERITY_OPTIONS.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={symptom.duration}
-                      onChange={(e) => updateSymptom(symptom.id, 'duration', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-                    >
-                      <option value="">Select duration</option>
-                      {DURATION_OPTIONS.map(duration => (
-                        <option key={duration} value={duration}>{duration}</option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() => removeSymptom(symptom.id)}
-                      className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded-md transition-colors justify-self-end"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Diagnosis Section */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <div className="space-y-4">
-            <PillSelector
-              title="Select Diagnosis"
-              items={[...PREDEFINED_DIAGNOSES, ...customDiagnoses]}
-              onSelect={(diagnosis) => {
-                const newDiagnosis = {
-                  id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                  name: diagnosis,
-                  description: ''
-                };
-                setFormData({
-                  ...formData,
-                  diagnosis: [...formData.diagnosis, newDiagnosis]
-                });
-              }}
-              searchPlaceholder="Search diagnoses..."
-              onAddCustom={async (diagnosis) => {
-                await storage.addCustomDiagnosis(diagnosis);
-                await loadCustomData();
-                const newDiagnosis = {
-                  id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                  name: diagnosis,
-                  description: ''
-                };
-                setFormData({
-                  ...formData,
-                  diagnosis: [...formData.diagnosis, newDiagnosis]
-                });
-              }}
-            />
-
-            {/* Selected diagnoses with details */}
-            {formData.diagnosis.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-gray-800">Selected Diagnoses</h4>
-                {formData.diagnosis.map((diagnosis) => (
-                  <div key={diagnosis.id} className="grid grid-cols-3 gap-3 items-center p-3 bg-gray-50 rounded-lg">
-                    <div className="text-sm text-gray-900">{diagnosis.name}</div>
-                    <input
-                      type="text"
-                      placeholder="Description (optional)"
-                      value={diagnosis.description}
-                      onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-                    />
-                    <button
-                      onClick={() => removeDiagnosis(diagnosis.id)}
-                      className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded-md transition-colors justify-self-end"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Medications Section */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <div className="space-y-4">
-            {isLoadingCustomData ? (
-              <div className="text-center py-6">
-                <div className="w-6 h-6 animate-spin mx-auto border-4 border-blue-500 border-t-transparent rounded-full mb-2"></div>
-                <p className="text-gray-500 text-sm">Loading medications...</p>
-              </div>
-            ) : (
-              <MedicationSelector
-                onSelect={(medication) => {
-                  const newMedication = {
+          {/* Symptoms Section */}
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
+            <div className="space-y-4">
+              <PillSelector
+                title="Select Symptoms"
+                items={[...PREDEFINED_SYMPTOMS, ...customSymptoms]}
+                onSelect={(symptom) => {
+                  const newSymptom = {
                     id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                    name: medication,
-                    timing: {
-                      morning: false,
-                      afternoon: false,
-                      evening: false,
-                      night: false
-                    },
-                    dosage: '',
-                    mealTiming: 'after_meal',
-                    duration: '',
-                    remarks: ''
+                    name: symptom,
+                    severity: 'mild',
+                    duration: ''
                   };
                   setFormData({
                     ...formData,
-                    medications: [...formData.medications, newMedication]
+                    symptoms: [...formData.symptoms, newSymptom]
                   });
                 }}
-                onAddCustom={async (medication) => {
-                  await storage.addCustomMedication(medication);
+                searchPlaceholder="Search symptoms..."
+                onAddCustom={async (symptom) => {
+                  await storage.addCustomSymptom(symptom);
                   await loadCustomData();
-                  const newMedication = {
+                  const newSymptom = {
                     id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                    name: medication,
-                    timing: {
-                      morning: false,
-                      afternoon: false,
-                      evening: false,
-                      night: false
-                    },
-                    dosage: '',
-                    mealTiming: 'after_meal',
-                    duration: '',
-                    remarks: ''
+                    name: symptom,
+                    severity: 'mild',
+                    duration: ''
                   };
                   setFormData({
                     ...formData,
-                    medications: [...formData.medications, newMedication]
+                    symptoms: [...formData.symptoms, newSymptom]
                   });
                 }}
               />
-            )}
 
-            {/* Selected medications with details */}
-            {formData.medications.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-gray-800">Selected Medications</h4>
-                {formData.medications.map((medication) => (
-                  <div key={medication.id} className="p-3 bg-gray-50 rounded-lg space-y-3">
-                    {/* Medication name and timing */}
-                    <div className="grid grid-cols-6 gap-3 items-center">
-                      <div className="text-sm text-gray-900">{medication.name}</div>
-
-                      {/* Timing checkboxes */}
-                      <div className="col-span-4 flex items-center space-x-2">
-                        {[
-                          { key: 'morning', label: 'M' },
-                          { key: 'afternoon', label: 'A' },
-                          { key: 'evening', label: 'E' },
-                          { key: 'night', label: 'N' }
-                        ].map(({ key, label }) => (
-                          <div key={key} className="flex flex-col items-center space-y-1">
-                            <button
-                              type="button"
-                              onClick={() => updateMedication(medication.id, `timing.${key}`, !medication.timing?.[key])}
-                              className={`w-6 h-6 rounded-md border-2 transition-all duration-200 flex items-center justify-center ${medication.timing?.[key]
-                                  ? 'border-green-300 bg-green-100'
-                                  : 'border-gray-300 hover:border-gray-400'
-                                }`}
-                            >
-                              {medication.timing?.[key] && (
-                                <div className="w-4 h-4 bg-green-500 rounded-sm"></div>
-                              )}
-                            </button>
-                            <span className="text-xs text-gray-600">{label}</span>
-                          </div>
+              {/* Selected symptoms with details */}
+              {formData.symptoms.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-gray-800">Selected Symptoms</h4>
+                  {formData.symptoms.map((symptom) => (
+                    <div key={symptom.id} className="grid grid-cols-4 gap-3 items-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-sm text-gray-900">{symptom.name}</div>
+                      <select
+                        value={symptom.severity}
+                        onChange={(e) => updateSymptom(symptom.id, 'severity', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                      >
+                        {SEVERITY_OPTIONS.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
-                      </div>
-
+                      </select>
+                      <select
+                        value={symptom.duration}
+                        onChange={(e) => updateSymptom(symptom.id, 'duration', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                      >
+                        <option value="">Select duration</option>
+                        {DURATION_OPTIONS.map(duration => (
+                          <option key={duration} value={duration}>{duration}</option>
+                        ))}
+                      </select>
                       <button
-                        onClick={() => removeMedication(medication.id)}
+                        onClick={() => removeSymptom(symptom.id)}
                         className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded-md transition-colors justify-self-end"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
-                    {/* Dosage, meal timing, and duration */}
-                    <div className="grid grid-cols-4 gap-3 items-center">
+          {/* Diagnosis Section */}
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
+            <div className="space-y-4">
+              <PillSelector
+                title="Select Diagnosis"
+                items={[...PREDEFINED_DIAGNOSES, ...customDiagnoses]}
+                onSelect={(diagnosis) => {
+                  const newDiagnosis = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                    name: diagnosis,
+                    description: ''
+                  };
+                  setFormData({
+                    ...formData,
+                    diagnosis: [...formData.diagnosis, newDiagnosis]
+                  });
+                }}
+                searchPlaceholder="Search diagnoses..."
+                onAddCustom={async (diagnosis) => {
+                  await storage.addCustomDiagnosis(diagnosis);
+                  await loadCustomData();
+                  const newDiagnosis = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                    name: diagnosis,
+                    description: ''
+                  };
+                  setFormData({
+                    ...formData,
+                    diagnosis: [...formData.diagnosis, newDiagnosis]
+                  });
+                }}
+              />
+
+              {/* Selected diagnoses with details */}
+              {formData.diagnosis.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-gray-800">Selected Diagnoses</h4>
+                  {formData.diagnosis.map((diagnosis) => (
+                    <div key={diagnosis.id} className="grid grid-cols-3 gap-3 items-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-sm text-gray-900">{diagnosis.name}</div>
                       <input
                         type="text"
-                        placeholder="Dosage (e.g., 500mg)"
-                        value={medication.dosage}
-                        onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
+                        placeholder="Description (optional)"
+                        value={diagnosis.description}
+                        onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
                       />
-                      <select
-                        value={medication.mealTiming}
-                        onChange={(e) => updateMedication(medication.id, 'mealTiming', e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                      <button
+                        onClick={() => removeDiagnosis(diagnosis.id)}
+                        className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded-md transition-colors justify-self-end"
                       >
-                        {MEDICATION_TIMING.map(option => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                      <select
-                        value={medication.duration}
-                        onChange={(e) => updateMedication(medication.id, 'duration', e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-                      >
-                        <option value="">Select duration</option>
-                        {MEDICATION_DURATION_OPTIONS.map(duration => (
-                          <option key={duration} value={duration}>{duration}</option>
-                        ))}
-                      </select>
-                      <input
-                        type="text"
-                        placeholder="Remarks"
-                        value={medication.remarks}
-                        onChange={(e) => updateMedication(medication.id, 'remarks', e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-                      />
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Lab Results Section */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <div className="space-y-4">
-            <PillSelector
-              title="Select Lab Tests"
-              items={[...PREDEFINED_LAB_TESTS, ...customLabTests]}
-              onSelect={(labTest) => {
-                const newLabResult = {
-                  id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                  testName: labTest
-                };
-                setFormData({
-                  ...formData,
-                  labResults: [...formData.labResults, newLabResult]
-                });
-              }}
-              searchPlaceholder="Search lab tests..."
-              onAddCustom={async (labTest) => {
-                await storage.addCustomLabTest(labTest);
-                await loadCustomData();
-                const newLabResult = {
-                  id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                  testName: labTest
-                };
-                setFormData({
-                  ...formData,
-                  labResults: [...formData.labResults, newLabResult]
-                });
-              }}
-            />
-
-            {/* Selected lab results */}
-            {formData.labResults.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-gray-800">Selected Lab Tests</h4>
-                {formData.labResults.map((lab) => (
-                  <div key={lab.id} className="grid grid-cols-2 gap-3 items-center p-3 bg-gray-50 rounded-lg">
-                    <div className="text-sm text-gray-900">{lab.testName}</div>
-                    <button
-                      onClick={() => removeLabResult(lab.id)}
-                      className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded-md transition-colors justify-self-end"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Doctor Notes and Advice */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Medications Section */}
           <div className="bg-white p-6 rounded-xl border border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">Doctor's Notes</h3>
-            <textarea
-              value={formData.doctorNotes}
-              onChange={(e) => setFormData({ ...formData, doctorNotes: e.target.value })}
-              placeholder="Enter doctor's notes (one per line)"
-              rows={5}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
-            />
-            <p className="text-xs text-gray-500 mt-2">Separate each note with a new line</p>
+            <div className="space-y-4">
+              {isLoadingCustomData ? (
+                <div className="text-center py-6">
+                  <div className="w-6 h-6 animate-spin mx-auto border-4 border-blue-500 border-t-transparent rounded-full mb-2"></div>
+                  <p className="text-gray-500 text-sm">Loading medications...</p>
+                </div>
+              ) : (
+                <MedicationSelector
+                  onSelect={(medication) => {
+                    const newMedication = {
+                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                      name: medication,
+                      timing: {
+                        morning: false,
+                        afternoon: false,
+                        evening: false,
+                        night: false
+                      },
+                      dosage: '',
+                      mealTiming: 'after_meal',
+                      duration: '',
+                      remarks: ''
+                    };
+                    setFormData({
+                      ...formData,
+                      medications: [...formData.medications, newMedication]
+                    });
+                  }}
+                  onAddCustom={async (medication) => {
+                    await storage.addCustomMedication(medication);
+                    await loadCustomData();
+                    const newMedication = {
+                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                      name: medication,
+                      timing: {
+                        morning: false,
+                        afternoon: false,
+                        evening: false,
+                        night: false
+                      },
+                      dosage: '',
+                      mealTiming: 'after_meal',
+                      duration: '',
+                      remarks: ''
+                    };
+                    setFormData({
+                      ...formData,
+                      medications: [...formData.medications, newMedication]
+                    });
+                  }}
+                />
+              )}
+
+              {/* Selected medications with details */}
+              {formData.medications.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-gray-800">Selected Medications</h4>
+                  {formData.medications.map((medication) => (
+                    <div key={medication.id} className="p-3 bg-gray-50 rounded-lg space-y-3">
+                      {/* Medication name and timing */}
+                      <div className="grid grid-cols-6 gap-3 items-center">
+                        <div className="text-sm text-gray-900">{medication.name}</div>
+
+                        {/* Timing checkboxes */}
+                        <div className="col-span-4 flex items-center space-x-2">
+                          {[
+                            { key: 'morning', label: 'M' },
+                            { key: 'afternoon', label: 'A' },
+                            { key: 'evening', label: 'E' },
+                            { key: 'night', label: 'N' }
+                          ].map(({ key, label }) => (
+                            <div key={key} className="flex flex-col items-center space-y-1">
+                              <button
+                                type="button"
+                                onClick={() => updateMedication(medication.id, `timing.${key}`, !medication.timing?.[key])}
+                                className={`w-6 h-6 rounded-md border-2 transition-all duration-200 flex items-center justify-center ${medication.timing?.[key]
+                                    ? 'border-green-300 bg-green-100'
+                                    : 'border-gray-300 hover:border-gray-400'
+                                  }`}
+                              >
+                                {medication.timing?.[key] && (
+                                  <div className="w-4 h-4 bg-green-500 rounded-sm"></div>
+                                )}
+                              </button>
+                              <span className="text-xs text-gray-600">{label}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <button
+                          onClick={() => removeMedication(medication.id)}
+                          className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded-md transition-colors justify-self-end"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Dosage, meal timing, and duration */}
+                      <div className="grid grid-cols-4 gap-3 items-center">
+                        <input
+                          type="text"
+                          placeholder="Dosage (e.g., 500mg)"
+                          value={medication.dosage}
+                          onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                        />
+                        <select
+                          value={medication.mealTiming}
+                          onChange={(e) => updateMedication(medication.id, 'mealTiming', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                        >
+                          {MEDICATION_TIMING.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={medication.duration}
+                          onChange={(e) => updateMedication(medication.id, 'duration', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                        >
+                          <option value="">Select duration</option>
+                          {MEDICATION_DURATION_OPTIONS.map(duration => (
+                            <option key={duration} value={duration}>{duration}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          placeholder="Remarks"
+                          value={medication.remarks}
+                          onChange={(e) => updateMedication(medication.id, 'remarks', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
+          {/* Lab Results Section */}
           <div className="bg-white p-6 rounded-xl border border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">Advice to Patient</h3>
-            <textarea
-              value={formData.advice}
-              onChange={(e) => setFormData({ ...formData, advice: e.target.value })}
-              placeholder="Enter advice for patient (one per line)"
-              rows={5}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
-            />
-            <p className="text-xs text-gray-500 mt-2">Separate each advice with a new line</p>
+            <div className="space-y-4">
+              <PillSelector
+                title="Select Lab Tests"
+                items={[...PREDEFINED_LAB_TESTS, ...customLabTests]}
+                onSelect={(labTest) => {
+                  const newLabResult = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                    testName: labTest
+                  };
+                  setFormData({
+                    ...formData,
+                    labResults: [...formData.labResults, newLabResult]
+                  });
+                }}
+                searchPlaceholder="Search lab tests..."
+                onAddCustom={async (labTest) => {
+                  await storage.addCustomLabTest(labTest);
+                  await loadCustomData();
+                  const newLabResult = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                    testName: labTest
+                  };
+                  setFormData({
+                    ...formData,
+                    labResults: [...formData.labResults, newLabResult]
+                  });
+                }}
+              />
+
+              {/* Selected lab results */}
+              {formData.labResults.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-gray-800">Selected Lab Tests</h4>
+                  {formData.labResults.map((lab) => (
+                    <div key={lab.id} className="grid grid-cols-2 gap-3 items-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-sm text-gray-900">{lab.testName}</div>
+                      <button
+                        onClick={() => removeLabResult(lab.id)}
+                        className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded-md transition-colors justify-self-end"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Doctor Notes and Advice */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-xl border border-gray-200">
+              <h3 className="text-base font-semibold text-gray-900 mb-4">Doctor's Notes</h3>
+              <textarea
+                value={formData.doctorNotes}
+                onChange={(e) => setFormData({ ...formData, doctorNotes: e.target.value })}
+                placeholder="Enter doctor's notes (one per line)"
+                rows={5}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-2">Separate each note with a new line</p>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl border border-gray-200">
+              <h3 className="text-base font-semibold text-gray-900 mb-4">Advice to Patient</h3>
+              <textarea
+                value={formData.advice}
+                onChange={(e) => setFormData({ ...formData, advice: e.target.value })}
+                placeholder="Enter advice for patient (one per line)"
+                rows={5}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
+              />
+              <p className="text-xs text-gray-500 mt-2">Separate each advice with a new line</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
