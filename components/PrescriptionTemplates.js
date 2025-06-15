@@ -212,16 +212,17 @@ export default function PrescriptionTemplates({ onBack }) {
 
         <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Search Bar */}
-
+          <div className="w-full flex justify-end">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search templates by name, description, or diagnosis..."
+              placeholder="Search templates..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+              className="w-70 pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
             />
+          </div>
           </div>
 
 
@@ -237,7 +238,8 @@ export default function PrescriptionTemplates({ onBack }) {
                           <h3 className="text-sm font-semibold text-gray-900 truncate">{template.name}</h3>
                           <div className="flex items-center space-x-1 ml-3">
                             <button
-                              onClick={() => handleEdit(template)}
+                              onClick={() => handleEdit(template)
+                              }
                               className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                             >
                               <Edit className="w-3.5 h-3.5" />
