@@ -132,7 +132,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     // Assuming your main fixed/sticky dashboard header is 64px tall.
     // This margin means the intersection is calculated relative to a viewport
     // whose top edge is effectively 64px lower.
-    const rootMarginTop = "-64px"; // Adjust if your main header height is different
+    const rootMarginTop = "-81px"; // Adjust if your main header height is different
 
     const observer = new window.IntersectionObserver(
       (entries) => {

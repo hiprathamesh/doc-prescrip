@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Plus, Search, Edit, Trash2, FileText, Calendar, User, Stethoscope } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Edit, Trash2, FileText, Calendar, User, Stethoscope, FlaskConical } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate } from '../utils/dateUtils';
 import { MEDICAL_CONDITIONS, SEVERITY_OPTIONS, DURATION_OPTIONS, MEDICATION_TIMING, MEDICATION_DURATION_OPTIONS } from '../lib/constants';
@@ -36,19 +36,20 @@ export default function PrescriptionTemplates({ onBack }) {
       return;
     }
 
-    const rootMarginTop = "-64px";
+    const rootMarginTop = "-81px"; // Adjusted to match main header height
 
     const observer = new window.IntersectionObserver(
       (entries) => {
         if (entries && entries.length > 0 && entries[0]) {
           const entry = entries[0];
+          // More precise logic: header is visible if any part is intersecting
           setIsTemplatesHeaderVisible(entry.isIntersecting);
         }
       },
       {
         root: null,
         rootMargin: `${rootMarginTop} 0px 0px 0px`,
-        threshold: [0, 0.01],
+        threshold: 0, // Trigger as soon as element enters/leaves the adjusted viewport
       }
     );
 
@@ -197,18 +198,18 @@ export default function PrescriptionTemplates({ onBack }) {
 
         <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Search Bar */}
-          <div className="bg-white p-4 rounded-xl border border-gray-200">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search templates by name, description, or diagnosis..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-              />
-            </div>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search templates by name, description, or diagnosis..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+            />
           </div>
+
 
           {/* Templates List */}
           <div className="bg-white rounded-xl border border-gray-200">
@@ -240,7 +241,7 @@ export default function PrescriptionTemplates({ onBack }) {
                           <p className="text-xs text-gray-600 mb-3 line-clamp-1">{template.description}</p>
                         )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
                           {/* Symptoms */}
                           {template.symptoms?.length > 0 && (
                             <div>
@@ -282,6 +283,20 @@ export default function PrescriptionTemplates({ onBack }) {
                               </div>
                             </div>
                           )}
+
+                          {/* Lab Tests */}
+                          {template.labResults?.length > 0 && (
+                            <div>
+                              <div className="flex items-center space-x-1 mb-1">
+                                <FlaskConical className="w-3 h-3 text-purple-500" />
+                                <span className="font-medium text-gray-700">Lab Tests ({template.labResults.length})</span>
+                              </div>
+                              <div className="text-gray-600">
+                                {template.labResults.slice(0, 2).map(l => l.testName).join(', ')}
+                                {template.labResults.length > 2 && ` +${template.labResults.length - 2} more`}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
@@ -290,9 +305,15 @@ export default function PrescriptionTemplates({ onBack }) {
                             <span>Created {formatDate(template.createdAt)}</span>
                           </div>
                           <div className="text-xs text-gray-500">
-                            {template.labResults?.length > 0 && (
-                              <span>{template.labResults.length} lab tests</span>
-                            )}
+                            {/* Show total items count */}
+                            {(() => {
+                              const totalItems = 
+                                (template.symptoms?.length || 0) + 
+                                (template.diagnosis?.length || 0) + 
+                                (template.medications?.length || 0) + 
+                                (template.labResults?.length || 0);
+                              return totalItems > 0 ? `${totalItems} total items` : '';
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -354,11 +375,11 @@ function TemplateEditor({ template, onSave, onCancel }) {
       setIsLoadingCustomData(true);
       const [symptoms, diagnoses, labTests, medications] = await Promise.all([
         storage.getCustomSymptoms(),
-        storage.getCustomDiagnoses(), 
+        storage.getCustomDiagnoses(),
         storage.getCustomLabTests(),
         storage.getCustomMedications()
       ]);
-      
+
       setCustomSymptoms(symptoms || []);
       setCustomDiagnoses(diagnoses || []);
       setCustomLabTests(labTests || []);
@@ -774,7 +795,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                     {/* Medication name and timing */}
                     <div className="grid grid-cols-6 gap-3 items-center">
                       <div className="text-sm text-gray-900">{medication.name}</div>
-                      
+
                       {/* Timing checkboxes */}
                       <div className="col-span-4 flex items-center space-x-2">
                         {[
@@ -787,11 +808,10 @@ function TemplateEditor({ template, onSave, onCancel }) {
                             <button
                               type="button"
                               onClick={() => updateMedication(medication.id, `timing.${key}`, !medication.timing?.[key])}
-                              className={`w-6 h-6 rounded-md border-2 transition-all duration-200 flex items-center justify-center ${
-                                medication.timing?.[key]
+                              className={`w-6 h-6 rounded-md border-2 transition-all duration-200 flex items-center justify-center ${medication.timing?.[key]
                                   ? 'border-green-300 bg-green-100'
                                   : 'border-gray-300 hover:border-gray-400'
-                              }`}
+                                }`}
                             >
                               {medication.timing?.[key] && (
                                 <div className="w-4 h-4 bg-green-500 rounded-sm"></div>
@@ -801,7 +821,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                           </div>
                         ))}
                       </div>
-                      
+
                       <button
                         onClick={() => removeMedication(medication.id)}
                         className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded-md transition-colors justify-self-end"
