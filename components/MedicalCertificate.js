@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Plus, Save, Calendar } from 'lucide-react';
+import { ArrowLeft, Plus, Save } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, getTodayString } from '../utils/dateUtils';
 import ConfirmationDialog from './ConfirmationDialog';
 import MedicalCertificateSuccess from './MedicalCertificateSuccess';
+import CustomSelect from './CustomSelect';
+import CustomDropdown from './CustomDropdown';
 import { activityLogger } from '../utils/activityLogger';
 
 export default function MedicalCertificate({ patient, patients, onBack, onPatientUpdate }) {
@@ -43,17 +45,24 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
     remarks: '',
     issuedDate: getTodayString(),
     certificateFor: '',
-    fitnessStatus: 'fit' // 'fit' or 'unfit'
+    fitnessStatus: 'fit'
   });
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [savedCertificate, setSavedCertificate] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // Add refs and state for floating header
   const medCertHeaderRef = useRef(null);
   const [isMedCertHeaderVisible, setIsMedCertHeaderVisible] = useState(true);
+
+  // Refs for new patient form fields
+  const nameRef = useRef(null);
+  const ageRef = useRef(null);
+  const genderRef = useRef(null);
+  const phoneRef = useRef(null);
 
   // Update form when patient is selected
   useEffect(() => {
@@ -85,7 +94,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
       return;
     }
 
-    const rootMarginTop = "-81px"; // Adjusted to match main header height
+    const rootMarginTop = "-81px";
 
     const observer = new window.IntersectionObserver(
       (entries) => {
@@ -137,6 +146,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
       const success = await storage.savePatients(updatedPatients);
       
       if (success) {
+        await activityLogger.logPatientCreated(newPatient);
         onPatientUpdate(updatedPatients);
         setSelectedPatient(newPatient);
         setIsNewPatient(false);
@@ -149,9 +159,31 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
     }
   };
 
+  const toggleNewPatient = () => {
+    if (isNewPatient) {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setIsNewPatient(false);
+        setIsAnimating(false);
+        setNewPatientData({
+          name: '',
+          gender: 'male',
+          age: '',
+          phone: ''
+        });
+      }, 300);
+    } else {
+      setIsNewPatient(true);
+      setIsAnimating(true);
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 50);
+    }
+  };
+
   const handleSaveCertificate = () => {
-    if (!certificateData.patientName || !certificateData.age || !certificateData.sex) {
-      alert('Please fill in the required patient information');
+    if (!selectedPatient) {
+      alert('Please select a patient');
       return;
     }
     
@@ -175,13 +207,12 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
         createdAt: new Date()
       };
 
-      // Save certificate (you'll need to add this to storage)
-      // For now, we'll just save it locally
+      // Save certificate
       const certificates = JSON.parse(localStorage.getItem('medicalCertificates') || '[]');
       certificates.push(certificate);
       localStorage.setItem('medicalCertificates', JSON.stringify(certificates));
 
-      // If patient was selected, update their last visited date
+      // Update patient's last visited date
       if (selectedPatient) {
         const updatedPatients = patients.map(p =>
           p.id === selectedPatient.id
@@ -221,6 +252,29 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
   const handleBackFromSuccess = () => {
     setShowSuccess(false);
     onBack();
+  };
+
+  // Handle Enter key press for form navigation
+  const handleKeyPress = (e, nextRef) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
+
+  const handleLastFieldKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleCreateNewPatient();
+    }
+  };
+
+  const handleGenderEnterPress = () => {
+    if (phoneRef.current) {
+      phoneRef.current.focus();
+    }
   };
 
   // Show success page if certificate was saved
@@ -298,361 +352,409 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
           {/* Patient Selection */}
           {!selectedPatient && (
             <div className="bg-white p-6 rounded-xl border border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-5">Select Patient or Enter Manually</h2>
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+              <h2 className="text-lg font-semibold text-gray-900 mb-5">Select Patient</h2>
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
                   <div className="flex-1 relative">
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value === 'new') {
+                    <CustomSelect
+                      options={patients.map(p => ({ value: p.id, label: `${p.name} (${p.id}) - ${p.phone}` }))
+                      }
+                      value={selectedPatient?.id || ''}
+                      onChange={(patientId) => {
+                        if (patientId === 'new') {
                           setIsNewPatient(true);
-                        } else if (e.target.value === 'manual') {
-                          // Skip patient selection, go to manual entry
                           setSelectedPatient(null);
                         } else {
-                          const patient = patients.find(p => p.id === e.target.value);
+                          const patient = patients.find(p => p.id === patientId);
                           setSelectedPatient(patient || null);
+                          setIsNewPatient(false);
                         }
                       }}
-                      className="w-full p-4 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-base sm:text-lg bg-white shadow-sm hover:shadow-md appearance-none"
-                    >
-                      <option value="">Select patient or enter manually...</option>
-                      <option value="manual">📝 Enter Details Manually</option>
-                      <option disabled>──────────</option>
-                      {patients.map(patient => (
-                        <option key={patient.id} value={patient.id}>
-                          {patient.name} ({patient.id}) - {patient.phone}
-                        </option>
-                      ))}
-                    </select>
+                      placeholder="Select or search patient..."
+                      onAddNew={() => setIsNewPatient(true)}
+                    />
                   </div>
                   <button
-                    onClick={() => setIsNewPatient(true)}
-                    className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-4 rounded-xl flex items-center justify-center space-x-2 font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    onClick={toggleNewPatient}
+                    className={`w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-medium transition-all duration-200 ${isNewPatient ? 'bg-gray-600 hover:bg-gray-700' : ''
+                      }`}
                   >
-                    <Plus className="w-5 h-5" />
-                    <span>Add New Patient</span>
+                    <Plus className={`w-5 h-5 transition-transform duration-300 ease-out ${isNewPatient ? 'rotate-45' : 'rotate-0'
+                      }`} />
+                    <span>{isNewPatient ? 'Cancel' : 'Add Patient'}</span>
                   </button>
                 </div>
 
-                {isNewPatient && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-                    {/* ...existing new patient form... */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Name *</label>
-                      <input
-                        type="text"
-                        value={newPatientData.name}
-                        onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
-                        className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Age *</label>
-                      <input
-                        type="number"
-                        value={newPatientData.age}
-                        onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
-                        className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Gender</label>
-                      <select
-                        value={newPatientData.gender}
-                        onChange={(e) => setNewPatientData({ ...newPatientData, gender: e.target.value })}
-                        className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                      >
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Phone *</label>
-                      <input
-                        type="tel"
-                        value={newPatientData.phone}
-                        onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
-                        className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                      />
-                    </div>
-                    <div className="col-span-1 sm:col-span-2">
-                      <button
-                        onClick={handleCreateNewPatient}
-                        className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                      >
-                        Create Patient
-                      </button>
+                {/* Animated patient creation form */}
+                <div className={`transition-all duration-300 ease-out ${isNewPatient
+                  ? 'max-h-96 opacity-100 transform translate-y-0'
+                  : 'max-h-0 opacity-0 transform -translate-y-4'
+                  }`}>
+                  <div className={`transition-all duration-300 ease-out delay-75 ${isNewPatient && !isAnimating
+                    ? 'opacity-100 transform translate-y-0'
+                    : 'opacity-0 transform translate-y-2'
+                    }`}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 p-5 bg-gray-50 rounded-xl border border-gray-200 mt-5">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Name *</label>
+                        <input
+                          ref={nameRef}
+                          type="text"
+                          value={newPatientData.name}
+                          onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
+                          onKeyPress={(e) => handleKeyPress(e, ageRef)}
+                          className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-12"
+                          placeholder="Enter patient name"
+                          autoFocus={isNewPatient && !isAnimating}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Age *</label>
+                        <input
+                          ref={ageRef}
+                          type="number"
+                          value={newPatientData.age}
+                          onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
+                          onKeyPress={(e) => handleKeyPress(e, genderRef)}
+                          className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-12"
+                          placeholder="Enter age"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Gender</label>
+                        <div ref={genderRef} tabIndex={0}>
+                          <CustomDropdown
+                            options={[
+                              { value: 'male', label: 'Male' },
+                              { value: 'female', label: 'Female' },
+                              { value: 'other', label: 'Other' }
+                            ]}
+                            value={newPatientData.gender}
+                            onChange={(value) => setNewPatientData({ ...newPatientData, gender: value })}
+                            placeholder="Select gender..."
+                            onEnterPress={handleGenderEnterPress}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone *</label>
+                        <input
+                          ref={phoneRef}
+                          type="tel"
+                          value={newPatientData.phone}
+                          onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
+                          onKeyPress={handleLastFieldKeyPress}
+                          className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-12"
+                          placeholder="Enter phone number"
+                        />
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                          <button
+                            onClick={handleCreateNewPatient}
+                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors duration-200"
+                          >
+                            Create Patient
+                          </button>
+                          <p className="text-xs text-gray-500">
+                            Tip: Press Enter on any field to move to the next one, or Enter on the last field to create patient
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Medical Certificate Form */}
-          {(selectedPatient || !isNewPatient) && (
+          {/* Medical Certificate Form - Only show when patient is selected */}
+          {selectedPatient && (
             <div className="space-y-6">
+              {/* Patient Info */}
+              <div className="bg-white p-5 rounded-xl border border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Patient Information</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <span className="font-semibold text-gray-700 block mb-1">Name</span>
+                    <span className="text-gray-900 font-medium">{selectedPatient.name}</span>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <span className="font-semibold text-gray-700 block mb-1">ID</span>
+                    <span className="text-gray-900 font-medium">{selectedPatient.id}</span>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <span className="font-semibold text-gray-700 block mb-1">Age</span>
+                    <span className="text-gray-900 font-medium">{selectedPatient.age} years</span>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <span className="font-semibold text-gray-700 block mb-1">Phone</span>
+                    <span className="text-gray-900 font-medium">{selectedPatient.phone}</span>
+                  </div>
+                </div>
+              </div>
+
               {/* Certificate Purpose and Date */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Certificate Details</h3>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="bg-white p-5 rounded-xl border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Certificate Details</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                   <div className="lg:col-span-2">
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Certificate For *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Certificate For *</label>
                     <input
                       type="text"
                       value={certificateData.certificateFor}
                       onChange={(e) => setCertificateData({ ...certificateData, certificateFor: e.target.value })}
                       placeholder="e.g., Employment, Sports, School admission, etc."
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Issue Date</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Issue Date</label>
                     <input
                       type="date"
                       value={certificateData.issuedDate}
                       onChange={(e) => setCertificateData({ ...certificateData, issuedDate: e.target.value })}
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Patient Information */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Patient Information</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="bg-white p-5 rounded-xl border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Patient Details</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Name *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
                     <input
                       type="text"
                       value={certificateData.patientName}
                       onChange={(e) => setCertificateData({ ...certificateData, patientName: e.target.value })}
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Age *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Age *</label>
                     <input
                       type="number"
                       value={certificateData.age}
                       onChange={(e) => setCertificateData({ ...certificateData, age: e.target.value })}
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Sex *</label>
-                    <select
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Sex *</label>
+                    <CustomDropdown
+                      options={[
+                        { value: '', label: 'Select' },
+                        { value: 'Male', label: 'Male' },
+                        { value: 'Female', label: 'Female' },
+                        { value: 'Other', label: 'Other' }
+                      ]}
                       value={certificateData.sex}
-                      onChange={(e) => setCertificateData({ ...certificateData, sex: e.target.value })}
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                    >
-                      <option value="">Select</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
+                      onChange={(value) => setCertificateData({ ...certificateData, sex: value })}
+                      placeholder="Select"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Height</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Height</label>
                     <input
                       type="text"
                       value={certificateData.height}
                       onChange={(e) => setCertificateData({ ...certificateData, height: e.target.value })}
                       placeholder="e.g., 170 cm"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Weight</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Weight</label>
                     <input
                       type="text"
                       value={certificateData.weight}
                       onChange={(e) => setCertificateData({ ...certificateData, weight: e.target.value })}
                       placeholder="e.g., 70 kg"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Build</label>
-                    <select
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Build</label>
+                    <CustomDropdown
+                      options={[
+                        { value: '', label: 'Select' },
+                        { value: 'Thin', label: 'Thin' },
+                        { value: 'Medium', label: 'Medium' },
+                        { value: 'Heavy', label: 'Heavy' },
+                        { value: 'Athletic', label: 'Athletic' }
+                      ]}
                       value={certificateData.build}
-                      onChange={(e) => setCertificateData({ ...certificateData, build: e.target.value })}
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
-                    >
-                      <option value="">Select</option>
-                      <option value="Thin">Thin</option>
-                      <option value="Medium">Medium</option>
-                      <option value="Heavy">Heavy</option>
-                      <option value="Athletic">Athletic</option>
-                    </select>
+                      onChange={(value) => setCertificateData({ ...certificateData, build: value })}
+                      placeholder="Select"
+                    />
                   </div>
                 </div>
               </div>
 
               {/* Physical Examination */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Physical Examination</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="bg-white p-5 rounded-xl border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Physical Examination</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Identification Marks</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Identification Marks</label>
                     <input
                       type="text"
                       value={certificateData.identificationMarks}
                       onChange={(e) => setCertificateData({ ...certificateData, identificationMarks: e.target.value })}
                       placeholder="e.g., Scar on left hand"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Colour of Eyes</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Colour of Eyes</label>
                     <input
                       type="text"
                       value={certificateData.colourOfEyes}
                       onChange={(e) => setCertificateData({ ...certificateData, colourOfEyes: e.target.value })}
                       placeholder="e.g., Brown"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Colour of Skin</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Colour of Skin</label>
                     <input
                       type="text"
                       value={certificateData.colourOfSkin}
                       onChange={(e) => setCertificateData({ ...certificateData, colourOfSkin: e.target.value })}
                       placeholder="e.g., Fair"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Pulse</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Pulse</label>
                     <input
                       type="text"
                       value={certificateData.pulse}
                       onChange={(e) => setCertificateData({ ...certificateData, pulse: e.target.value })}
                       placeholder="e.g., 72/min"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">BP</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">BP</label>
                     <input
                       type="text"
                       value={certificateData.bp}
                       onChange={(e) => setCertificateData({ ...certificateData, bp: e.target.value })}
                       placeholder="e.g., 120/80 mmHg"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Vision</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Vision</label>
                     <input
                       type="text"
                       value={certificateData.vision}
                       onChange={(e) => setCertificateData({ ...certificateData, vision: e.target.value })}
                       placeholder="e.g., 6/6"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                 </div>
               </div>
 
               {/* System Examination */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">System Examination</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="bg-white p-5 rounded-xl border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">System Examination</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Chest Measurement (Insp)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Chest Measurement (Insp)</label>
                     <input
                       type="text"
                       value={certificateData.chestMeasurementInsp}
                       onChange={(e) => setCertificateData({ ...certificateData, chestMeasurementInsp: e.target.value })}
                       placeholder="e.g., 36 inches"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Chest Measurement (Exp)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Chest Measurement (Exp)</label>
                     <input
                       type="text"
                       value={certificateData.chestMeasurementExp}
                       onChange={(e) => setCertificateData({ ...certificateData, chestMeasurementExp: e.target.value })}
                       placeholder="e.g., 34 inches"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Lungs</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Lungs</label>
                     <input
                       type="text"
                       value={certificateData.lungs}
                       onChange={(e) => setCertificateData({ ...certificateData, lungs: e.target.value })}
                       placeholder="e.g., Normal"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Cardiovascular System</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Cardiovascular System</label>
                     <input
                       type="text"
                       value={certificateData.cardiovascularSystem}
                       onChange={(e) => setCertificateData({ ...certificateData, cardiovascularSystem: e.target.value })}
                       placeholder="e.g., Normal"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Liver</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Liver</label>
                     <input
                       type="text"
                       value={certificateData.liver}
                       onChange={(e) => setCertificateData({ ...certificateData, liver: e.target.value })}
                       placeholder="e.g., Not palpable"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Spleen</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Spleen</label>
                     <input
                       type="text"
                       value={certificateData.spleen}
                       onChange={(e) => setCertificateData({ ...certificateData, spleen: e.target.value })}
                       placeholder="e.g., Not palpable"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Urinary System</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Urinary System</label>
                     <input
                       type="text"
                       value={certificateData.urinarySystem}
                       onChange={(e) => setCertificateData({ ...certificateData, urinarySystem: e.target.value })}
                       placeholder="e.g., Normal"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Urine</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Urine</label>
                     <input
                       type="text"
                       value={certificateData.urine}
                       onChange={(e) => setCertificateData({ ...certificateData, urine: e.target.value })}
                       placeholder="e.g., Normal"
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Fitness Status and Remarks */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Assessment</h3>
-                <div className="space-y-6">
+              <div className="bg-white p-5 rounded-xl border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Assessment</h3>
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Fitness Status</label>
-                    <div className="flex space-x-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">Fitness Status</label>
+                    <div className="flex space-x-6">
                       <label className="flex items-center space-x-2">
                         <input
                           type="radio"
@@ -661,7 +763,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                           onChange={(e) => setCertificateData({ ...certificateData, fitnessStatus: e.target.value })}
                           className="text-green-600 focus:ring-green-500"
                         />
-                        <span className="text-green-700 font-medium">Medically Fit</span>
+                        <span className="text-green-700 text-sm font-medium">Medically Fit</span>
                       </label>
                       <label className="flex items-center space-x-2">
                         <input
@@ -671,18 +773,18 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                           onChange={(e) => setCertificateData({ ...certificateData, fitnessStatus: e.target.value })}
                           className="text-red-600 focus:ring-red-500"
                         />
-                        <span className="text-red-700 font-medium">Medically Unfit</span>
+                        <span className="text-red-700 text-sm font-medium">Medically Unfit</span>
                       </label>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Remarks</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Remarks</label>
                     <textarea
                       value={certificateData.remarks}
                       onChange={(e) => setCertificateData({ ...certificateData, remarks: e.target.value })}
                       placeholder="Any additional remarks or observations..."
-                      rows={4}
-                      className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
+                      rows={3}
+                      className="w-full text-sm p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
                     />
                   </div>
                 </div>

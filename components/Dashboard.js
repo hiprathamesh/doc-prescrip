@@ -385,10 +385,10 @@ export default function Dashboard() {
     
     if (day === 1) { // Monday
       const mondayMessages = [
-        {
-          title: "Monday motivation, Dr. Nikam!",
-          subtitle: "Start the week with purpose and compassion"
-        },
+        // {
+        //   title: "Monday motivation, Dr. Nikam!",
+        //   subtitle: "Start the week with purpose and compassion"
+        // },
         {
           title: "Fresh start, Dr. Nikam!",
           subtitle: "New week, new opportunities to heal and help"
