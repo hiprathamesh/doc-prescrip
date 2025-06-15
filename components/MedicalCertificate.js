@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Plus, Save, Calendar } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, getTodayString } from '../utils/dateUtils';
@@ -62,6 +62,10 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
       }));
     }
   }, [selectedPatient]);
+
+  // Add refs and state for floating header
+  const medCertHeaderRef = useRef(null);
+  const [isMedCertHeaderVisible, setIsMedCertHeaderVisible] = useState(true);
 
   const generatePatientId = () => {
     const prefix = 'P';
@@ -187,17 +191,91 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
     );
   }
 
+  // Reset header visibility when component mounts
+  useEffect(() => {
+    setIsMedCertHeaderVisible(true);
+  }, [selectedPatient]);
+
+  // Intersection Observer for medical certificate header visibility
+  useEffect(() => {
+    const medCertHeaderElement = medCertHeaderRef.current;
+
+    if (!medCertHeaderElement) {
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      setIsMedCertHeaderVisible(true);
+      return;
+    }
+
+    const rootMarginTop = "-81px"; // Adjusted to match main header height
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        if (entries && entries.length > 0 && entries[0]) {
+          const entry = entries[0];
+          setIsMedCertHeaderVisible(entry.isIntersecting);
+        }
+      },
+      {
+        root: null,
+        rootMargin: `${rootMarginTop} 0px 0px 0px`,
+        threshold: 0,
+      }
+    );
+
+    observer.observe(medCertHeaderElement);
+
+    return () => {
+      if (medCertHeaderElement) {
+        observer.unobserve(medCertHeaderElement);
+      }
+    };
+  }, []);
+
   return (
     <>
-      <div className="space-y-6 min-h-screen">
-        {/* Header */}
-        <div className="">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <div className="flex items-center space-x-3 sm:space-x-4">
+      {/* Floating header */}
+      <div
+        className={`fixed left-0 right-0 z-30 transition-transform duration-300 ease-in-out
+          ${isMedCertHeaderVisible ? '-translate-y-full' : 'translate-y-0'}
+        `}
+        style={{ top: '81px' }}
+      >
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-6 py-3">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-4 h-4 text-gray-600" />
+                </button>
+                <span className="text-md font-semibold text-gray-900">Medical Certificate</span>
+              </div>
+              <button
+                onClick={handleSaveCertificate}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save Certificate</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-6 min-h-screen">
+        {/* Header */}
+        <div ref={medCertHeaderRef} className="med-cert-header">
+          <div className="max-w-5xl mx-auto px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onBack}
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
@@ -206,7 +284,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
               <div className="flex space-x-3">
                 <button
                   onClick={handleSaveCertificate}
-                  className="w-full sm:w-auto bg-green-600 hover:green-800 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-all duration-200 transform"
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save Certificate</span>
@@ -216,11 +294,11 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+        <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Patient Selection */}
           {!selectedPatient && (
-            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Select Patient or Enter Manually</h2>
+            <div className="bg-white p-6 rounded-xl border border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 mb-5">Select Patient or Enter Manually</h2>
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                   <div className="flex-1 relative">
@@ -315,9 +393,9 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
 
           {/* Medical Certificate Form */}
           {(selectedPatient || !isNewPatient) && (
-            <div className="space-y-6 sm:space-y-8">
+            <div className="space-y-6">
               {/* Certificate Purpose and Date */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Certificate Details</h3>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2">
@@ -343,7 +421,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
               </div>
 
               {/* Patient Information */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Patient Information</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div>
@@ -415,7 +493,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
               </div>
 
               {/* Physical Examination */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Physical Examination</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div>
@@ -482,7 +560,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
               </div>
 
               {/* System Examination */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">System Examination</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
@@ -569,7 +647,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
               </div>
 
               {/* Fitness Status and Remarks */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+              <div className="bg-white p-6 rounded-xl border border-gray-200">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6">Assessment</h3>
                 <div className="space-y-6">
                   <div>
