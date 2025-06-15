@@ -435,9 +435,9 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                     downloadPrescription(visit);
                                     setDropdownOpen(null);
                                   }}
-                                  className="w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 flex items-center space-x-2"
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                                 >
-                                  <Download className="w-4 h-4" />
+                                  <Download className="w-4 h-4 text-gray-500" />
                                   <span>Download Prescription</span>
                                 </button>
                                 <SharePDFButton
@@ -447,11 +447,12 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                   type="prescription"
                                   patientName={patient.name}
                                   visitDate={formatDate(visit.visitDate)}
-                                  className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center space-x-2"
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                                   variant="dropdown"
                                   onShare={() => setDropdownOpen(null)}
                                   prescription={visit}
                                   patient={patient}
+                                  customText="Share Prescription PDF"
                                 />
                               </>
                             )}
@@ -462,9 +463,9 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                     downloadBill(visit.bill);
                                     setDropdownOpen(null);
                                   }}
-                                  className="w-full text-left px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 flex items-center space-x-2"
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                                 >
-                                  <Download className="w-4 h-4" />
+                                  <Download className="w-4 h-4 text-gray-500" />
                                   <span>Download Bill</span>
                                 </button>
                                 <SharePDFButton
@@ -476,11 +477,12 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                   billDate={formatDate(visit.bill.createdAt)}
                                   amount={visit.bill.amount}
                                   isPaid={visit.bill.isPaid}
-                                  className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center space-x-2"
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                                   variant="dropdown"
                                   onShare={() => setDropdownOpen(null)}
                                   bill={visit.bill}
                                   patient={patient}
+                                  customText="Share Bill PDF"
                                 />
                               </>
                             )}

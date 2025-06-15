@@ -21,6 +21,7 @@ export default function SharePDFButton({
   className,
   variant = 'button', // 'button' or 'dropdown'
   onShare,
+  customText, // Add customText prop
   // Add these props for regeneration
   prescription,
   patient,
@@ -197,10 +198,10 @@ Dr. Prashant Nikam`
       <button 
         onClick={handleClick}
         disabled={disabled || status === 'loading'}
-        className={className || "w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center space-x-2"}
+        className={className || "w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"}
       >
-        <Share2 className="w-4 h-4" />
-        <span>{status === 'loading' ? 'Loading...' : 'Share PDF'}</span>
+        <Share2 className="w-4 h-4 text-gray-500" />
+        <span>{status === 'loading' ? 'Loading...' : (customText || 'Share PDF')}</span>
       </button>
     )
   }
