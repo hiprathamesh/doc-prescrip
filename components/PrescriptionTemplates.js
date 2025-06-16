@@ -19,6 +19,7 @@ export default function PrescriptionTemplates({ onBack }) {
   // Add refs and state for floating header
   const templatesHeaderRef = useRef(null);
   const [isTemplatesHeaderVisible, setIsTemplatesHeaderVisible] = useState(true);
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     loadTemplates();
@@ -153,6 +154,21 @@ export default function PrescriptionTemplates({ onBack }) {
     }
   };
 
+  // Handle Ctrl+K shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   if (currentView === 'create' || currentView === 'edit') {
     return (
       <TemplateEditor
@@ -230,12 +246,16 @@ export default function PrescriptionTemplates({ onBack }) {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search templates..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-70 pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                className="w-70 pl-10 pr-16 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
               />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded border">
+                Ctrl K
+              </div>
             </div>
           </div>
 
