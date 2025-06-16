@@ -24,7 +24,8 @@ import {
   PieChart,
   BarChart3,
   LogOut,
-  Trash2
+  Trash2,
+  Download
 } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, formatTimeAgo } from '../utils/dateUtils';
@@ -469,6 +470,7 @@ export default function Dashboard() {
       Edit: FileText, // Using FileText as Edit might not be available
       Trash2,
       Award: FileText, // Using FileText as Award might not be available
+      Download,
       CreditCard: DollarSign,
       UserMinus: Trash2, // Using Trash2 as UserMinus might not be available
       Activity

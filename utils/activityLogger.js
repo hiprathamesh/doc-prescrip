@@ -10,6 +10,7 @@ export const ACTIVITY_TYPES = {
   TEMPLATE_EDITED: 'template_edited',
   TEMPLATE_DELETED: 'template_deleted',
   MEDICAL_CERTIFICATE_CREATED: 'medical_certificate_created',
+  MEDICAL_CERTIFICATE_DOWNLOADED: 'medical_certificate_downloaded',
   BILL_PAYMENT_UPDATED: 'bill_payment_updated',
   CUSTOM_SYMPTOM_ADDED: 'custom_symptom_added',
   CUSTOM_DIAGNOSIS_ADDED: 'custom_diagnosis_added',
@@ -26,6 +27,7 @@ export const ACTIVITY_ICONS = {
   [ACTIVITY_TYPES.TEMPLATE_EDITED]: 'Edit',
   [ACTIVITY_TYPES.TEMPLATE_DELETED]: 'Trash2',
   [ACTIVITY_TYPES.MEDICAL_CERTIFICATE_CREATED]: 'Award',
+  [ACTIVITY_TYPES.MEDICAL_CERTIFICATE_DOWNLOADED]: 'Download',
   [ACTIVITY_TYPES.BILL_PAYMENT_UPDATED]: 'CreditCard',
   [ACTIVITY_TYPES.CUSTOM_SYMPTOM_ADDED]: 'Plus',
   [ACTIVITY_TYPES.CUSTOM_DIAGNOSIS_ADDED]: 'Plus',
@@ -42,6 +44,7 @@ export const ACTIVITY_COLORS = {
   [ACTIVITY_TYPES.TEMPLATE_EDITED]: 'orange',
   [ACTIVITY_TYPES.TEMPLATE_DELETED]: 'red',
   [ACTIVITY_TYPES.MEDICAL_CERTIFICATE_CREATED]: 'cyan',
+  [ACTIVITY_TYPES.MEDICAL_CERTIFICATE_DOWNLOADED]: 'blue',
   [ACTIVITY_TYPES.BILL_PAYMENT_UPDATED]: 'yellow',
   [ACTIVITY_TYPES.CUSTOM_SYMPTOM_ADDED]: 'indigo',
   [ACTIVITY_TYPES.CUSTOM_DIAGNOSIS_ADDED]: 'indigo',
@@ -147,7 +150,7 @@ class ActivityLogger {
   }
 
   async logMedicalCertificatePDFDownloaded(patient, certificateFor) {
-    return this.logActivity(ACTIVITY_TYPES.MEDICAL_CERTIFICATE_CREATED, {
+    return this.logActivity(ACTIVITY_TYPES.MEDICAL_CERTIFICATE_DOWNLOADED, {
       patientId: patient?.id,
       patientName: patient?.name || 'Manual Entry',
       certificateFor,
