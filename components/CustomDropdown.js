@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-export default function CustomDropdown({ options, value, onChange, placeholder, disabled = false, onEnterPress }) {
+const CustomDropdown = forwardRef(function CustomDropdown({ options, value, onChange, placeholder, disabled = false, onEnterPress }, ref) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef(null);
@@ -11,6 +11,21 @@ export default function CustomDropdown({ options, value, onChange, placeholder, 
 
   const selectedOption = options.find(option => option.value === value);
   const selectedIndex = options.findIndex(option => option.value === value);
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      buttonRef.current?.focus();
+    },
+    open: () => {
+      setIsOpen(true);
+      buttonRef.current?.focus();
+    },
+    close: () => {
+      setIsOpen(false);
+      setHighlightedIndex(-1);
+    }
+  }));
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -133,4 +148,6 @@ export default function CustomDropdown({ options, value, onChange, placeholder, 
       </div>
     </div>
   );
-}
+});
+
+export default CustomDropdown;

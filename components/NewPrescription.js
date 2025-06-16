@@ -757,7 +757,13 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     if (e.key === 'Enter') {
       e.preventDefault();
       if (nextRef && nextRef.current) {
-        nextRef.current.focus();
+        if (nextRef === genderRef) {
+          // For gender dropdown, focus and open it
+          nextRef.current.open();
+        } else {
+          // For regular inputs, just focus
+          nextRef.current.focus();
+        }
       }
     }
   };
@@ -910,19 +916,18 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">Gender</label>
-                        <div ref={genderRef} tabIndex={0} className="rounded-lg">
-                          <CustomDropdown
-                            options={[
-                              { value: 'male', label: 'Male' },
-                              { value: 'female', label: 'Female' },
-                              { value: 'other', label: 'Other' }
-                            ]}
-                            value={newPatientData.gender}
-                            onChange={(value) => setNewPatientData({ ...newPatientData, gender: value })}
-                            placeholder="Select gender..."
-                            onEnterPress={handleGenderEnterPress}
-                          />
-                        </div>
+                        <CustomDropdown
+                          ref={genderRef}
+                          options={[
+                            { value: 'male', label: 'Male' },
+                            { value: 'female', label: 'Female' },
+                            { value: 'other', label: 'Other' }
+                          ]}
+                          value={newPatientData.gender}
+                          onChange={(value) => setNewPatientData({ ...newPatientData, gender: value })}
+                          placeholder="Select gender..."
+                          onEnterPress={handleGenderEnterPress}
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone *</label>
