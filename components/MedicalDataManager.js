@@ -332,18 +332,19 @@ export default function MedicalDataManager({ onBack }) {
               </span>
             </div>
             {filteredItems.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="flex flex-wrap gap-2">
                 {filteredItems.map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                    className="relative group px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200 transition-colors cursor-default"
                   >
-                    <span className="text-blue-800 font-medium text-sm">{item}</span>
+                    <span>{item}</span>
                     <button
                       onClick={() => handleDeleteItem(item)}
-                      className="text-red-600 hover:text-red-800 p-1 hover:bg-red-50 rounded transition-colors"
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs"
+                      title="Remove item"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      ×
                     </button>
                   </div>
                 ))}
