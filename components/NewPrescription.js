@@ -910,7 +910,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">Gender</label>
-                        <div ref={genderRef} tabIndex={0}>
+                        <div ref={genderRef} tabIndex={0} className="rounded-lg">
                           <CustomDropdown
                             options={[
                               { value: 'male', label: 'Male' },
