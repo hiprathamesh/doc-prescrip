@@ -129,7 +129,7 @@ export const ToastProvider = ({ children }) => {
     title,
     description,
     type = 'success',
-    duration = 20000, // Increased duration
+    duration = 8000, // Increased duration
     onUndo
   }) => {
     const id = Date.now() + Math.random();
