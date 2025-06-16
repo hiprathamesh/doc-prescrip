@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Download, FileText, DollarSign, CheckCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Download, FileText, DollarSign, CheckCircle, Pill, FlaskConical, Calendar, User, Phone } from 'lucide-react';
 import { generatePDF } from '../utils/pdfGenerator';
 import { storage } from '../utils/storage';
 import { generateBillPDF } from '../utils/billGenerator';
@@ -16,6 +16,10 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
   const [isGeneratingPdfs, setIsGeneratingPdfs] = useState(true);
   const [currentBill, setCurrentBill] = useState(bill);
 
+  // Add refs and state for floating header
+  const successHeaderRef = useRef(null);
+  const [isSuccessHeaderVisible, setIsSuccessHeaderVisible] = useState(true);
+
   useEffect(() => {
     // Since PDFs are already generated, just set the URLs
     if (prescription.pdfUrl) {
@@ -26,6 +30,49 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
     }
     setIsGeneratingPdfs(false);
   }, [prescription, bill]);
+
+  // Reset header visibility when component mounts
+  useEffect(() => {
+    setIsSuccessHeaderVisible(true);
+  }, []);
+
+  // Intersection Observer for success header visibility
+  useEffect(() => {
+    const successHeaderElement = successHeaderRef.current;
+
+    if (!successHeaderElement) {
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      setIsSuccessHeaderVisible(true);
+      return;
+    }
+
+    const rootMarginTop = "-81px";
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        if (entries && entries.length > 0 && entries[0]) {
+          const entry = entries[0];
+          setIsSuccessHeaderVisible(entry.isIntersecting);
+        }
+      },
+      {
+        root: null,
+        rootMargin: `${rootMarginTop} 0px 0px 0px`,
+        threshold: 0,
+      }
+    );
+
+    observer.observe(successHeaderElement);
+
+    return () => {
+      if (successHeaderElement) {
+        observer.unobserve(successHeaderElement);
+      }
+    };
+  }, []);
 
   const generatePdfs = async () => {
     // This function is no longer needed since PDFs are pre-generated
@@ -146,168 +193,243 @@ Dr. Prashant Nikam`;
   };
 
   const formatMedicationTiming = (timing) => {
-    if (!timing) return 'As prescribed';
-    const timings = [];
-    if (timing.morning) timings.push('M');
-    if (timing.afternoon) timings.push('A');
-    if (timing.evening) timings.push('E');
-    if (timing.night) timings.push('N');
-    return timings.length > 0 ? timings.join('-') : 'As prescribed';
+    if (!timing) return '1-0-1-0'; // Default pattern
+
+    const morning = timing.morning ? '1' : '0';
+    const afternoon = timing.afternoon ? '1' : '0';
+    const evening = timing.evening ? '1' : '0';
+    const night = timing.night ? '1' : '0';
+
+    return `${morning}-${afternoon}-${evening}-${night}`;
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-
-          <span className="text-xl font-semibold text-gray-900">
-            Prescription Saved Successfully
-          </span>
-
-        </div>
-
-        {/* Prescription Summary */}
-        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Prescription Summary</h2>
-
-          {/* Patient Info */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
-            <div>
-              <span className="text-sm font-semibold text-gray-700">Patient</span>
-              <p className="text-gray-900 font-medium">{patient.name}</p>
-            </div>
-            <div>
-              <span className="text-sm font-semibold text-gray-700">Age</span>
-              <p className="text-gray-900 font-medium">{patient.age} years</p>
-            </div>
-            <div>
-              <span className="text-sm font-semibold text-gray-700">Phone</span>
-              <p className="text-gray-900 font-medium">{patient.phone}</p>
-            </div>
-            <div>
-              <span className="text-sm font-semibold text-gray-700">Date</span>
-              <p className="text-gray-900 font-medium">{formatDate(prescription.visitDate)}</p>
-            </div>
-          </div>
-
-          {/* Prescription Details */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Symptoms */}
-            {prescription.symptoms?.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-3">Symptoms</h3>
-                <div className="space-y-2">
-                  {prescription.symptoms.map((symptom, index) => (
-                    <div key={index} className="text-sm text-gray-700 bg-orange-50 p-2 rounded-lg border border-orange-200">
-                      {symptom.name} ({symptom.severity}) - {symptom.duration}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Diagnosis */}
-            {prescription.diagnosis?.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-3">Diagnosis</h3>
-                <div className="space-y-2">
-                  {prescription.diagnosis.map((diag, index) => (
-                    <div key={index} className="text-sm text-gray-700 bg-blue-50 p-2 rounded-lg border border-blue-200">
-                      {diag.name}
-                      {diag.description && <p className="text-xs text-gray-600 mt-1">{diag.description}</p>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Medications */}
-            {prescription.medications?.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-3">Medications</h3>
-                <div className="space-y-2">
-                  {prescription.medications.map((med, index) => (
-                    <div key={index} className="text-sm text-gray-700 bg-green-50 p-3 rounded-lg border border-green-200">
-                      <div className="font-medium">{med.name}</div>
-                      <div className="text-xs text-gray-600 space-y-1">
-                        <div>Dosage: {med.dosage}</div>
-                        <div>Timing: {formatMedicationTiming(med.timing)}</div>
-                        <div>Meal: {med.mealTiming?.replace('_', ' ') || 'after meal'}</div>
-                        {med.duration && <div>Duration: {med.duration}</div>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Lab Tests */}
-            {prescription.labResults?.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-3">Lab Tests</h3>
-                <div className="space-y-2">
-                  {prescription.labResults.map((lab, index) => (
-                    <div key={index} className="text-sm text-gray-700 bg-purple-50 p-2 rounded-lg border border-purple-200">
-                      <div className="font-medium">{lab.testName}</div>
-                      {lab.remarks && (
-                        <div className="text-xs text-gray-600 mt-1">Remarks: {lab.remarks}</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Doctor Notes and Advice */}
-          {(prescription.doctorNotes || prescription.advice) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-gray-200">
-              {prescription.doctorNotes && (
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-3">Doctor's Notes</h3>
-                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
-                    {prescription.doctorNotes.split('\n').map((note, index) => (
-                      <div key={index} className="mb-1">• {note}</div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {prescription.advice && (
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-3">Patient Advice</h3>
-                  <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
-                    {prescription.advice.split('\n').map((advice, index) => (
-                      <div key={index} className="mb-1">• {advice}</div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* PDF Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Prescription PDF */}
-          <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
+    <>
+      {/* Floating header */}
+      <div
+        className={`fixed left-0 right-0 z-30 transition-transform duration-300 ease-in-out
+          ${isSuccessHeaderVisible ? '-translate-y-full' : 'translate-y-0'}
+        `}
+        style={{ top: '81px' }}
+      >
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-6 py-3">
+            <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
-                <FileText className="w-6 h-6 text-blue-600" />
-                <h3 className="text-xl font-bold text-gray-900">Prescription PDF</h3>
+                <button
+                  onClick={onBack}
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-4 h-4 text-gray-600" />
+                </button>
+                <span className="text-md font-semibold text-gray-900">Prescription Saved Successfully</span>
               </div>
-              <div className="flex space-x-3">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <span className="text-sm font-medium text-green-600">Completed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-6 min-h-screen">
+        {/* Header */}
+        <div ref={successHeaderRef} className="success-header">
+          <div className="max-w-5xl mx-auto px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onBack}
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <span className="text-xl font-semibold text-gray-900">Prescription Saved Successfully</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+                <span className="text-sm font-medium text-green-600">Completed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-5xl mx-auto px-6 space-y-6">
+          {/* Patient Info Card */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+              <div className="flex items-center space-x-2">
+                <User className="w-4 h-4 text-gray-500" />
+                <div>
+                  <span className="text-gray-600">Patient</span>
+                  <p className="font-medium text-gray-900">{patient.name}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-gray-500" />
+                <div>
+                  <span className="text-gray-600">Age</span>
+                  <p className="font-medium text-gray-900">{patient.age} years</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Phone className="w-4 h-4 text-gray-500" />
+                <div>
+                  <span className="text-gray-600">Phone</span>
+                  <p className="font-medium text-gray-900">{patient.phone}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-gray-500" />
+                <div>
+                  <span className="text-gray-600">Date</span>
+                  <p className="font-medium text-gray-900">{formatDate(prescription.visitDate)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Prescription Summary */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 className="text-lg font-semibold text-gray-900 mb-5">Prescription Summary</h2>
+
+            {/* Visit Content */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-sm">
+              {/* Symptoms */}
+              {prescription.symptoms?.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-gray-800 mb-2">Symptoms</h4>
+                  <div className="space-y-1">
+                    {prescription.symptoms.map((symptom) => (
+                      <div key={symptom.id} className="text-gray-700 text-xs">
+                        <span className="font-medium">{symptom.name}</span>
+                        <span className="text-gray-500"> • {symptom.severity} • {symptom.duration}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Diagnosis */}
+              {prescription.diagnosis?.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-gray-800 mb-2">Diagnosis</h4>
+                  <div className="space-y-1">
+                    {prescription.diagnosis.map((diag, index) => (
+                      <div key={index} className="text-xs text-gray-700">
+                        <span className="font-medium">{diag.name}</span>
+                        {diag.description && <p className="text-gray-500 mt-0.5">{diag.description}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Medications */}
+              {prescription.medications?.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                    <Pill className="w-4 h-4 mr-1" />
+                    Medications
+                  </h4>
+                  <div className="space-y-1">
+                    {prescription.medications.map((med, medIndex) => (
+                      <div key={medIndex} className="text-gray-700 text-xs">
+                        <span className="font-medium">{med.name}</span>
+                        <span className="text-gray-500"> • {med.dosage} • {formatMedicationTiming(med.timing)}</span>
+                        {med.duration && <span className="text-gray-500"> • {med.duration}</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Lab Tests */}
+              {prescription.labResults?.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                    <FlaskConical className="w-4 h-4 mr-1" />
+                    Lab Tests
+                  </h4>
+                  <div className="space-y-1">
+                    {prescription.labResults.map((lab, index) => (
+                      <div key={index} className="text-xs text-gray-700">
+                        <div className="font-medium">{lab.testName}</div>
+                        {lab.remarks && (
+                          <div className="text-gray-500 mt-0.5">Remarks: {lab.remarks}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Doctor Notes and Advice */}
+            {(prescription.doctorNotes || prescription.advice) && (
+              <div className="mt-5 pt-4 border-t border-gray-200 space-y-3">
+                {prescription.doctorNotes && (
+                  <div>
+                    <h4 className="font-medium text-gray-800 mb-2">Doctor's Notes</h4>
+                    <div className="text-xs text-gray-700">
+                      {prescription.doctorNotes.split('\n').map((note, index) => (
+                        <div key={index} className="mb-1">• {note}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {prescription.advice && (
+                  <div>
+                    <h4 className="font-medium text-gray-800 mb-2">Patient Advice</h4>
+                    <div className="text-xs text-gray-700">
+                      {prescription.advice.split('\n').map((advice, index) => (
+                        <div key={index} className="mb-1">• {advice}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* PDF Actions */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Prescription PDF */}
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">Prescription PDF</h3>
+                </div>
+              </div>
+
+              
+
+              {isGeneratingPdfs ? (
+                <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg">
+                  <div className="text-center">
+                    <div className="w-6 h-6 animate-spin mx-auto border-4 border-blue-500 border-t-transparent rounded-full mb-2"></div>
+                    <p className="text-gray-500 text-sm">Generating PDF...</p>
+                  </div>
+                </div>
+              ) : prescriptionPdfUrl ? (
+                <iframe
+                  src={prescriptionPdfUrl}
+                  className="w-full flex-1 h-70 border border-gray-300 rounded-lg"
+                  title="Prescription PDF Preview"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500 text-sm">Failed to generate PDF</p>
+                </div>
+              )}
+              <div className="flex space-x-3 mt-4 justify-end">
                 <button
                   onClick={downloadPrescription}
                   disabled={!prescriptionPdfUrl || isGeneratingPdfs}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download</span>
@@ -326,39 +448,64 @@ Dr. Prashant Nikam`;
               </div>
             </div>
 
-            {isGeneratingPdfs ? (
-              <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                <div className="text-center">
-                  <div className="w-8 h-8 animate-spin mx-auto border-4 border-blue-500 border-t-transparent rounded-full mb-2"></div>
-                  <p className="text-gray-500">Generating PDF...</p>
+            {/* Bill PDF */}
+            {currentBill && (
+              <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                    <h3 className="text-lg font-semibold text-gray-900">Bill PDF</h3>
+                  </div>
                 </div>
-              </div>
-            ) : prescriptionPdfUrl ? (
-              <iframe
-                src={prescriptionPdfUrl}
-                className="w-full h-64 border border-gray-300 rounded-lg"
-                title="Prescription PDF Preview"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">Failed to generate PDF</p>
-              </div>
-            )}
-          </div>
 
-          {/* Bill PDF */}
-          {currentBill && (
-            <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                  <DollarSign className="w-6 h-6 text-green-600" />
-                  <h3 className="text-xl font-bold text-gray-900">Bill PDF</h3>
+                
+
+                {isGeneratingPdfs ? (
+                  <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg">
+                    <div className="text-center">
+                      <div className="w-6 h-6 animate-spin mx-auto border-4 border-green-500 border-t-transparent rounded-full mb-2"></div>
+                      <p className="text-gray-500 text-sm">Updating Bill...</p>
+                    </div>
+                  </div>
+                ) : billPdfUrl ? (
+                  <iframe
+                    src={billPdfUrl}
+                    className="w-full h-48 border border-gray-300 rounded-lg"
+                    title="Bill PDF Preview"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg">
+                    <p className="text-gray-500 text-sm">Failed to generate bill</p>
+                  </div>
+                )}
+
+                {/* Bill Summary with Payment Toggle */}
+                <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-green-800 text-sm">Amount: ₹{currentBill.amount}</span>
+                    <button
+                      onClick={toggleBillPayment}
+                      disabled={isGeneratingPdfs}
+                      className={`px-3 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${currentBill.isPaid
+                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                        : 'bg-red-100 text-red-800 hover:bg-red-200'
+                        }`}
+                    >
+                      {currentBill.isPaid ? 'Paid' : 'Pending'}
+                    </button>
+                  </div>
+                  <p className="text-xs text-green-700 mt-1">{currentBill.description}</p>
+                  {currentBill.isPaid && currentBill.paidAt && (
+                    <p className="text-xs text-green-600 mt-1">
+                      Paid: {formatDateTime(currentBill.paidAt)}
+                    </p>
+                  )}
                 </div>
-                <div className="flex space-x-3">
+                <div className="flex space-x-3 mt-4 justify-end">
                   <button
                     onClick={downloadBill}
                     disabled={!billPdfUrl || isGeneratingPdfs}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-normal"
                   >
                     <Download className="w-4 h-4" />
                     <span>Download</span>
@@ -378,82 +525,40 @@ Dr. Prashant Nikam`;
                   />
                 </div>
               </div>
+            )}
+          </div>
 
-              {isGeneratingPdfs ? (
-                <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                  <div className="text-center">
-                    <div className="w-8 h-8 animate-spin mx-auto border-4 border-green-500 border-t-transparent rounded-full mb-2"></div>
-                    <p className="text-gray-500">Updating Bill...</p>
-                  </div>
-                </div>
-              ) : billPdfUrl ? (
-                <iframe
-                  src={billPdfUrl}
-                  className="w-full h-64 border border-gray-300 rounded-lg"
-                  title="Bill PDF Preview"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500">Failed to generate bill</p>
-                </div>
-              )}
-
-              {/* Bill Summary with Payment Toggle */}
-              <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-green-800">Amount: ₹{currentBill.amount}</span>
-                  <button
-                    onClick={toggleBillPayment}
-                    disabled={isGeneratingPdfs}
-                    className={`px-3 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${currentBill.isPaid
-                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                        : 'bg-red-100 text-red-800 hover:bg-red-200'
-                      }`}
-                  >
-                    {currentBill.isPaid ? 'Paid' : 'Pending'}
-                  </button>
-                </div>
-                <p className="text-sm text-green-700 mt-1">{currentBill.description}</p>
-                {currentBill.isPaid && currentBill.paidAt && (
-                  <p className="text-xs text-green-600 mt-1">
-                    Paid: {formatDateTime(currentBill.paidAt)}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Follow-up Information */}
-        {prescription.followUpDate && (
-          <div className={`mt-8 p-6 rounded-2xl border-2 ${prescription.followUpStatus === 'completed'
+          {/* Follow-up Information */}
+          {prescription.followUpDate && (
+            <div className={`p-4 rounded-xl border-2 ${prescription.followUpStatus === 'completed'
               ? 'bg-green-50 border-green-200'
               : prescription.followUpStatus === 'overdue'
                 ? 'bg-red-50 border-red-200'
                 : 'bg-yellow-50 border-yellow-200'
-            }`}>
-            <h3 className={`text-lg font-semibold mb-2 ${prescription.followUpStatus === 'completed'
+              }`}>
+              <h3 className={`text-base font-semibold mb-2 ${prescription.followUpStatus === 'completed'
                 ? 'text-green-800'
                 : prescription.followUpStatus === 'overdue'
                   ? 'text-red-800'
                   : 'text-yellow-800'
-              }`}>
-              Follow-up {prescription.followUpStatus === 'completed' ? 'Completed' : 'Scheduled'}
-            </h3>
-            <p className={`${prescription.followUpStatus === 'completed'
+                }`}>
+                Follow-up {prescription.followUpStatus === 'completed' ? 'Completed' : 'Scheduled'}
+              </h3>
+              <p className={`text-sm ${prescription.followUpStatus === 'completed'
                 ? 'text-green-700'
                 : prescription.followUpStatus === 'overdue'
                   ? 'text-red-700'
                   : 'text-yellow-700'
-              }`}>
-              {prescription.followUpStatus === 'completed'
-                ? `Follow-up was completed on: ${formatDate(prescription.followUpCompletedDate)}`
-                : `Next appointment: ${formatDate(prescription.followUpDate)}`
-              }
-            </p>
-          </div>
-        )}
+                }`}>
+                {prescription.followUpStatus === 'completed'
+                  ? `Follow-up was completed on: ${formatDate(prescription.followUpCompletedDate)}`
+                  : `Next appointment: ${formatDate(prescription.followUpDate)}`
+                }
+              </p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
