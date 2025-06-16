@@ -14,7 +14,7 @@ import ConfirmationDialog from './ConfirmationDialog';
 import PrescriptionSuccess from './PrescriptionSuccess';
 import CustomSelect from './CustomSelect';
 import CustomDropdown from './CustomDropdown';
-import { useToast } from '../contexts/ToastContext';
+import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
 
 export default function NewPrescription({ patient, patients, onBack, onPatientUpdate }) {
@@ -81,8 +81,6 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   const ageRef = useRef(null);
   const genderRef = useRef(null);
   const phoneRef = useRef(null);
-
-  const { addToast } = useToast();
 
   useEffect(() => {
     if (selectedPatient) {
@@ -323,27 +321,26 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     setTemplateSearch('');
 
     // Show success toast with undo functionality
-    addToast({
-      title: 'Template Applied',
+    const undoToast = () => {
+      // Restore previous state
+      setSymptoms(previousState.symptoms);
+      setDiagnoses(previousState.diagnoses);
+      setMedications(previousState.medications);
+      setLabResults(previousState.labResults);
+      setDoctorNotesList(previousState.doctorNotesList);
+      setAdviceList(previousState.adviceList);
+      
+      // Show undo confirmation
+      toast.info('Template Undone', {
+        description: `"${template.name}" has been removed`
+      });
+    };
+
+    toast.success('Template Applied', {
       description: `"${template.name}" has been applied successfully`,
-      type: 'success',
-      duration: 6000,
-      onUndo: () => {
-        // Restore previous state
-        setSymptoms(previousState.symptoms);
-        setDiagnoses(previousState.diagnoses);
-        setMedications(previousState.medications);
-        setLabResults(previousState.labResults);
-        setDoctorNotesList(previousState.doctorNotesList);
-        setAdviceList(previousState.adviceList);
-        
-        // Show undo confirmation
-        addToast({
-          title: 'Template Undone',
-          description: `"${template.name}" has been removed`,
-          type: 'info',
-          duration: 3000
-        });
+      action: {
+        label: 'Undo',
+        onClick: undoToast
       }
     });
   };

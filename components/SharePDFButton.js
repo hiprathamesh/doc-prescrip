@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useSession, signIn } from 'next-auth/react'
 import { Share2, Loader2 } from 'lucide-react'
 import { storage } from '../utils/storage'
-import { useToast } from '../contexts/ToastContext'
+import { toast } from 'sonner'
 
 export default function SharePDFButton({ 
   pdfUrl, 
@@ -29,7 +29,6 @@ export default function SharePDFButton({
 }) {
   const { data: session, status } = useSession()
   const [isUploading, setIsUploading] = useState(false)
-  const { addToast } = useToast()
 
   const generateMessage = () => {
     if (type === 'prescription') {
@@ -154,12 +153,8 @@ Dr. Prashant Nikam`
         
         window.open(`https://wa.me/${formattedPhone}?text=${encoded}`, '_blank')
         
-        // Show success toast instead of alert
-        addToast({
-          title: 'Document Shared',
-          description: `${type === 'prescription' ? 'Prescription' : type === 'bill' ? 'Bill' : 'Certificate'} shared via WhatsApp successfully`,
-          type: 'success',
-          duration: 4000
+        toast.success('Document Shared', {
+          description: `${type === 'prescription' ? 'Prescription' : type === 'bill' ? 'Bill' : 'Certificate'} shared via WhatsApp successfully`
         });
         
         // Call onShare callback if provided (for dropdown variant)
@@ -172,19 +167,13 @@ Dr. Prashant Nikam`
     } catch (error) {
       console.error('Error sharing PDF:', error)
       if (error.message.includes('Unauthorized') || error.message.includes('authentication')) {
-        addToast({
-          title: 'Authentication Required',
-          description: 'Please sign in with Google to share documents',
-          type: 'warning',
-          duration: 5000
+        toast.warning('Authentication Required', {
+          description: 'Please sign in with Google to share documents'
         });
         signIn('google', { callbackUrl: window.location.href })
       } else {
-        addToast({
-          title: 'Share Failed',
-          description: `Failed to share PDF: ${error.message}`,
-          type: 'error',
-          duration: 5000
+        toast.error('Share Failed', {
+          description: `Failed to share PDF: ${error.message}`
         });
       }
     } finally {

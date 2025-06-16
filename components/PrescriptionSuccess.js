@@ -8,14 +8,13 @@ import { generateBillPDF } from '../utils/billGenerator';
 import { sendWhatsApp, generateWhatsAppMessage } from '../utils/whatsapp';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import SharePDFButton from './SharePDFButton';
-import { useToast } from '../contexts/ToastContext';
+import { toast } from 'sonner';
 
 export default function PrescriptionSuccess({ prescription, patient, bill, onBack }) {
   const [prescriptionPdfUrl, setPrescriptionPdfUrl] = useState(null);
   const [billPdfUrl, setBillPdfUrl] = useState(null);
   const [isGeneratingPdfs, setIsGeneratingPdfs] = useState(true);
   const [currentBill, setCurrentBill] = useState(bill);
-  const { addToast } = useToast();
 
   useEffect(() => {
     // Since PDFs are already generated, just set the URLs
@@ -61,11 +60,8 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       a.click();
       document.body.removeChild(a);
       
-      addToast({
-        title: 'Download Started',
-        description: 'Prescription PDF download has started',
-        type: 'success',
-        duration: 3000
+      toast.success('Download Started', {
+        description: 'Prescription PDF download has started'
       });
     }
   };
@@ -123,11 +119,8 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       a.click();
       document.body.removeChild(a);
       
-      addToast({
-        title: 'Download Started',
-        description: 'Bill PDF download has started',
-        type: 'success',
-        duration: 3000
+      toast.success('Download Started', {
+        description: 'Bill PDF download has started'
       });
     }
   };

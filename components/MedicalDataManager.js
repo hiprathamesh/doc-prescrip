@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Plus, Trash2, Search } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from '../lib/medicalData';
-import { useToast } from '../contexts/ToastContext';
+import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
 import CustomDropdown from './CustomDropdown';
 
@@ -18,7 +18,6 @@ export default function MedicalDataManager({ onBack }) {
   // Add pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(24); // Show 24 items per page for better grid layout
-  const { addToast } = useToast();
 
   // Add refs and state for floating header
   const medDataHeaderRef = useRef(null);
@@ -99,39 +98,31 @@ export default function MedicalDataManager({ onBack }) {
         setCustomSymptoms(updated);
         await storage.saveCustomSymptoms(updated);
         await activityLogger.logCustomDataAdded('symptom', newItem.trim());
-        addToast({
-          title: 'Symptom Added',
-          description: `"${newItem.trim()}" added to custom symptoms`,
-          type: 'success'
+        toast.success('Symptom Added', {
+          description: `"${newItem.trim()}" added to custom symptoms`
         });
       } else if (activeTab === 'diagnoses') {
         const updated = [...customDiagnoses, newItem.trim()];
         setCustomDiagnoses(updated);
         await storage.saveCustomDiagnoses(updated);
         await activityLogger.logCustomDataAdded('diagnosis', newItem.trim());
-        addToast({
-          title: 'Diagnosis Added',
-          description: `"${newItem.trim()}" added to custom diagnoses`,
-          type: 'success'
+        toast.success('Diagnosis Added', {
+          description: `"${newItem.trim()}" added to custom diagnoses`
         });
       } else if (activeTab === 'lab-tests') {
         const updated = [...customLabTests, newItem.trim()];
         setCustomLabTests(updated);
         await storage.saveCustomLabTests(updated);
         await activityLogger.logCustomDataAdded('labTest', newItem.trim());
-        addToast({
-          title: 'Lab Test Added',
-          description: `"${newItem.trim()}" added to custom lab tests`,
-          type: 'success'
+        toast.success('Lab Test Added', {
+          description: `"${newItem.trim()}" added to custom lab tests`
         });
       }
       setNewItem('');
     } catch (error) {
       console.error('Error adding item:', error);
-      addToast({
-        title: 'Error',
-        description: 'Failed to add item. Please try again.',
-        type: 'error'
+      toast.error('Error', {
+        description: 'Failed to add item. Please try again.'
       });
     }
   };

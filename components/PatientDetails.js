@@ -5,7 +5,7 @@ import { ArrowLeft, FileText, Phone, User, Trash2, MoreVertical, Pill, Download,
 import { storage } from '../utils/storage';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import SharePDFButton from './SharePDFButton';
-import { useToast } from '../contexts/ToastContext';
+import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
 
 export default function PatientDetails({ patient, onBack, onNewPrescription }) {
@@ -14,7 +14,6 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   const [showFloatingHeader, setShowFloatingHeader] = useState(false);
   const headerRef = useRef(null);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const { addToast } = useToast();
 
   useEffect(() => {
     if (patient) {
@@ -167,17 +166,13 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       
       loadPatientData();
 
-      addToast({
-        title: updatedBill.isPaid ? 'Payment Received' : 'Payment Marked Pending',
-        description: `Bill payment status updated successfully`,
-        type: 'success'
+      toast.success(updatedBill.isPaid ? 'Payment Received' : 'Payment Marked Pending', {
+        description: `Bill payment status updated successfully`
       });
     } catch (error) {
       console.error('Error updating bill payment status:', error);
-      addToast({
-        title: 'Error',
-        description: 'Failed to update payment status',
-        type: 'error'
+      toast.error('Error', {
+        description: 'Failed to update payment status'
       });
     }
   };
@@ -222,19 +217,15 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         loadPatientData();
         setDropdownOpen(null);
 
-        addToast({
-          title: visitType === 'certificate' ? 'Certificate Deleted' : 'Visit Deleted',
+        toast.success(visitType === 'certificate' ? 'Certificate Deleted' : 'Visit Deleted', {
           description: visitType === 'certificate' 
             ? 'Medical certificate has been deleted successfully'
-            : 'Visit record has been deleted successfully',
-          type: 'success'
+            : 'Visit record has been deleted successfully'
         });
       } catch (error) {
         console.error('Error deleting visit:', error);
-        addToast({
-          title: 'Error',
-          description: `Failed to delete ${visitType === 'certificate' ? 'certificate' : 'visit record'}`,
-          type: 'error'
+        toast.error('Error', {
+          description: `Failed to delete ${visitType === 'certificate' ? 'certificate' : 'visit record'}`
         });
       }
     }
@@ -252,20 +243,16 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         a.click();
         document.body.removeChild(a);
 
-        addToast({
-          title: 'Download Started',
-          description: 'Prescription PDF is being downloaded',
-          type: 'success'
+        toast.success('Download Started', {
+          description: 'Prescription PDF is being downloaded'
         });
       } else {
         throw new Error('Failed to generate PDF');
       }
     } catch (error) {
       console.error('Error downloading prescription:', error);
-      addToast({
-        title: 'Download Failed',
-        description: 'Failed to download prescription',
-        type: 'error'
+      toast.error('Download Failed', {
+        description: 'Failed to download prescription'
       });
     }
   };
@@ -282,20 +269,16 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         a.click();
         document.body.removeChild(a);
 
-        addToast({
-          title: 'Download Started',
-          description: 'Bill PDF is being downloaded',
-          type: 'success'
+        toast.success('Download Started', {
+          description: 'Bill PDF is being downloaded'
         });
       } else {
         throw new Error('Failed to generate PDF');
       }
     } catch (error) {
       console.error('Error downloading bill:', error);
-      addToast({
-        title: 'Download Failed',
-        description: 'Failed to download bill',
-        type: 'error'
+      toast.error('Download Failed', {
+        description: 'Failed to download bill'
       });
     }
   };
@@ -317,17 +300,13 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       // Log download activity
       await activityLogger.logMedicalCertificatePDFDownloaded(patient, certificate.certificateFor);
 
-      addToast({
-        title: 'Download Started',
-        description: 'Medical certificate PDF is being downloaded',
-        type: 'success'
+      toast.success('Download Started', {
+        description: 'Medical certificate PDF is being downloaded'
       });
     } catch (error) {
       console.error('Error downloading certificate:', error);
-      addToast({
-        title: 'Download Failed',
-        description: 'Failed to download medical certificate',
-        type: 'error'
+      toast.error('Download Failed', {
+        description: 'Failed to download medical certificate'
       });
     }
   };
