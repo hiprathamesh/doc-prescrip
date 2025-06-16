@@ -32,7 +32,7 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
     // But keeping it for backward compatibility
     try {
       setIsGeneratingPdfs(true);
-      
+
       if (!prescription.pdfUrl) {
         const prescriptionBlob = await generatePDF(prescription, patient, false);
         const prescriptionUrl = URL.createObjectURL(prescriptionBlob);
@@ -59,7 +59,7 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      
+
       toast.success('Download Started', {
         description: 'Prescription PDF download has started'
       });
@@ -68,10 +68,10 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
 
   const toggleBillPayment = async () => {
     if (!currentBill) return;
-    
+
     try {
       setIsGeneratingPdfs(true);
-      
+
       // Update bill status
       const updatedBill = {
         ...currentBill,
@@ -81,7 +81,7 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
 
       // Update bill in storage
       const allBills = await storage.getBills();
-      const updatedBills = allBills.map(b => 
+      const updatedBills = allBills.map(b =>
         b.id === currentBill.id ? updatedBill : b
       );
       await storage.saveBills(updatedBills);
@@ -93,7 +93,7 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
 
       // Update the bill with new PDF URL in storage
       updatedBill.pdfUrl = newBillUrl;
-      const finalUpdatedBills = allBills.map(b => 
+      const finalUpdatedBills = allBills.map(b =>
         b.id === currentBill.id ? updatedBill : b
       );
       await storage.saveBills(finalUpdatedBills);
@@ -101,7 +101,7 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       // Update local state
       setCurrentBill(updatedBill);
       setBillPdfUrl(newBillUrl);
-      
+
     } catch (error) {
       console.error('Error updating bill payment status:', error);
       alert('Failed to update payment status');
@@ -118,7 +118,7 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      
+
       toast.success('Download Started', {
         description: 'Bill PDF download has started'
       });
@@ -156,28 +156,27 @@ Dr. Prashant Nikam`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
         <div className="flex items-center space-x-4 mb-8">
           <button
             onClick={onBack}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200"
+            className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
           >
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
-          <div className="flex items-center space-x-3">
-            <CheckCircle className="w-8 h-8 text-green-600" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Prescription Saved Successfully
-            </h1>
-          </div>
+
+          <span className="text-xl font-semibold text-gray-900">
+            Prescription Saved Successfully
+          </span>
+
         </div>
 
         {/* Prescription Summary */}
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 mb-8">
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Prescription Summary</h2>
-          
+
           {/* Patient Info */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
             <div>
@@ -406,11 +405,10 @@ Dr. Prashant Nikam`;
                   <button
                     onClick={toggleBillPayment}
                     disabled={isGeneratingPdfs}
-                    className={`px-3 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                      currentBill.isPaid
+                    className={`px-3 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${currentBill.isPaid
                         ? 'bg-green-100 text-green-800 hover:bg-green-200'
                         : 'bg-red-100 text-red-800 hover:bg-red-200'
-                    }`}
+                      }`}
                   >
                     {currentBill.isPaid ? 'Paid' : 'Pending'}
                   </button>
@@ -428,30 +426,27 @@ Dr. Prashant Nikam`;
 
         {/* Follow-up Information */}
         {prescription.followUpDate && (
-          <div className={`mt-8 p-6 rounded-2xl border-2 ${
-            prescription.followUpStatus === 'completed' 
-              ? 'bg-green-50 border-green-200' 
+          <div className={`mt-8 p-6 rounded-2xl border-2 ${prescription.followUpStatus === 'completed'
+              ? 'bg-green-50 border-green-200'
               : prescription.followUpStatus === 'overdue'
-              ? 'bg-red-50 border-red-200'
-              : 'bg-yellow-50 border-yellow-200'
-          }`}>
-            <h3 className={`text-lg font-semibold mb-2 ${
-              prescription.followUpStatus === 'completed' 
-                ? 'text-green-800' 
-                : prescription.followUpStatus === 'overdue'
-                ? 'text-red-800'
-                : 'text-yellow-800'
+                ? 'bg-red-50 border-red-200'
+                : 'bg-yellow-50 border-yellow-200'
             }`}>
+            <h3 className={`text-lg font-semibold mb-2 ${prescription.followUpStatus === 'completed'
+                ? 'text-green-800'
+                : prescription.followUpStatus === 'overdue'
+                  ? 'text-red-800'
+                  : 'text-yellow-800'
+              }`}>
               Follow-up {prescription.followUpStatus === 'completed' ? 'Completed' : 'Scheduled'}
             </h3>
-            <p className={`${
-              prescription.followUpStatus === 'completed' 
-                ? 'text-green-700' 
+            <p className={`${prescription.followUpStatus === 'completed'
+                ? 'text-green-700'
                 : prescription.followUpStatus === 'overdue'
-                ? 'text-red-700'
-                : 'text-yellow-700'
-            }`}>
-              {prescription.followUpStatus === 'completed' 
+                  ? 'text-red-700'
+                  : 'text-yellow-700'
+              }`}>
+              {prescription.followUpStatus === 'completed'
                 ? `Follow-up was completed on: ${formatDate(prescription.followUpCompletedDate)}`
                 : `Next appointment: ${formatDate(prescription.followUpDate)}`
               }
