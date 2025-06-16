@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import { formatDate } from './dateUtils';
+import { activityLogger } from './activityLogger';
 
 export const generateMedicalCertificatePDF = async (certificate, patient, autoDownload = true) => {
   const pdf = new jsPDF('p', 'mm', 'a4');
@@ -191,6 +192,11 @@ export const generateMedicalCertificatePDF = async (certificate, patient, autoDo
 
   // Generate blob
   const pdfBlob = pdf.output('blob');
+
+  // Log activity when PDF is generated
+  if (patient) {
+    await activityLogger.logMedicalCertificateCreated(patient, certificate.certificateFor);
+  }
 
   if (autoDownload) {
     const url = URL.createObjectURL(pdfBlob);

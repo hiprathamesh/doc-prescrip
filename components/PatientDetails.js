@@ -67,22 +67,71 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
     try {
       const patientPrescriptions = await storage.getPrescriptionsByPatient(patient.id);
       const patientBills = await storage.getBillsByPatient(patient.id);
+      
+      // Load medical certificates for this patient
+      const allCertificates = JSON.parse(localStorage.getItem('medicalCertificates') || '[]');
+      const patientCertificates = allCertificates.filter(cert => cert.patientId === patient.id);
 
       const prescriptionsArray = Array.isArray(patientPrescriptions) ? patientPrescriptions : [];
       const billsArray = Array.isArray(patientBills) ? patientBills : [];
+      const certificatesArray = Array.isArray(patientCertificates) ? patientCertificates : [];
 
       // Combine prescriptions with their corresponding bills
-      const combinedVisits = prescriptionsArray.map(prescription => {
+      const prescriptionVisits = prescriptionsArray.map(prescription => {
         const correspondingBill = billsArray.find(bill =>
           Math.abs(new Date(bill.createdAt) - new Date(prescription.createdAt)) < 24 * 60 * 60 * 1000
         );
+        
+        // Use visitDate if available, otherwise fall back to createdAt
+        const visitDateTime = prescription.visitDate ? new Date(prescription.visitDate) : new Date(prescription.createdAt);
+        
         return {
           ...prescription,
-          bill: correspondingBill
+          type: 'prescription',
+          bill: correspondingBill,
+          sortDate: visitDateTime,
+          displayDate: visitDateTime
         };
       });
 
-      setVisits(combinedVisits.sort((a, b) => new Date(b.visitDate) - new Date(a.visitDate)));
+      // Add medical certificates as timeline items with proper date handling
+      const certificateVisits = certificatesArray.map(certificate => {
+        // Use the actual timestamp from issuedDate or createdAt, preserving the full DateTime
+        let certificateDateTime;
+        if (certificate.issuedDate) {
+          // If issuedDate is already a Date object or proper timestamp, use it
+          certificateDateTime = new Date(certificate.issuedDate);
+        } else if (certificate.createdAt) {
+          certificateDateTime = new Date(certificate.createdAt);
+        } else {
+          certificateDateTime = new Date();
+        }
+        
+        return {
+          ...certificate,
+          type: 'certificate',
+          id: certificate.id + '_cert',
+          sortDate: certificateDateTime,
+          displayDate: certificateDateTime
+        };
+      });
+
+      // Combine all visits and sort by date (most recent first)
+      const allVisits = [...prescriptionVisits, ...certificateVisits];
+      
+      // Sort by sortDate in descending order (most recent first) with proper date comparison
+      const sortedVisits = allVisits.sort((a, b) => {
+        const dateA = new Date(a.sortDate);
+        const dateB = new Date(b.sortDate);
+        
+        // Ensure we have valid dates
+        if (isNaN(dateA.getTime())) return 1;
+        if (isNaN(dateB.getTime())) return -1;
+        
+        return dateB.getTime() - dateA.getTime(); // Most recent first
+      });
+      
+      setVisits(sortedVisits);
     } catch (error) {
       console.error('Error loading patient data:', error);
       setVisits([]);
@@ -133,37 +182,58 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
     }
   };
 
-  const deleteVisit = async (prescriptionId, billId) => {
-    if (window.confirm('Are you sure you want to delete this visit record? This action cannot be undone.')) {
+  const deleteVisit = async (visitId, billId, visitType = 'prescription') => {
+    const confirmMessage = visitType === 'certificate' 
+      ? 'Are you sure you want to delete this medical certificate? This action cannot be undone.'
+      : 'Are you sure you want to delete this visit record? This action cannot be undone.';
+      
+    if (window.confirm(confirmMessage)) {
       try {
-        // Delete prescription
-        const allPrescriptions = await storage.getPrescriptions();
-        const updatedPrescriptions = allPrescriptions.filter(p => p.id !== prescriptionId);
-        await storage.savePrescriptions(updatedPrescriptions);
+        if (visitType === 'certificate') {
+          // Delete medical certificate
+          const allCertificates = JSON.parse(localStorage.getItem('medicalCertificates') || '[]');
+          const updatedCertificates = allCertificates.filter(cert => cert.id !== visitId.replace('_cert', ''));
+          localStorage.setItem('medicalCertificates', JSON.stringify(updatedCertificates));
+        } else {
+          // Delete prescription
+          const allPrescriptions = await storage.getPrescriptions();
+          const updatedPrescriptions = allPrescriptions.filter(p => p.id !== visitId);
+          await storage.savePrescriptions(updatedPrescriptions);
 
-        // Delete bill if exists
-        if (billId) {
-          const allBills = await storage.getBills();
-          const updatedBills = allBills.filter(b => b.id !== billId);
-          await storage.saveBills(updatedBills);
+          // Delete bill if exists
+          if (billId) {
+            const allBills = await storage.getBills();
+            const updatedBills = allBills.filter(b => b.id !== billId);
+            await storage.saveBills(updatedBills);
+          }
         }
 
         // Log activity
-        await activityLogger.logVisitDeleted(patient.name);
+        if (visitType === 'certificate') {
+          await activityLogger.logActivity('certificate_deleted', {
+            patientId: patient.id,
+            patientName: patient.name,
+            description: `Deleted medical certificate for ${patient.name}`
+          });
+        } else {
+          await activityLogger.logVisitDeleted(patient.name);
+        }
 
         loadPatientData();
         setDropdownOpen(null);
 
         addToast({
-          title: 'Visit Deleted',
-          description: 'Visit record has been deleted successfully',
+          title: visitType === 'certificate' ? 'Certificate Deleted' : 'Visit Deleted',
+          description: visitType === 'certificate' 
+            ? 'Medical certificate has been deleted successfully'
+            : 'Visit record has been deleted successfully',
           type: 'success'
         });
       } catch (error) {
         console.error('Error deleting visit:', error);
         addToast({
           title: 'Error',
-          description: 'Failed to delete visit record',
+          description: `Failed to delete ${visitType === 'certificate' ? 'certificate' : 'visit record'}`,
           type: 'error'
         });
       }
@@ -225,6 +295,38 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       addToast({
         title: 'Download Failed',
         description: 'Failed to download bill',
+        type: 'error'
+      });
+    }
+  };
+
+  const downloadCertificate = async (certificate) => {
+    try {
+      const { generateMedicalCertificatePDF } = await import('../utils/medicalCertificatePDFGenerator');
+      const certificateBlob = await generateMedicalCertificatePDF(certificate, patient, false);
+      
+      const url = URL.createObjectURL(certificateBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `medical-certificate-${certificate.patientName}-${formatDate(certificate.issuedDate)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Log download activity
+      await activityLogger.logMedicalCertificatePDFDownloaded(patient, certificate.certificateFor);
+
+      addToast({
+        title: 'Download Started',
+        description: 'Medical certificate PDF is being downloaded',
+        type: 'success'
+      });
+    } catch (error) {
+      console.error('Error downloading certificate:', error);
+      addToast({
+        title: 'Download Failed',
+        description: 'Failed to download medical certificate',
         type: 'error'
       });
     }
@@ -397,7 +499,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
           <div className="text-center py-12">
             <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600">No visits recorded yet</p>
-            <p className="text-sm text-gray-500 mt-1">Start by creating a new visit</p>
+            <p className="text-sm text-gray-500 mt-1">Start by creating a new visit or medical certificate</p>
           </div>
         ) : (
           <div className="relative">
@@ -410,16 +512,27 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                   {/* Timeline circle and date row */}
                   <div className="flex items-center space-x-4 mb-4">
                     <div className="relative flex-shrink-0">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm">
-                        <Calendar className="w-5 h-5 text-blue-600" />
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${
+                        visit.type === 'certificate' 
+                          ? 'bg-green-100' 
+                          : 'bg-blue-100'
+                      }`}>
+                        {visit.type === 'certificate' ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <Calendar className="w-5 h-5 text-blue-600" />
+                        )}
                       </div>
                     </div>
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-900">
-                        {formatDate(visit.visitDate)}
+                        {visit.type === 'certificate' 
+                          ? formatDate(visit.displayDate)
+                          : formatDate(visit.visitDate || visit.displayDate)
+                        }
                       </div>
                       <div className="text-xs text-gray-500">
-                        {formatDateTime(visit.createdAt)}
+                        {formatDateTime(visit.displayDate)}
                       </div>
                     </div>
                   </div>
@@ -438,71 +551,103 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       {dropdownOpen === visit.id && (
                         <div className="absolute right-0 mt-2 w-60 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                           <div className="py-1">
-                            {visit.pdfUrl && (
+                            {visit.type === 'certificate' ? (
                               <>
                                 <button
                                   onClick={() => {
-                                    downloadPrescription(visit);
+                                    downloadCertificate(visit);
                                     setDropdownOpen(null);
                                   }}
                                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                                 >
                                   <Download className="w-4 h-4 text-gray-500" />
-                                  <span>Download Prescription</span>
+                                  <span>Download Certificate</span>
                                 </button>
                                 <SharePDFButton
-                                  pdfUrl={visit.pdfUrl}
-                                  filename={`prescription-${patient.name}-${formatDate(visit.visitDate)}.pdf`}
+                                  pdfUrl={null}
+                                  filename={`medical-certificate-${visit.patientName}-${formatDate(visit.issuedDate)}.pdf`}
                                   phone={patient.phone}
-                                  type="prescription"
-                                  patientName={patient.name}
-                                  visitDate={formatDate(visit.visitDate)}
+                                  type="certificate"
+                                  patientName={visit.patientName}
+                                  certificateDate={formatDate(visit.issuedDate)}
+                                  certificateFor={visit.certificateFor}
                                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
                                   variant="dropdown"
                                   onShare={() => setDropdownOpen(null)}
-                                  prescription={visit}
+                                  certificate={visit}
                                   patient={patient}
-                                  customText="Share Prescription PDF"
+                                  customText="Share Certificate PDF"
                                 />
                               </>
-                            )}
-                            {visit.bill?.pdfUrl && (
+                            ) : (
                               <>
-                                <button
-                                  onClick={() => {
-                                    downloadBill(visit.bill);
-                                    setDropdownOpen(null);
-                                  }}
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                                >
-                                  <Download className="w-4 h-4 text-gray-500" />
-                                  <span>Download Bill</span>
-                                </button>
-                                <SharePDFButton
-                                  pdfUrl={visit.bill.pdfUrl}
-                                  filename={`bill-${patient.name}-${formatDate(visit.bill.createdAt)}.pdf`}
-                                  phone={patient.phone}
-                                  type="bill"
-                                  patientName={patient.name}
-                                  billDate={formatDate(visit.bill.createdAt)}
-                                  amount={visit.bill.amount}
-                                  isPaid={visit.bill.isPaid}
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                                  variant="dropdown"
-                                  onShare={() => setDropdownOpen(null)}
-                                  bill={visit.bill}
-                                  patient={patient}
-                                  customText="Share Bill PDF"
-                                />
+                                {visit.pdfUrl && (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        downloadPrescription(visit);
+                                        setDropdownOpen(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                                    >
+                                      <Download className="w-4 h-4 text-gray-500" />
+                                      <span>Download Prescription</span>
+                                    </button>
+                                    <SharePDFButton
+                                      pdfUrl={visit.pdfUrl}
+                                      filename={`prescription-${patient.name}-${formatDate(visit.visitDate)}.pdf`}
+                                      phone={patient.phone}
+                                      type="prescription"
+                                      patientName={patient.name}
+                                      visitDate={formatDate(visit.visitDate)}
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                                      variant="dropdown"
+                                      onShare={() => setDropdownOpen(null)}
+                                      prescription={visit}
+                                      patient={patient}
+                                      customText="Share Prescription PDF"
+                                    />
+                                  </>
+                                )}
+                                {visit.bill?.pdfUrl && (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        downloadBill(visit.bill);
+                                        setDropdownOpen(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                                    >
+                                      <Download className="w-4 h-4 text-gray-500" />
+                                      <span>Download Bill</span>
+                                    </button>
+                                    <SharePDFButton
+                                      pdfUrl={visit.bill.pdfUrl}
+                                      filename={`bill-${patient.name}-${formatDate(visit.bill.createdAt)}.pdf`}
+                                      phone={patient.phone}
+                                      type="bill"
+                                      patientName={patient.name}
+                                      billDate={formatDate(visit.bill.createdAt)}
+                                      amount={visit.bill.amount}
+                                      isPaid={visit.bill.isPaid}
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                                      variant="dropdown"
+                                      onShare={() => setDropdownOpen(null)}
+                                      bill={visit.bill}
+                                      patient={patient}
+                                      customText="Share Bill PDF"
+                                    />
+                                  </>
+                                )}
                               </>
                             )}
                             <div className="border-t border-gray-100 my-1"></div>
                             <button
-                              onClick={() => deleteVisit(visit.id, visit.bill?.id)}
+                              onClick={() => deleteVisit(visit.type === 'certificate' ? visit.id : visit.id, visit.bill?.id, visit.type)}
                               className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
                             >
                               <Trash2 className="w-4 h-4" />
-                              <span>Delete Visit</span>
+                              <span>{visit.type === 'certificate' ? 'Delete Certificate' : 'Delete Visit'}</span>
                             </button>
                           </div>
                         </div>
@@ -513,7 +658,14 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                     <div className="flex items-center justify-between mb-3 pr-8">
                       <div className="flex items-center space-x-3">
                         <h3 className="font-medium text-gray-900">
-                          {visit.isFollowUpVisit ? 'Follow-up Visit' : 'Regular Visit'}
+                          {visit.type === 'certificate' ? (
+                            <span className="flex items-center space-x-2">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              <span>Medical Certificate</span>
+                            </span>
+                          ) : (
+                            visit.isFollowUpVisit ? 'Follow-up Visit' : 'Regular Visit'
+                          )}
                         </h3>
                         {visit.bill && (
                           <div className="flex items-center space-x-2">
@@ -531,63 +683,98 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                           </div>
                         )}
                       </div>
+                      {/* Add time indicator for better chronological understanding */}
+                      <div className="text-xs text-gray-500">
+                        {formatDateTime(visit.displayDate)}
+                      </div>
                     </div>
 
                     {/* Visit Content */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                      {/* Symptoms */}
-                      <div>
-                        <h4 className="font-medium text-gray-800 mb-2">Symptoms</h4>
-                        <div className="space-y-1">
-                          {visit.symptoms.map((symptom) => (
-                            <div key={symptom.id} className="text-gray-700 text-xs">
-                              <span className="font-medium">{symptom.name}</span>
-                              <span className="text-gray-500"> • {symptom.severity} • {symptom.duration}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Diagnosis */}
-                      <div>
-                        <h4 className="font-medium text-gray-800 mb-2">Diagnosis</h4>
-                        <div className="text-xs text-gray-700">
-                          {formatListAsText(visit.diagnosis)}
-                        </div>
-                      </div>
-
-                      {/* Medications */}
-                      {visit.medications?.length > 0 && (
+                    {visit.type === 'certificate' ? (
+                      /* Medical Certificate Content */
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
-                          <h4 className="font-medium text-gray-800 mb-2 flex items-center">
-                            <Pill className="w-4 h-4 mr-1" />
-                            Medications
-                          </h4>
+                          <h4 className="font-medium text-gray-800 mb-2">Certificate Purpose</h4>
+                          <div className="text-gray-700 text-xs bg-green-50 p-2 rounded-md">
+                            {visit.certificateFor}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-800 mb-2">Fitness Status</h4>
+                          <div className={`text-xs font-medium p-2 rounded-md ${
+                            visit.fitnessStatus === 'fit' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {visit.fitnessStatus === 'fit' ? 'Medically Fit' : 'Medically Unfit'}
+                          </div>
+                        </div>
+                        {visit.remarks && (
+                          <div className="md:col-span-2">
+                            <h4 className="font-medium text-gray-800 mb-2">Remarks</h4>
+                            <div className="text-xs text-gray-700 bg-gray-100 p-2 rounded-md">
+                              {visit.remarks}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* Prescription Visit Content */
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                        {/* Symptoms */}
+                        <div>
+                          <h4 className="font-medium text-gray-800 mb-2">Symptoms</h4>
                           <div className="space-y-1">
-                            {visit.medications.map((med, medIndex) => (
-                              <div key={medIndex} className="text-gray-700 text-xs">
-                                <span className="font-medium">{med.name}</span>
-                                <span className="text-gray-500"> • {med.dosage} • {formatMedicationTiming(med.timing)}</span>
-                                {med.duration && <span className="text-gray-500"> • {med.duration}</span>}
+                            {visit.symptoms.map((symptom) => (
+                              <div key={symptom.id} className="text-gray-700 text-xs">
+                                <span className="font-medium">{symptom.name}</span>
+                                <span className="text-gray-500"> • {symptom.severity} • {symptom.duration}</span>
                               </div>
                             ))}
                           </div>
                         </div>
-                      )}
 
-                      {/* Lab Tests */}
-                      {visit.labResults?.length > 0 && (
+                        {/* Diagnosis */}
                         <div>
-                          <h4 className="font-medium text-gray-800 mb-2">Lab Tests</h4>
+                          <h4 className="font-medium text-gray-800 mb-2">Diagnosis</h4>
                           <div className="text-xs text-gray-700">
-                            {formatListAsText(visit.labResults, 'testName')}
+                            {formatListAsText(visit.diagnosis)}
                           </div>
                         </div>
-                      )}
-                    </div>
 
-                    {/* Notes and Advice */}
-                    {(visit.doctorNotes || visit.advice) && (
+                        {/* Medications */}
+                        {visit.medications?.length > 0 && (
+                          <div>
+                            <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                              <Pill className="w-4 h-4 mr-1" />
+                              Medications
+                            </h4>
+                            <div className="space-y-1">
+                              {visit.medications.map((med, medIndex) => (
+                                <div key={medIndex} className="text-gray-700 text-xs">
+                                  <span className="font-medium">{med.name}</span>
+                                  <span className="text-gray-500"> • {med.dosage} • {formatMedicationTiming(med.timing)}</span>
+                                  {med.duration && <span className="text-gray-500"> • {med.duration}</span>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Lab Tests */}
+                        {visit.labResults?.length > 0 && (
+                          <div>
+                            <h4 className="font-medium text-gray-800 mb-2">Lab Tests</h4>
+                            <div className="text-xs text-gray-700">
+                              {formatListAsText(visit.labResults, 'testName')}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Notes and Advice for prescription visits */}
+                    {visit.type === 'prescription' && (visit.doctorNotes || visit.advice) && (
                       <div className="mt-4 pt-3 border-t border-gray-200 space-y-2">
                         {visit.doctorNotes && (
                           <div>
@@ -604,8 +791,8 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       </div>
                     )}
 
-                    {/* Follow-up */}
-                    {visit.followUpDate && (
+                    {/* Follow-up for prescription visits */}
+                    {visit.type === 'prescription' && visit.followUpDate && (
                       <div className="mt-3 pt-3 border-t border-gray-200">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-gray-800">Follow-up:</span>

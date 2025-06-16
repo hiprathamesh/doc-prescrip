@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Plus, Search, Edit, Trash2, FileText, Calendar, User, Stethoscope, FlaskConical } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Edit, Trash2, FileText, Calendar, User, Stethoscope, FlaskConical, Pill } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate } from '../utils/dateUtils';
 import { MEDICAL_CONDITIONS, SEVERITY_OPTIONS, DURATION_OPTIONS, MEDICATION_TIMING, MEDICATION_DURATION_OPTIONS } from '../lib/constants';
@@ -304,7 +304,7 @@ export default function PrescriptionTemplates({ onBack }) {
                           {template.medications?.length > 0 && (
                             <div>
                               <div className="flex items-center space-x-1 mb-1">
-                                <FileText className="w-3 h-3 text-green-500" />
+                                <Pill className="w-3 h-3 text-green-500" />
                                 <span className="font-medium text-gray-700">Medications ({template.medications.length})</span>
                               </div>
                               <div className="text-gray-600">

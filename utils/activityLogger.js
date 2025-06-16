@@ -146,6 +146,15 @@ class ActivityLogger {
     });
   }
 
+  async logMedicalCertificatePDFDownloaded(patient, certificateFor) {
+    return this.logActivity(ACTIVITY_TYPES.MEDICAL_CERTIFICATE_CREATED, {
+      patientId: patient?.id,
+      patientName: patient?.name || 'Manual Entry',
+      certificateFor,
+      description: `Downloaded medical certificate PDF for ${patient?.name || 'Manual Entry'}`
+    });
+  }
+
   async logBillPaymentUpdated(patient, amount, isPaid) {
     return this.logActivity(ACTIVITY_TYPES.BILL_PAYMENT_UPDATED, {
       patientId: patient.id,

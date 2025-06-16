@@ -5,6 +5,7 @@ import { ArrowLeft, Download, Share2, FileText, CheckCircle } from 'lucide-react
 import { generateMedicalCertificatePDF } from '../utils/medicalCertificatePDFGenerator';
 import { formatDate } from '../utils/dateUtils';
 import SharePDFButton from './SharePDFButton';
+import { activityLogger } from '../utils/activityLogger';
 
 export default function MedicalCertificateSuccess({ certificate, patient, onBack }) {
   const [certificatePdfUrl, setCertificatePdfUrl] = useState(null);
@@ -29,7 +30,7 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
     }
   };
 
-  const downloadCertificate = () => {
+  const downloadCertificate = async () => {
     if (certificatePdfUrl) {
       const a = document.createElement('a');
       a.href = certificatePdfUrl;
@@ -37,6 +38,11 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+
+      // Log download activity
+      if (patient) {
+        await activityLogger.logMedicalCertificatePDFDownloaded(patient, certificate.certificateFor);
+      }
     }
   };
 

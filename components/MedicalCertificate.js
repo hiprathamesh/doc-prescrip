@@ -203,7 +203,8 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
         id: Date.now().toString(),
         patientId: selectedPatient?.id || null,
         ...certificateData,
-        issuedDate: new Date(certificateData.issuedDate),
+        // Use current DateTime instead of just the date to preserve time
+        issuedDate: new Date(),
         createdAt: new Date()
       };
 
