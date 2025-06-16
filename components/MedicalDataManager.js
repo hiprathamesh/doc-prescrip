@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Search, Save } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Plus, Trash2, Search } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from '../lib/medicalData';
 import { useToast } from '../contexts/ToastContext';
 import { activityLogger } from '../utils/activityLogger';
+import CustomDropdown from './CustomDropdown';
 
 export default function MedicalDataManager({ onBack }) {
   const [activeTab, setActiveTab] = useState('symptoms');
@@ -16,8 +17,55 @@ export default function MedicalDataManager({ onBack }) {
   const [searchTerm, setSearchTerm] = useState('');
   const { addToast } = useToast();
 
+  // Add refs and state for floating header
+  const medDataHeaderRef = useRef(null);
+  const [isMedDataHeaderVisible, setIsMedDataHeaderVisible] = useState(true);
+
   useEffect(() => {
     loadData();
+  }, []);
+
+  // Reset header visibility when component mounts
+  useEffect(() => {
+    setIsMedDataHeaderVisible(true);
+  }, []);
+
+  // Intersection Observer for medical data header visibility
+  useEffect(() => {
+    const medDataHeaderElement = medDataHeaderRef.current;
+
+    if (!medDataHeaderElement) {
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      setIsMedDataHeaderVisible(true);
+      return;
+    }
+
+    const rootMarginTop = "-81px";
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        if (entries && entries.length > 0 && entries[0]) {
+          const entry = entries[0];
+          setIsMedDataHeaderVisible(entry.isIntersecting);
+        }
+      },
+      {
+        root: null,
+        rootMargin: `${rootMarginTop} 0px 0px 0px`,
+        threshold: 0,
+      }
+    );
+
+    observer.observe(medDataHeaderElement);
+
+    return () => {
+      if (medDataHeaderElement) {
+        observer.unobserve(medDataHeaderElement);
+      }
+    };
   }, []);
 
   const loadData = async () => {
@@ -27,7 +75,7 @@ export default function MedicalDataManager({ onBack }) {
         storage.getCustomDiagnoses(),
         storage.getCustomLabTests()
       ]);
-      
+
       setCustomSymptoms(symptoms || []);
       setCustomDiagnoses(diagnoses || []);
       setCustomLabTests(labTests || []);
@@ -122,7 +170,7 @@ export default function MedicalDataManager({ onBack }) {
 
   const currentItems = getCurrentItems();
   const predefinedItems = getPredefinedItems();
-  
+
   const filteredItems = currentItems.filter(item =>
     item.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -145,98 +193,126 @@ export default function MedicalDataManager({ onBack }) {
     return '';
   };
 
+  const getItemCount = () => {
+    if (activeTab === 'symptoms') return customSymptoms.length;
+    if (activeTab === 'diagnoses') return customDiagnoses.length;
+    if (activeTab === 'lab-tests') return customLabTests.length;
+    return 0;
+  };
+
+  const categoryOptions = [
+    { value: 'symptoms', label: `Custom Symptoms (${customSymptoms.length})` },
+    { value: 'diagnoses', label: `Custom Diagnoses (${customDiagnoses.length})` },
+    { value: 'lab-tests', label: `Custom Lab Tests (${customLabTests.length})` }
+  ];
+
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Medical Data Manager</h1>
-            <p className="text-gray-600 mt-1">Manage custom symptoms, diagnoses, and lab tests</p>
+    <>
+      {/* Floating header */}
+      <div
+        className={`fixed left-0 right-0 z-30 transition-transform duration-300 ease-in-out
+          ${isMedDataHeaderVisible ? '-translate-y-full' : 'translate-y-0'}
+        `}
+        style={{ top: '81px' }}
+      >
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-6 py-3">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onBack}
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-4 h-4 text-gray-600" />
+                </button>
+                <span className="text-md font-semibold text-gray-900">Medical Data Manager</span>
+              </div>
+              <div className="w-64">
+                <CustomDropdown
+                  options={categoryOptions}
+                  value={activeTab}
+                  onChange={setActiveTab}
+                  placeholder="Select category..."
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
-            <button
-              onClick={() => setActiveTab('symptoms')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'symptoms'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              Custom Symptoms ({customSymptoms.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('diagnoses')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'diagnoses'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              Custom Diagnoses ({customDiagnoses.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('lab-tests')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'lab-tests'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              Custom Lab Tests ({customLabTests.length})
-            </button>
-          </nav>
+      <div className="space-y-6 min-h-screen">
+        {/* Header */}
+        <div ref={medDataHeaderRef} className="med-data-header">
+          <div className="max-w-5xl mx-auto px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onBack}
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <span className="text-xl font-semibold text-gray-900">Medical Data Manager</span>
+              </div>
+              <div className="w-full sm:w-64">
+                <CustomDropdown
+                  options={categoryOptions}
+                  value={activeTab}
+                  onChange={setActiveTab}
+                  placeholder="Select category..."
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Add new item */}
-          <div className="flex space-x-4">
-            <input
-              type="text"
-              value={newItem}
-              onChange={(e) => setNewItem(e.target.value)}
-              placeholder={getPlaceholder()}
-              className="flex-1 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              onKeyDown={(e) => e.key === 'Enter' && handleAddItem()}
-            />
-            <button
-              onClick={handleAddItem}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-4 rounded-xl flex items-center space-x-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Add</span>
-            </button>
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New {activeTab === 'symptoms' ? 'Symptom' : activeTab === 'diagnoses' ? 'Diagnosis' : 'Lab Test'}</h3>
+            <div className="flex space-x-3">
+              <input
+                type="text"
+                value={newItem}
+                onChange={(e) => setNewItem(e.target.value)}
+                placeholder={getPlaceholder()}
+                className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                onKeyDown={(e) => e.key === 'Enter' && handleAddItem()}
+              />
+              <button
+                onClick={handleAddItem}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors duration-200 font-medium"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add</span>
+              </button>
+            </div>
           </div>
 
           {/* Search */}
+
           <div className="relative">
-            <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder={`Search ${activeTab.replace('-', ' ')}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
             />
           </div>
 
+
           {/* Custom items */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              {getTabLabel(activeTab)}
-            </h3>
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {getTabLabel(activeTab)}
+              </h3>
+              <span className="text-sm text-gray-500">
+                {getItemCount()} item{getItemCount() !== 1 ? 's' : ''}
+              </span>
+            </div>
             {filteredItems.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredItems.map((item, index) => (
@@ -244,7 +320,7 @@ export default function MedicalDataManager({ onBack }) {
                     key={index}
                     className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
                   >
-                    <span className="text-blue-800 font-medium">{item}</span>
+                    <span className="text-blue-800 font-medium text-sm">{item}</span>
                     <button
                       onClick={() => handleDeleteItem(item)}
                       className="text-red-600 hover:text-red-800 p-1 hover:bg-red-50 rounded transition-colors"
@@ -256,16 +332,26 @@ export default function MedicalDataManager({ onBack }) {
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">
-                <p>No custom {activeTab.replace('-', ' ')} found</p>
+                <p className="text-sm">
+                  {searchTerm ? `No ${activeTab.replace('-', ' ')} found matching "${searchTerm}"` : `No custom ${activeTab.replace('-', ' ')} found`}
+                </p>
+                {!searchTerm && (
+                  <p className="text-xs text-gray-400 mt-1">Add items using the form above</p>
+                )}
               </div>
             )}
           </div>
 
           {/* Predefined items (for reference) */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Predefined {activeTab === 'symptoms' ? 'Symptoms' : activeTab === 'diagnoses' ? 'Diagnoses' : 'Lab Tests'}
-            </h3>
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Predefined {activeTab === 'symptoms' ? 'Symptoms' : activeTab === 'diagnoses' ? 'Diagnoses' : 'Lab Tests'}
+              </h3>
+              <span className="text-sm text-gray-500">
+                {searchTerm ? `${filteredPredefined.length} found` : `${predefinedItems.length} total`}
+              </span>
+            </div>
             <div className="flex flex-wrap gap-2 max-h-64 overflow-y-auto">
               {filteredPredefined.slice(0, 50).map((item, index) => (
                 <span
@@ -284,6 +370,6 @@ export default function MedicalDataManager({ onBack }) {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
