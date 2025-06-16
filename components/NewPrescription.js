@@ -891,7 +891,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                           value={newPatientData.name}
                           onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
                           onKeyPress={(e) => handleKeyPress(e, ageRef)}
-                          className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                          className="w-full text-sm p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
                           placeholder="Enter patient name"
                           autoFocus={isNewPatient && !isAnimating}
                         />
@@ -904,7 +904,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                           value={newPatientData.age}
                           onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
                           onKeyPress={(e) => handleKeyPress(e, genderRef)}
-                          className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                          className="w-full text-sm p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
                           placeholder="Enter age"
                         />
                       </div>
@@ -932,7 +932,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                           value={newPatientData.phone}
                           onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
                           onKeyPress={handleLastFieldKeyPress}
-                          className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                          className="w-full text-sm p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
                           placeholder="Enter phone number"
                         />
                       </div>
