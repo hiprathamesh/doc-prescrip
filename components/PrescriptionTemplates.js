@@ -111,7 +111,7 @@ export default function PrescriptionTemplates({ onBack }) {
           if (templateToDelete) {
             await activityLogger.logTemplateDeleted(templateToDelete.name);
           }
-          
+
           await loadTemplates(); // Reload templates after deletion
         } else {
           alert('Failed to delete template');
@@ -140,7 +140,7 @@ export default function PrescriptionTemplates({ onBack }) {
         } else {
           await activityLogger.logTemplateCreated(template);
         }
-        
+
         await loadTemplates(); // Reload templates after saving
         setCurrentView('list');
         setSelectedTemplate(null);
@@ -227,16 +227,16 @@ export default function PrescriptionTemplates({ onBack }) {
         <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Search Bar */}
           <div className="w-full flex justify-end">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search templates..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-70 pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-            />
-          </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search templates..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-70 pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+              />
+            </div>
           </div>
 
 
@@ -337,10 +337,10 @@ export default function PrescriptionTemplates({ onBack }) {
                           <div className="text-xs text-gray-500">
                             {/* Show total items count */}
                             {(() => {
-                              const totalItems = 
-                                (template.symptoms?.length || 0) + 
-                                (template.diagnosis?.length || 0) + 
-                                (template.medications?.length || 0) + 
+                              const totalItems =
+                                (template.symptoms?.length || 0) +
+                                (template.diagnosis?.length || 0) +
+                                (template.medications?.length || 0) +
                                 (template.labResults?.length || 0);
                               return totalItems > 0 ? `${totalItems} total items` : '';
                             })()}
@@ -929,8 +929,8 @@ function TemplateEditor({ template, onSave, onCancel }) {
                                 type="button"
                                 onClick={() => updateMedication(medication.id, `timing.${key}`, !medication.timing?.[key])}
                                 className={`w-6 h-6 rounded-md border-2 transition-all duration-200 flex items-center justify-center ${medication.timing?.[key]
-                                    ? 'border-green-300 bg-green-100'
-                                    : 'border-gray-300 hover:border-gray-400'
+                                  ? 'border-green-300 bg-green-100'
+                                  : 'border-gray-300 hover:border-gray-400'
                                   }`}
                               >
                                 {medication.timing?.[key] && (

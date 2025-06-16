@@ -276,6 +276,22 @@ export default function MedicalDataManager({ onBack }) {
         </div>
 
         <div className="max-w-5xl mx-auto px-6 space-y-6">
+          {/* Search */}
+
+          <div className="w-full flex justify-end">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder={`Search ${activeTab.replace('-', ' ')}...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-70 pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+              />
+            </div>
+          </div>
+
+
           {/* Add new item */}
           <div className="bg-white p-6 rounded-xl border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New {activeTab === 'symptoms' ? 'Symptom' : activeTab === 'diagnoses' ? 'Diagnosis' : 'Lab Test'}</h3>
@@ -298,18 +314,7 @@ export default function MedicalDataManager({ onBack }) {
             </div>
           </div>
 
-          {/* Search */}
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder={`Search ${activeTab.replace('-', ' ')}...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-            />
-          </div>
 
 
           {/* Custom items */}
@@ -369,7 +374,7 @@ export default function MedicalDataManager({ onBack }) {
                 )}
               </div>
             </div>
-            
+
             {filteredPredefined.length > 0 ? (
               <>
                 <div className="flex flex-wrap gap-2">
@@ -382,7 +387,7 @@ export default function MedicalDataManager({ onBack }) {
                     </span>
                   ))}
                 </div>
-                
+
                 {totalPages > 1 && (
                   <div className="mt-6 pt-4 border-t border-gray-200">
                     <Pagination
@@ -415,38 +420,38 @@ function Pagination({ currentPage, totalPages, onPageChange, showingStart, showi
   const getPageNumbers = () => {
     const delta = 2; // Number of pages to show on each side of current page
     const range = [];
-    
+
     // Always show first page
     if (totalPages > 0) {
       range.push(1);
     }
-    
+
     // Calculate start and end of middle range
     const start = Math.max(2, currentPage - delta);
     const end = Math.min(totalPages - 1, currentPage + delta);
-    
+
     // Add ellipsis after page 1 if needed
     if (start > 2) {
       range.push('...');
     }
-    
+
     // Add middle pages
     for (let i = start; i <= end; i++) {
       if (i !== 1 && i !== totalPages) {
         range.push(i);
       }
     }
-    
+
     // Add ellipsis before last page if needed
     if (end < totalPages - 1) {
       range.push('...');
     }
-    
+
     // Always show last page (if different from first)
     if (totalPages > 1) {
       range.push(totalPages);
     }
-    
+
     return range;
   };
 
@@ -457,21 +462,20 @@ function Pagination({ currentPage, totalPages, onPageChange, showingStart, showi
       <div className="text-sm text-gray-600">
         Showing {showingStart}-{showingEnd} of {totalItems} items
       </div>
-      
+
       <div className="flex items-center space-x-1">
         {/* Previous button */}
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-            currentPage === 1
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-          }`}
+          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === 1
+            ? 'text-gray-400 cursor-not-allowed'
+            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
         >
           Previous
         </button>
-        
+
         {/* Page numbers */}
         <div className="flex space-x-1">
           {pageNumbers.map((page, index) => (
@@ -479,28 +483,26 @@ function Pagination({ currentPage, totalPages, onPageChange, showingStart, showi
               key={index}
               onClick={() => typeof page === 'number' && onPageChange(page)}
               disabled={page === '...'}
-              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                page === currentPage
-                  ? 'bg-blue-600 text-white'
-                  : page === '...'
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${page === currentPage
+                ? 'bg-blue-600 text-white'
+                : page === '...'
                   ? 'text-gray-400 cursor-default'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-              }`}
+                }`}
             >
               {page}
             </button>
           ))}
         </div>
-        
+
         {/* Next button */}
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-            currentPage === totalPages
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-          }`}
+          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === totalPages
+            ? 'text-gray-400 cursor-not-allowed'
+            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
         >
           Next
         </button>
