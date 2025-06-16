@@ -15,6 +15,9 @@ export default function MedicalDataManager({ onBack }) {
   const [customLabTests, setCustomLabTests] = useState([]);
   const [newItem, setNewItem] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  // Add pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(24); // Show 24 items per page for better grid layout
   const { addToast } = useToast();
 
   // Add refs and state for floating header
@@ -179,6 +182,16 @@ export default function MedicalDataManager({ onBack }) {
     item.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination logic for predefined items
+  const totalPages = Math.ceil(filteredPredefined.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedPredefined = filteredPredefined.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   const getTabLabel = (tab) => {
     if (tab === 'symptoms') return 'Custom Symptoms';
     if (tab === 'diagnoses') return 'Custom Diagnoses';
@@ -205,6 +218,11 @@ export default function MedicalDataManager({ onBack }) {
     { value: 'diagnoses', label: `Custom Diagnoses (${customDiagnoses.length})` },
     { value: 'lab-tests', label: `Custom Lab Tests (${customLabTests.length})` }
   ];
+
+  // Reset pagination when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, activeTab]);
 
   return (
     <>
@@ -348,28 +366,153 @@ export default function MedicalDataManager({ onBack }) {
               <h3 className="text-lg font-semibold text-gray-900">
                 Predefined {activeTab === 'symptoms' ? 'Symptoms' : activeTab === 'diagnoses' ? 'Diagnoses' : 'Lab Tests'}
               </h3>
-              <span className="text-sm text-gray-500">
-                {searchTerm ? `${filteredPredefined.length} found` : `${predefinedItems.length} total`}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2 max-h-64 overflow-y-auto">
-              {filteredPredefined.slice(0, 50).map((item, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                >
-                  {item}
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-500">
+                  {searchTerm ? `${filteredPredefined.length} found` : `${predefinedItems.length} total`}
                 </span>
-              ))}
+                {totalPages > 1 && (
+                  <span className="text-sm text-gray-500">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                )}
+              </div>
             </div>
-            {filteredPredefined.length > 50 && (
-              <p className="text-gray-500 text-sm mt-2">
-                Showing first 50 results. Use search to find more.
-              </p>
+            
+            {filteredPredefined.length > 0 ? (
+              <>
+                <div className="flex flex-wrap gap-2">
+                  {paginatedPredefined.map((item, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors cursor-default"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+                
+                {totalPages > 1 && (
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      showingStart={startIndex + 1}
+                      showingEnd={Math.min(endIndex, filteredPredefined.length)}
+                      totalItems={filteredPredefined.length}
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p className="text-sm">
+                  {searchTerm ? `No ${activeTab.replace('-', ' ')} found matching "${searchTerm}"` : `No ${activeTab.replace('-', ' ')} available`}
+                </p>
+              </div>
             )}
           </div>
         </div>
       </div>
     </>
+  );
+}
+
+// Reusable Pagination Component
+function Pagination({ currentPage, totalPages, onPageChange, showingStart, showingEnd, totalItems }) {
+  const getPageNumbers = () => {
+    const delta = 2; // Number of pages to show on each side of current page
+    const range = [];
+    
+    // Always show first page
+    if (totalPages > 0) {
+      range.push(1);
+    }
+    
+    // Calculate start and end of middle range
+    const start = Math.max(2, currentPage - delta);
+    const end = Math.min(totalPages - 1, currentPage + delta);
+    
+    // Add ellipsis after page 1 if needed
+    if (start > 2) {
+      range.push('...');
+    }
+    
+    // Add middle pages
+    for (let i = start; i <= end; i++) {
+      if (i !== 1 && i !== totalPages) {
+        range.push(i);
+      }
+    }
+    
+    // Add ellipsis before last page if needed
+    if (end < totalPages - 1) {
+      range.push('...');
+    }
+    
+    // Always show last page (if different from first)
+    if (totalPages > 1) {
+      range.push(totalPages);
+    }
+    
+    return range;
+  };
+
+  const pageNumbers = getPageNumbers();
+
+  return (
+    <div className="flex items-center justify-between">
+      <div className="text-sm text-gray-600">
+        Showing {showingStart}-{showingEnd} of {totalItems} items
+      </div>
+      
+      <div className="flex items-center space-x-1">
+        {/* Previous button */}
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+            currentPage === 1
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+          }`}
+        >
+          Previous
+        </button>
+        
+        {/* Page numbers */}
+        <div className="flex space-x-1">
+          {pageNumbers.map((page, index) => (
+            <button
+              key={index}
+              onClick={() => typeof page === 'number' && onPageChange(page)}
+              disabled={page === '...'}
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                page === currentPage
+                  ? 'bg-blue-600 text-white'
+                  : page === '...'
+                  ? 'text-gray-400 cursor-default'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
+        
+        {/* Next button */}
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+            currentPage === totalPages
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+          }`}
+        >
+          Next
+        </button>
+      </div>
+    </div>
   );
 }
