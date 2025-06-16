@@ -51,7 +51,7 @@ const ToastContainer = ({ toasts, removeToast, isHovered, setIsHovered }) => {
               key={toast.id}
               className={`
                 absolute bg-white rounded-xl shadow-lg p-4 min-w-[320px] max-w-[400px] border border-gray-200
-                transition-all duration-300 ease-out cursor-pointer group
+                transition-all duration-500 ease-out cursor-pointer group
                 ${isTop ? 'z-30' : isMiddle ? 'z-20' : 'z-10'}
                 ${isHovered
                   ? isTop
@@ -70,7 +70,7 @@ const ToastContainer = ({ toasts, removeToast, isHovered, setIsHovered }) => {
               style={{
                 bottom: '0px',
                 right: '0px',
-                animationDelay: `${index * 100}ms`,
+                animationDelay: isTop ? '0ms' : '0ms', // Remove staggered delay for smoother simultaneous animation
               }}
             >
               <div className="space-y-2">
@@ -192,18 +192,33 @@ export const ToastProvider = ({ children }) => {
       />
       <style jsx global>{`
         @keyframes toast-enter {
-          from {
-            transform: translateY(100%) scale(0.95);
+          0% {
+            transform: translateY(100%) scale(0.8);
             opacity: 0;
           }
-          to {
+          100% {
             transform: translateY(0) scale(1);
             opacity: 1;
           }
         }
         
+        @keyframes toast-stack-down {
+          from {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+          }
+          to {
+            transform: translateY(-12px) scale(0.95);
+            opacity: 0.9;
+          }
+        }
+        
         .animate-toast-enter {
-          animation: toast-enter 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation: toast-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        
+        .animate-toast-stack {
+          animation: toast-stack-down 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
       `}</style>
     </ToastContext.Provider>
