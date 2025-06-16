@@ -1,18 +1,66 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Download, Share2, FileText, CheckCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Download, FileText, CheckCircle, User, Phone, Calendar } from 'lucide-react';
 import { generateMedicalCertificatePDF } from '../utils/medicalCertificatePDFGenerator';
 import { formatDate } from '../utils/dateUtils';
 import SharePDFButton from './SharePDFButton';
 import { activityLogger } from '../utils/activityLogger';
+import { toast } from 'sonner';
 
 export default function MedicalCertificateSuccess({ certificate, patient, onBack }) {
   const [certificatePdfUrl, setCertificatePdfUrl] = useState(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(true);
 
+  // Add refs and state for floating header
+  const successHeaderRef = useRef(null);
+  const [isSuccessHeaderVisible, setIsSuccessHeaderVisible] = useState(true);
+
   useEffect(() => {
     generatePdf();
+  }, []);
+
+  // Reset header visibility when component mounts
+  useEffect(() => {
+    setIsSuccessHeaderVisible(true);
+  }, []);
+
+  // Intersection Observer for success header visibility
+  useEffect(() => {
+    const successHeaderElement = successHeaderRef.current;
+
+    if (!successHeaderElement) {
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      setIsSuccessHeaderVisible(true);
+      return;
+    }
+
+    const rootMarginTop = "-81px";
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        if (entries && entries.length > 0 && entries[0]) {
+          const entry = entries[0];
+          setIsSuccessHeaderVisible(entry.isIntersecting);
+        }
+      },
+      {
+        root: null,
+        rootMargin: `${rootMarginTop} 0px 0px 0px`,
+        threshold: 0,
+      }
+    );
+
+    observer.observe(successHeaderElement);
+
+    return () => {
+      if (successHeaderElement) {
+        observer.unobserve(successHeaderElement);
+      }
+    };
   }, []);
 
   const generatePdf = async () => {
@@ -43,95 +91,250 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
       if (patient) {
         await activityLogger.logMedicalCertificatePDFDownloaded(patient, certificate.certificateFor);
       }
+
+      toast.success('Download Started', {
+        description: 'Medical certificate PDF download has started'
+      });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <>
+      {/* Floating header */}
+      <div
+        className={`fixed left-0 right-0 z-30 transition-transform duration-300 ease-in-out
+          ${isSuccessHeaderVisible ? '-translate-y-full' : 'translate-y-0'}
+        `}
+        style={{ top: '81px' }}
+      >
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-6 py-3">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onBack}
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-4 h-4 text-gray-600" />
+                </button>
+                <span className="text-md font-semibold text-gray-900">Medical Certificate Generated Successfully</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <span className="text-sm font-medium text-green-600">Completed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-6 min-h-screen">
         {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors duration-200"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <div className="flex items-center space-x-3">
-            <CheckCircle className="w-8 h-8 text-green-600" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Medical Certificate Generated Successfully
-            </h1>
+        <div ref={successHeaderRef} className="success-header">
+          <div className="max-w-5xl mx-auto px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onBack}
+                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  <ArrowLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <span className="text-xl font-semibold text-gray-900">Medical Certificate Generated Successfully</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+                <span className="text-sm font-medium text-green-600">Completed</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Certificate Summary */}
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Certificate Summary</h2>
-          
-          {/* Patient Info */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
-            <div>
-              <span className="text-sm font-semibold text-gray-700">Patient</span>
-              <p className="text-gray-900 font-medium">{certificate.patientName}</p>
-            </div>
-            <div>
-              <span className="text-sm font-semibold text-gray-700">Age</span>
-              <p className="text-gray-900 font-medium">{certificate.age} years</p>
-            </div>
-            <div>
-              <span className="text-sm font-semibold text-gray-700">Sex</span>
-              <p className="text-gray-900 font-medium">{certificate.sex}</p>
-            </div>
-            <div>
-              <span className="text-sm font-semibold text-gray-700">Date</span>
-              <p className="text-gray-900 font-medium">{formatDate(certificate.issuedDate)}</p>
+        <div className="max-w-5xl mx-auto px-6 space-y-6">
+          {/* Patient Info Card */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+              <div className="flex items-center space-x-2">
+                <User className="w-4 h-4 text-gray-500" />
+                <div>
+                  <span className="text-gray-600">Patient</span>
+                  <p className="font-medium text-gray-900">{certificate.patientName}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-gray-500" />
+                <div>
+                  <span className="text-gray-600">Age</span>
+                  <p className="font-medium text-gray-900">{certificate.age} years</p>
+                </div>
+              </div>
+              {patient && (
+                <div className="flex items-center space-x-2">
+                  <Phone className="w-4 h-4 text-gray-500" />
+                  <div>
+                    <span className="text-gray-600">Phone</span>
+                    <p className="font-medium text-gray-900">{patient.phone}</p>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-gray-500" />
+                <div>
+                  <span className="text-gray-600">Date</span>
+                  <p className="font-medium text-gray-900">{formatDate(certificate.issuedDate)}</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Certificate Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold text-gray-800 mb-3">Certificate Purpose</h3>
-              <div className="text-sm text-gray-700 bg-blue-50 p-3 rounded-lg border border-blue-200">
-                {certificate.certificateFor}
+          {/* Certificate Summary */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 className="text-lg font-semibold text-gray-900 mb-5">Certificate Summary</h2>
+
+            {/* Certificate Content */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
+              {/* Certificate Purpose */}
+              <div>
+                <h4 className="font-medium text-gray-800 mb-2">Certificate Purpose</h4>
+                <div className="text-gray-700 text-xs bg-green-50 p-3 rounded-md border border-green-200">
+                  {certificate.certificateFor}
+                </div>
               </div>
+
+              {/* Fitness Status */}
+              <div>
+                <h4 className="font-medium text-gray-800 mb-2">Fitness Status</h4>
+                <div className={`text-xs font-medium p-3 rounded-md border ${
+                  certificate.fitnessStatus === 'fit' 
+                    ? 'bg-green-100 text-green-800 border-green-200' 
+                    : 'bg-red-100 text-red-800 border-red-200'
+                }`}>
+                  {certificate.fitnessStatus === 'fit' ? 'Medically Fit' : 'Medically Unfit'}
+                </div>
+              </div>
+
+              {/* Physical Details */}
+              {(certificate.height || certificate.weight || certificate.build) && (
+                <div>
+                  <h4 className="font-medium text-gray-800 mb-2">Physical Details</h4>
+                  <div className="space-y-1">
+                    {certificate.height && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-medium">Height:</span> {certificate.height}
+                      </div>
+                    )}
+                    {certificate.weight && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-medium">Weight:</span> {certificate.weight}
+                      </div>
+                    )}
+                    {certificate.build && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-medium">Build:</span> {certificate.build}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Vital Signs */}
+              {(certificate.pulse || certificate.bp || certificate.vision) && (
+                <div>
+                  <h4 className="font-medium text-gray-800 mb-2">Vital Signs</h4>
+                  <div className="space-y-1">
+                    {certificate.pulse && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-medium">Pulse:</span> {certificate.pulse}
+                      </div>
+                    )}
+                    {certificate.bp && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-medium">BP:</span> {certificate.bp}
+                      </div>
+                    )}
+                    {certificate.vision && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-medium">Vision:</span> {certificate.vision}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* System Examination */}
+              {(certificate.lungs || certificate.cardiovascularSystem || certificate.liver || certificate.spleen) && (
+                <div className="md:col-span-2">
+                  <h4 className="font-medium text-gray-800 mb-2">System Examination</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {certificate.lungs && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-medium">Lungs:</span> {certificate.lungs}
+                      </div>
+                    )}
+                    {certificate.cardiovascularSystem && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-medium">CVS:</span> {certificate.cardiovascularSystem}
+                      </div>
+                    )}
+                    {certificate.liver && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-medium">Liver:</span> {certificate.liver}
+                      </div>
+                    )}
+                    {certificate.spleen && (
+                      <div className="text-xs text-gray-700">
+                        <span className="font-medium">Spleen:</span> {certificate.spleen}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div>
-              <h3 className="font-semibold text-gray-800 mb-3">Fitness Status</h3>
-              <div className={`text-sm font-medium p-3 rounded-lg border ${
-                certificate.fitnessStatus === 'fit' 
-                  ? 'bg-green-50 text-green-800 border-green-200' 
-                  : 'bg-red-50 text-red-800 border-red-200'
-              }`}>
-                {certificate.fitnessStatus === 'fit' ? 'Medically Fit' : 'Medically Unfit'}
-              </div>
-            </div>
-
+            {/* Remarks */}
             {certificate.remarks && (
-              <div className="md:col-span-2">
-                <h3 className="font-semibold text-gray-800 mb-3">Remarks</h3>
-                <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
+              <div className="mt-5 pt-4 border-t border-gray-200">
+                <h4 className="font-medium text-gray-800 mb-2">Remarks</h4>
+                <div className="text-xs text-gray-700 bg-gray-50 p-3 rounded-md">
                   {certificate.remarks}
                 </div>
               </div>
             )}
           </div>
-        </div>
 
-        {/* PDF Actions */}
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <FileText className="w-6 h-6 text-green-600" />
-              <h3 className="text-xl font-bold text-gray-900">Medical Certificate PDF</h3>
+          {/* PDF Actions */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <FileText className="w-5 h-5 text-green-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Medical Certificate PDF</h3>
+              </div>
             </div>
-            <div className="flex space-x-3">
+
+            {isGeneratingPdf ? (
+              <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg">
+                <div className="text-center">
+                  <div className="w-6 h-6 animate-spin mx-auto border-4 border-green-500 border-t-transparent rounded-full mb-2"></div>
+                  <p className="text-gray-500 text-sm">Generating PDF...</p>
+                </div>
+              </div>
+            ) : certificatePdfUrl ? (
+              <iframe
+                src={certificatePdfUrl}
+                className="w-full h-100 border border-gray-300 rounded-lg"
+                title="Medical Certificate PDF Preview"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg">
+                <p className="text-gray-500 text-sm">Failed to generate PDF</p>
+              </div>
+            )}
+
+            <div className="flex space-x-3 mt-4 justify-end">
               <button
                 onClick={downloadCertificate}
                 disabled={!certificatePdfUrl || isGeneratingPdf}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Download</span>
@@ -146,31 +349,14 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
                   patientName={certificate.patientName}
                   certificateDate={formatDate(certificate.issuedDate)}
                   certificateFor={certificate.certificateFor}
+                  certificate={certificate}
+                  patient={patient}
                 />
               )}
             </div>
           </div>
-
-          {isGeneratingPdf ? (
-            <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-              <div className="text-center">
-                <div className="w-8 h-8 animate-spin mx-auto border-4 border-green-500 border-t-transparent rounded-full mb-2"></div>
-                <p className="text-gray-500">Generating PDF...</p>
-              </div>
-            </div>
-          ) : certificatePdfUrl ? (
-            <iframe
-              src={certificatePdfUrl}
-              className="w-full h-64 border border-gray-300 rounded-lg"
-              title="Medical Certificate PDF Preview"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-              <p className="text-gray-500">Failed to generate PDF</p>
-            </div>
-          )}
         </div>
       </div>
-    </div>
+    </>
   );
 }
