@@ -41,10 +41,20 @@ export default function Dashboard() {
   const [stats, setStats] = useState({});
   const [isStatsHovered, setIsStatsHovered] = useState(false);
   const [recentActivities, setRecentActivities] = useState([]);
+  const [currentGreeting, setCurrentGreeting] = useState({ title: '', subtitle: '' });
+  const [lastGreetingUpdate, setLastGreetingUpdate] = useState('');
 
   useEffect(() => {
     loadAllData();
     loadRecentActivities();
+    updateGreeting();
+    
+    // Update greeting every minute to check for time period changes
+    const greetingInterval = setInterval(() => {
+      updateGreeting();
+    }, 60000); // Check every minute
+
+    return () => clearInterval(greetingInterval);
   }, []);
 
   const loadAllData = async () => {
@@ -241,13 +251,25 @@ export default function Dashboard() {
     }
   };
 
-  // Add function to generate contextual greeting
-  const getContextualGreeting = () => {
+  // Add function to generate contextual greeting with stable message selection
+  const generateContextualGreeting = () => {
     const now = new Date();
     const hour = now.getHours();
     const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
     const month = now.getMonth(); // 0 = January, 11 = December
     const date = now.getDate();
+    
+    // Create a stable seed based on current date and hour for consistent message selection
+    const seed = `${now.getFullYear()}-${month}-${date}-${hour}`;
+    const getSeedBasedIndex = (arrayLength) => {
+      let hash = 0;
+      for (let i = 0; i < seed.length; i++) {
+        const char = seed.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+      }
+      return Math.abs(hash) % arrayLength;
+    };
     
     // Performance metrics for pep talk
     const hasGoodPerformance = (stats.visitsThisWeek || 0) >= 10 || (stats.newPatientsThisWeek || 0) >= 3;
@@ -275,10 +297,10 @@ export default function Dashboard() {
       'worldHealthDay': month === 3 && date === 7,
     };
 
-    // Festival greetings
+    // Festival greetings (these take priority and don't shuffle)
     if (specialDays.diwali2024) {
       return {
-        title: "✨ Happy Diwali, Dr. Nikam! ✨",
+        title: "Happy Diwali, Dr. Nikam!",
         subtitle: "May this festival of lights brighten your practice and bring prosperity to all your patients"
       };
     }
@@ -332,44 +354,7 @@ export default function Dashboard() {
       };
     }
 
-    // // Performance-based pep talks
-    // if (hasExcellentPerformance) {
-    //   const excellentMessages = [
-    //     {
-    //       title: "🚀 Outstanding work, Dr. Nikam!",
-    //       subtitle: "Your exceptional care is making a real difference in people's lives"
-    //     },
-    //     {
-    //       title: "⭐ Superstar healer, Dr. Nikam!",
-    //       subtitle: "Your dedication to excellence shows in every patient interaction"
-    //     },
-    //     {
-    //       title: "🏆 Phenomenal progress, Dr. Nikam!",
-    //       subtitle: "You're setting new standards in patient care"
-    //     }
-    //   ];
-    //   return excellentMessages[Math.floor(Math.random() * excellentMessages.length)];
-    // }
-    
-    // if (hasGoodPerformance) {
-    //   const goodMessages = [
-    //     {
-    //       title: "💪 Great going, Dr. Nikam!",
-    //       subtitle: "Your consistent care is building a healthier community"
-    //     },
-    //     {
-    //       title: "🌟 Back at it, Dr. Nikam!",
-    //       subtitle: "Every patient you see is a life touched by your expertise"
-    //     },
-    //     {
-    //       title: "📈 Impressive work, Dr. Nikam!",
-    //       subtitle: "Your commitment to healing continues to inspire"
-    //     }
-    //   ];
-    //   return goodMessages[Math.floor(Math.random() * goodMessages.length)];
-    // }
-
-    // Day-specific greetings
+    // Day-specific greetings with stable message selection
     if (day === 5) { // Friday
       const fridayMessages = [
         {
@@ -381,21 +366,17 @@ export default function Dashboard() {
           subtitle: "Friday energy for healing and caring"
         }
       ];
-      return fridayMessages[Math.floor(Math.random() * fridayMessages.length)];
+      return fridayMessages[getSeedBasedIndex(fridayMessages.length)];
     }
     
     if (day === 1) { // Monday
       const mondayMessages = [
-        // {
-        //   title: "Monday motivation, Dr. Nikam!",
-        //   subtitle: "Start the week with purpose and compassion"
-        // },
         {
           title: "Fresh start, Dr. Nikam!",
           subtitle: "New week, new opportunities to heal and help"
         }
       ];
-      return mondayMessages[Math.floor(Math.random() * mondayMessages.length)];
+      return mondayMessages[getSeedBasedIndex(mondayMessages.length)];
     }
     
     if (day === 0 || day === 6) { // Weekend
@@ -405,7 +386,7 @@ export default function Dashboard() {
       };
     }
 
-    // Time-based greetings
+    // Time-based greetings with stable message selection
     if (hour >= 5 && hour < 12) {
       const morningMessages = [
         {
@@ -421,7 +402,7 @@ export default function Dashboard() {
           subtitle: "Starting the day with purpose and healing"
         }
       ];
-      return morningMessages[Math.floor(Math.random() * morningMessages.length)];
+      return morningMessages[getSeedBasedIndex(morningMessages.length)];
     } else if (hour >= 12 && hour < 17) {
       const afternoonMessages = [
         {
@@ -433,7 +414,7 @@ export default function Dashboard() {
           subtitle: "Keeping the healing energy strong"
         }
       ];
-      return afternoonMessages[Math.floor(Math.random() * afternoonMessages.length)];
+      return afternoonMessages[getSeedBasedIndex(afternoonMessages.length)];
     } else if (hour >= 17 && hour < 21) {
       const eveningMessages = [
         {
@@ -445,7 +426,7 @@ export default function Dashboard() {
           subtitle: "Your dedication brightens even the evening hours"
         }
       ];
-      return eveningMessages[Math.floor(Math.random() * eveningMessages.length)];
+      return eveningMessages[getSeedBasedIndex(eveningMessages.length)];
     } else {
       const lateMessages = [
         {
@@ -457,7 +438,19 @@ export default function Dashboard() {
           subtitle: "Thank you for your round-the-clock dedication"
         }
       ];
-      return lateMessages[Math.floor(Math.random() * lateMessages.length)];
+      return lateMessages[getSeedBasedIndex(lateMessages.length)];
+    }
+  };
+
+  const updateGreeting = () => {
+    const now = new Date();
+    const currentPeriod = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${now.getHours()}`;
+    
+    // Only update greeting if the time period has changed
+    if (currentPeriod !== lastGreetingUpdate) {
+      const newGreeting = generateContextualGreeting();
+      setCurrentGreeting(newGreeting);
+      setLastGreetingUpdate(currentPeriod);
     }
   };
 
@@ -544,19 +537,12 @@ export default function Dashboard() {
           <div className="space-y-8">
             {/* Dynamic Welcome Section */}
             <div>
-              {(() => {
-                const greeting = getContextualGreeting();
-                return (
-                  <>
-                    <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                      {greeting.title}
-                    </h2>
-                    <p className="text-gray-600">
-                      {greeting.subtitle}
-                    </p>
-                  </>
-                );
-              })()}
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                {currentGreeting.title}
+              </h2>
+              <p className="text-gray-600">
+                {currentGreeting.subtitle}
+              </p>
             </div>
 
             {/* Stats Grid with Hover Expansion */}
