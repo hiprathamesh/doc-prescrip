@@ -195,9 +195,22 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     return `${prefix}${timestamp}`;
   };
 
+  // Add validation confirmation dialog state
+  const [validationDialog, setValidationDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null
+  });
+
   const handleCreateNewPatient = async () => {
     if (!newPatientData.name || !newPatientData.age || !newPatientData.phone) {
-      alert('Please fill all required fields for new patient');
+      setValidationDialog({
+        isOpen: true,
+        title: 'Missing Information',
+        message: 'Please fill all required fields for new patient (Name, Age, and Phone are required).',
+        onConfirm: () => setValidationDialog({ isOpen: false, title: '', message: '', onConfirm: null })
+      });
       return;
     }
 
@@ -223,11 +236,21 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         setSelectedPatient(newPatient);
         setIsNewPatient(false);
       } else {
-        alert('Failed to create patient. Please try again.');
+        setValidationDialog({
+          isOpen: true,
+          title: 'Error',
+          message: 'Failed to create patient. Please try again.',
+          onConfirm: () => setValidationDialog({ isOpen: false, title: '', message: '', onConfirm: null })
+        });
       }
     } catch (error) {
       console.error('Error creating patient:', error);
-      alert('Failed to create patient. Please try again.');
+      setValidationDialog({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to create patient. Please try again.',
+        onConfirm: () => setValidationDialog({ isOpen: false, title: '', message: '', onConfirm: null })
+      });
     }
   };
 
@@ -554,7 +577,12 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
   const handleSavePrescription = async () => {
     if (!selectedPatient) {
-      alert('Please select a patient');
+      setValidationDialog({
+        isOpen: true,
+        title: 'No Patient Selected',
+        message: 'Please select a patient before saving the prescription.',
+        onConfirm: () => setValidationDialog({ isOpen: false, title: '', message: '', onConfirm: null })
+      });
       return;
     }
 
@@ -1601,6 +1629,16 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
           )}
         </div>
       </div>
+
+      {/* Validation Dialog */}
+      <ConfirmationDialog
+        isOpen={validationDialog.isOpen}
+        title={validationDialog.title}
+        message={validationDialog.message}
+        onConfirm={validationDialog.onConfirm}
+        onCancel={() => setValidationDialog({ isOpen: false, title: '', message: '', onConfirm: null })}
+        isLoading={false}
+      />
 
       {/* Confirmation Dialog */}
       <ConfirmationDialog

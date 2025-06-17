@@ -4,6 +4,7 @@ import { User, Phone, FileText, Trash2, MoreVertical, ArrowLeft, Search } from '
 import { formatDate } from '../utils/dateUtils';
 import { useState, useRef, useEffect } from 'react';
 import CustomDropdown from './CustomDropdown';
+import ConfirmationDialog from './ConfirmationDialog';
 
 export default function PatientList({ patients, onPatientSelect, onNewPrescription, onPatientDelete, onBack }) {
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -15,6 +16,16 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
   const patientHeaderRef = useRef(null);
   const [isPatientHeaderVisible, setIsPatientHeaderVisible] = useState(true);
   const searchInputRef = useRef(null);
+  
+  // Add confirmation dialog state
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    isLoading: false,
+    onConfirm: null,
+    patientToDelete: null
+  });
 
   // Filter options
   const filterOptions = [
@@ -104,10 +115,47 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
 
   const handleDeletePatient = (patient, e) => {
     e.stopPropagation();
-    if (window.confirm(`Are you sure you want to delete patient ${patient.name}? This will permanently remove all their data including prescriptions and bills.`)) {
-      onPatientDelete(patient.id);
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Patient',
+      message: `Are you sure you want to delete patient ${patient.name}? This will permanently remove all their data including prescriptions and bills.`,
+      isLoading: false,
+      onConfirm: () => handleConfirmDelete(patient.id),
+      patientToDelete: patient
+    });
     setDropdownOpen(null);
+  };
+
+  const handleConfirmDelete = async (patientId) => {
+    setConfirmDialog(prev => ({ ...prev, isLoading: true }));
+    
+    try {
+      await onPatientDelete(patientId);
+      setConfirmDialog({
+        isOpen: false,
+        title: '',
+        message: '',
+        isLoading: false,
+        onConfirm: null,
+        patientToDelete: null
+      });
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+      setConfirmDialog(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleCancelDelete = () => {
+    if (!confirmDialog.isLoading) {
+      setConfirmDialog({
+        isOpen: false,
+        title: '',
+        message: '',
+        isLoading: false,
+        onConfirm: null,
+        patientToDelete: null
+      });
+    }
   };
 
   const handleDropdownToggle = (patientId, e) => {
@@ -468,7 +516,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                               e.stopPropagation();
                               onNewPrescription(patient);
                             }}
-                            className="text-blue-600 hover:text-blue-800 flex items-center space-x-1 font-medium transition-colors text-xs"
+                            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded-md flex items-center space-x-1 font-medium transition-colors text-xs"
                           >
                             <FileText className="w-3 h-3" />
                             <span>New Prescription</span>
@@ -510,6 +558,16 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={handleCancelDelete}
+        isLoading={confirmDialog.isLoading}
+      />
     </>
   );
 }
