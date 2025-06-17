@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Plus, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Save, User, Phone, Calendar } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, getTodayString } from '../utils/dateUtils';
 import ConfirmationDialog from './ConfirmationDialog';
@@ -478,24 +478,35 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
           {selectedPatient && (
             <div className="space-y-6">
               {/* Patient Info */}
-              <div className="bg-white p-5 rounded-xl border border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Patient Information</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <span className="font-semibold text-gray-700 block mb-1">Name</span>
-                    <span className="text-gray-900 font-medium">{selectedPatient.name}</span>
+              <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <User className="w-4 h-4 text-gray-500" />
+                    <div>
+                      <span className="text-gray-600">Patient</span>
+                      <p className="font-medium text-gray-900">{selectedPatient.name}</p>
+                    </div>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <span className="font-semibold text-gray-700 block mb-1">ID</span>
-                    <span className="text-gray-900 font-medium">{selectedPatient.id}</span>
+                  <div className="flex items-center space-x-2">
+                    <User className="w-4 h-4 text-gray-500" />
+                    <div>
+                      <span className="text-gray-600">ID</span>
+                      <p className="font-medium text-gray-900">{selectedPatient.id}</p>
+                    </div>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <span className="font-semibold text-gray-700 block mb-1">Age</span>
-                    <span className="text-gray-900 font-medium">{selectedPatient.age} years</span>
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <div>
+                      <span className="text-gray-600">Age</span>
+                      <p className="font-medium text-gray-900">{selectedPatient.age} years</p>
+                    </div>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <span className="font-semibold text-gray-700 block mb-1">Phone</span>
-                    <span className="text-gray-900 font-medium">{selectedPatient.phone}</span>
+                  <div className="flex items-center space-x-2">
+                    <Phone className="w-4 h-4 text-gray-500" />
+                    <div>
+                      <span className="text-gray-600">Phone</span>
+                      <p className="font-medium text-gray-900">{selectedPatient.phone}</p>
+                    </div>
                   </div>
                 </div>
               </div>
