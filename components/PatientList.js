@@ -9,7 +9,8 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBy, setFilterBy] = useState('all');
-  const [sortBy, setSortBy] = useState('original');
+  const [sortBy, setSortBy] = useState('date-created');
+  const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
   const dropdownRefs = useRef({});
   const patientHeaderRef = useRef(null);
   const [isPatientHeaderVisible, setIsPatientHeaderVisible] = useState(true);
@@ -21,16 +22,15 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
     { value: 'pending-followup', label: 'Pending Follow-up' },
     { value: 'overdue-followup', label: 'Overdue Follow-up' },
     { value: 'recent-visits', label: 'Recent Visits (Last 7 days)' },
-    { value: 'no-followup', label: 'No Pending Follow-up' }
+    { value: 'no-followup', label: 'No Pending Follow-up' },
+    { value: 'pending-payments', label: 'Pending Payments' }
   ];
 
   // Sort options
   const sortOptions = [
-    { value: 'original', label: 'Original Order' },
-    { value: 'name-asc', label: 'Name (A-Z)' },
-    { value: 'name-desc', label: 'Name (Z-A)' },
-    { value: 'last-visit-desc', label: 'Last Visit (Recent First)' },
-    { value: 'last-visit-asc', label: 'Last Visit (Oldest First)' }
+    { value: 'date-created', label: 'Date Created' },
+    { value: 'name', label: 'Name' },
+    { value: 'last-visit', label: 'Last Visit' }
   ];
 
   // Filter patients based on search term and filter criteria
@@ -57,6 +57,9 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
       case 'no-followup':
         filtered = filtered.filter(patient => patient.followUpStatus === 'none');
         break;
+      case 'pending-payments':
+        filtered = filtered.filter(patient => patient.hasPendingPayments === true);
+        break;
       default:
         // 'all' - no additional filtering
         break;
@@ -64,20 +67,25 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
 
     // Apply sorting
     switch (sortBy) {
-      case 'name-asc':
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
+      case 'name':
+        filtered.sort((a, b) => {
+          const comparison = a.name.localeCompare(b.name);
+          return sortDirection === 'asc' ? comparison : -comparison;
+        });
         break;
-      case 'name-desc':
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
+      case 'last-visit':
+        filtered.sort((a, b) => {
+          const comparison = new Date(a.lastVisited) - new Date(b.lastVisited);
+          return sortDirection === 'asc' ? comparison : -comparison;
+        });
         break;
-      case 'last-visit-desc':
-        filtered.sort((a, b) => new Date(b.lastVisited) - new Date(a.lastVisited));
-        break;
-      case 'last-visit-asc':
-        filtered.sort((a, b) => new Date(a.lastVisited) - new Date(b.lastVisited));
+      case 'date-created':
+        filtered.sort((a, b) => {
+          const comparison = new Date(a.createdAt || a.lastVisited) - new Date(b.createdAt || b.lastVisited);
+          return sortDirection === 'asc' ? comparison : -comparison;
+        });
         break;
       default:
-        // 'original' - keep original order
         break;
     }
 
@@ -85,6 +93,14 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
   };
 
   const filteredPatients = getFilteredPatients();
+
+  const handleSortChange = (newSortBy) => {
+    setSortBy(newSortBy);
+  };
+
+  const handleSortDirectionToggle = () => {
+    setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
 
   const handleDeletePatient = (patient, e) => {
     e.stopPropagation();
@@ -287,8 +303,11 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                   <CustomDropdown
                     options={sortOptions}
                     value={sortBy}
-                    onChange={setSortBy}
+                    onChange={handleSortChange}
                     placeholder="Sort by..."
+                    showDirectionToggle={true}
+                    sortDirection={sortDirection}
+                    onDirectionToggle={handleSortDirectionToggle}
                   />
                 </div>
               </div>

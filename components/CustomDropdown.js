@@ -3,7 +3,17 @@
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-const CustomDropdown = forwardRef(function CustomDropdown({ options, value, onChange, placeholder, disabled = false, onEnterPress }, ref) {
+const CustomDropdown = forwardRef(function CustomDropdown({ 
+  options, 
+  value, 
+  onChange, 
+  placeholder, 
+  disabled = false, 
+  onEnterPress,
+  showDirectionToggle = false,
+  sortDirection = 'desc',
+  onDirectionToggle
+}, ref) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef(null);
@@ -52,6 +62,24 @@ const CustomDropdown = forwardRef(function CustomDropdown({ options, value, onCh
     setHighlightedIndex(-1);
     if (onEnterPress) {
       onEnterPress();
+    }
+  };
+
+  const handleSortDirectionClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDirectionToggle) {
+      onDirectionToggle();
+    }
+  };
+
+  const handleMainButtonClick = (e) => {
+    // Check if the click was on the direction toggle area
+    if (showDirectionToggle && e.target.closest('.direction-toggle')) {
+      return; // Don't toggle dropdown if clicking on direction toggle
+    }
+    if (!disabled) {
+      setIsOpen(!isOpen);
     }
   };
 
@@ -110,20 +138,35 @@ const CustomDropdown = forwardRef(function CustomDropdown({ options, value, onCh
 
   return (
     <div className="relative w-full" ref={wrapperRef}>
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        onKeyDown={handleKeyDown}
-        disabled={disabled}
-        className={`w-full bg-white border border-gray-300 rounded-lg p-3 hover:border-[#BFDBFE] text-left cursor-default focus:outline-none focus:ring-3 focus:ring-[#BFDBFE] focus:border-[#3B82F6] text-sm flex items-center justify-between h-12 transition-colors ${disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''
+      <div
+        className={`w-full bg-white border border-gray-300 rounded-lg hover:border-[#BFDBFE] text-left cursor-default focus-within:outline-none focus-within:ring-3 focus-within:ring-[#BFDBFE] focus-within:border-[#3B82F6] text-sm flex items-center justify-between h-12 transition-colors ${disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''
           }`}
       >
-        <span className={`block truncate ${selectedOption ? 'text-gray-900' : 'text-gray-400'}`}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} ${disabled ? 'opacity-50' : ''}`} />
-      </button>
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={handleMainButtonClick}
+          onKeyDown={handleKeyDown}
+          disabled={disabled}
+          className="flex-1 p-3 text-left focus:outline-none flex items-center justify-between"
+        >
+          <span className={`block truncate ${selectedOption ? 'text-gray-900' : 'text-gray-400'}`}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+          <div className="flex items-center space-x-1">
+            {showDirectionToggle && selectedOption && (
+              <div
+                className="direction-toggle flex items-center justify-center w-5 h-5 bg-gray-100 hover:bg-gray-200 rounded border transition-colors cursor-pointer"
+                onClick={handleSortDirectionClick}
+                title={sortDirection === 'asc' ? 'Sort Ascending' : 'Sort Descending'}
+              >
+                <ChevronDown className={`w-3 h-3 text-gray-600 transition-transform duration-200 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
+              </div>
+            )}
+            <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} ${disabled ? 'opacity-50' : ''}`} />
+          </div>
+        </button>
+      </div>
 
       <div className={`absolute z-20 mt-2 w-full bg-white max-h-60 rounded-xl p-2 overflow-auto focus:outline-none text-sm border border-gray-200 transition-all duration-300 ease-out origin-top ${
         isOpen && !disabled 
