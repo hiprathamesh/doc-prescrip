@@ -334,12 +334,12 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                         </div>
                       </div>
 
-                      <div className="relative ml-2" ref={el => dropdownRefs.current[patient.id] = el}>
+                      <div className="relative ml-4" ref={el => dropdownRefs.current[patient.id] = el}>
                         <button
                           onClick={(e) => handleDropdownToggle(patient.id, e)}
-                          className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                          className="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
                         >
-                          <MoreVertical className="w-4 h-4" />
+                          <MoreVertical className="w-5 h-5" />
                         </button>
 
                         {dropdownOpen === patient.id && (
@@ -475,14 +475,14 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                           </button>
 
                           <div
-                            className="relative"
+                            className="relative ml-4"
                             ref={el => dropdownRefs.current[patient.id] = el}
                           >
                             <button
                               onClick={(e) => handleDropdownToggle(patient.id, e)}
-                              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                              className="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
                             >
-                              <MoreVertical className="w-3 h-3" />
+                              <MoreVertical className="w-4 h-4" />
                             </button>
 
                             {dropdownOpen === patient.id && (
