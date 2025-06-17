@@ -9,6 +9,7 @@ import MedicalCertificateSuccess from './MedicalCertificateSuccess';
 import CustomSelect from './CustomSelect';
 import CustomDropdown from './CustomDropdown';
 import { activityLogger } from '../utils/activityLogger';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function MedicalCertificate({ patient, patients, onBack, onPatientUpdate }) {
   const [selectedPatient, setSelectedPatient] = useState(patient);
@@ -19,6 +20,9 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
     age: '',
     phone: ''
   });
+
+  // Add scroll to top when component mounts or patient changes
+  useScrollToTop([selectedPatient?.id]);
 
   // Medical certificate form state
   const [certificateData, setCertificateData] = useState({

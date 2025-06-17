@@ -5,6 +5,7 @@ import { formatDate } from '../utils/dateUtils';
 import { useState, useRef, useEffect } from 'react';
 import CustomDropdown from './CustomDropdown';
 import ConfirmationDialog from './ConfirmationDialog';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function PatientList({ patients, onPatientSelect, onNewPrescription, onPatientDelete, onBack }) {
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -229,6 +230,9 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Add scroll to top when component mounts
+  useScrollToTop();
 
   if (patients.length === 0) {
     return (

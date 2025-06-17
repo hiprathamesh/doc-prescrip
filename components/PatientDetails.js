@@ -8,6 +8,7 @@ import SharePDFButton from './SharePDFButton';
 import ConfirmationDialog from './ConfirmationDialog';
 import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   const [visits, setVisits] = useState([]);
@@ -24,6 +25,9 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
     isLoading: false,
     onConfirm: null
   });
+
+  // Add scroll to top when component mounts or patient changes
+  useScrollToTop([patient?.id]);
 
   useEffect(() => {
     if (patient) {

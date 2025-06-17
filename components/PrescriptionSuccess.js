@@ -9,6 +9,7 @@ import { sendWhatsApp, generateWhatsAppMessage } from '../utils/whatsapp';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import SharePDFButton from './SharePDFButton';
 import { toast } from 'sonner';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function PrescriptionSuccess({ prescription, patient, bill, onBack }) {
   const [prescriptionPdfUrl, setPrescriptionPdfUrl] = useState(null);
@@ -19,6 +20,9 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
   // Add refs and state for floating header
   const successHeaderRef = useRef(null);
   const [isSuccessHeaderVisible, setIsSuccessHeaderVisible] = useState(true);
+
+  // Add scroll to top when component mounts
+  useScrollToTop();
 
   useEffect(() => {
     // Since PDFs are already generated, just set the URLs

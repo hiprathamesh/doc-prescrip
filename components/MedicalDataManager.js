@@ -7,6 +7,7 @@ import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from 
 import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
 import CustomDropdown from './CustomDropdown';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function MedicalDataManager({ onBack }) {
   const [activeTab, setActiveTab] = useState('symptoms');
@@ -23,6 +24,9 @@ export default function MedicalDataManager({ onBack }) {
   const medDataHeaderRef = useRef(null);
   const [isMedDataHeaderVisible, setIsMedDataHeaderVisible] = useState(true);
   const searchInputRef = useRef(null);
+
+  // Add scroll to top when component mounts or active tab changes
+  useScrollToTop([activeTab]);
 
   useEffect(() => {
     loadData();

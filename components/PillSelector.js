@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function PillSelector({ 
   title, 
@@ -16,6 +17,9 @@ export default function PillSelector({
   const scrollContainerRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // Add scroll to top when component mounts
+  useScrollToTop();
 
   const filteredItems = items.filter(item =>
     item.toLowerCase().includes(searchTerm.toLowerCase())
@@ -94,7 +98,7 @@ export default function PillSelector({
       </div>
 
       {showSearch && (
-        <div className="space-y-3 animate-in slide-in-from-top duration-300">
+        <div className="space-y-3 animate-in fade-in duration-400">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input

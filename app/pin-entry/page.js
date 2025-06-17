@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield, Lock, Eye, EyeOff, CheckCircle, AlertCircle, Clock, Ban } from 'lucide-react';
+import useScrollToTop from '../../hooks/useScrollToTop';
 
 export default function PinEntry() {
   const [pin, setPin] = useState('');
@@ -15,6 +16,9 @@ export default function PinEntry() {
   const [remainingAttempts, setRemainingAttempts] = useState(null);
   const router = useRouter();
   const inputRef = useRef(null);
+
+  // Add scroll to top when component mounts
+  useScrollToTop();
 
   useEffect(() => {
     // Auto-focus and maintain focus on the invisible input

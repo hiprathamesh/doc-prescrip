@@ -16,6 +16,7 @@ import CustomSelect from './CustomSelect';
 import CustomDropdown from './CustomDropdown';
 import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function NewPrescription({ patient, patients, onBack, onPatientUpdate }) {
   console.log('[NewPrescription] Component rendering/re-rendering. Selected patient:', patient ? patient.id : 'none'); // TOP-LEVEL LOG
@@ -28,6 +29,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     age: '',
     phone: ''
   });
+
+  // Add scroll to top when component mounts or patient changes
+  useScrollToTop([selectedPatient?.id]);
 
   // Prescription form state
   const [symptoms, setSymptoms] = useState([]);
@@ -1067,7 +1071,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                 </div>
 
                 {showTemplates && (
-                  <div className="space-y-4">
+                  <div className="space-y-4 animate-in fade-in-5 duration-300">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <input

@@ -9,6 +9,7 @@ import PillSelector from './PillSelector';
 import MedicationSelector from './MedicationSelector';
 import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from '../lib/medicalData';
 import { activityLogger } from '../utils/activityLogger';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function PrescriptionTemplates({ onBack }) {
   const [templates, setTemplates] = useState([]);
@@ -168,6 +169,9 @@ export default function PrescriptionTemplates({ onBack }) {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Add scroll to top when component mounts or when returning to list view
+  useScrollToTop([currentView]);
 
   if (currentView === 'create' || currentView === 'edit') {
     return (
@@ -466,6 +470,12 @@ function TemplateEditor({ template, onSave, onCancel }) {
       }
     };
   }, []);
+
+  // Add scroll restoration when component mounts
+  useEffect(() => {
+    // Scroll to top when template editor opens
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []); // Empty dependency array means this runs once when component mounts
 
   const loadCustomData = async () => {
     try {

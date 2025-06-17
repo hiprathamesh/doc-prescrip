@@ -30,6 +30,7 @@ import {
 import { storage } from '../utils/storage';
 import { formatDate, formatTimeAgo } from '../utils/dateUtils';
 import { activityLogger, ACTIVITY_ICONS, ACTIVITY_COLORS } from '../utils/activityLogger';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function Dashboard() {
   const [patients, setPatients] = useState([]);
@@ -52,10 +53,13 @@ export default function Dashboard() {
     // Update greeting every minute to check for time period changes
     const greetingInterval = setInterval(() => {
       updateGreeting();
-    }, 60000); // Check every minute
+    }, 600000); // Check every minute
 
     return () => clearInterval(greetingInterval);
   }, []);
+
+  // Add scroll to top when returning to dashboard
+  useScrollToTop([currentView === 'dashboard']);
 
   const loadAllData = async () => {
     try {

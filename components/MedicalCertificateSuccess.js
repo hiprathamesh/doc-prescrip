@@ -7,6 +7,7 @@ import { formatDate } from '../utils/dateUtils';
 import SharePDFButton from './SharePDFButton';
 import { activityLogger } from '../utils/activityLogger';
 import { toast } from 'sonner';
+import useScrollToTop from '../hooks/useScrollToTop';
 
 export default function MedicalCertificateSuccess({ certificate, patient, onBack }) {
   const [certificatePdfUrl, setCertificatePdfUrl] = useState(null);
@@ -15,6 +16,9 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
   // Add refs and state for floating header
   const successHeaderRef = useRef(null);
   const [isSuccessHeaderVisible, setIsSuccessHeaderVisible] = useState(true);
+
+  // Add scroll to top when component mounts
+  useScrollToTop();
 
   useEffect(() => {
     generatePdf();
