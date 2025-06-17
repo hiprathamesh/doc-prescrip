@@ -3,21 +3,88 @@
 import { User, Phone, FileText, Trash2, MoreVertical, ArrowLeft, Search } from 'lucide-react';
 import { formatDate } from '../utils/dateUtils';
 import { useState, useRef, useEffect } from 'react';
+import CustomDropdown from './CustomDropdown';
 
 export default function PatientList({ patients, onPatientSelect, onNewPrescription, onPatientDelete, onBack }) {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterBy, setFilterBy] = useState('all');
+  const [sortBy, setSortBy] = useState('original');
   const dropdownRefs = useRef({});
   const patientHeaderRef = useRef(null);
   const [isPatientHeaderVisible, setIsPatientHeaderVisible] = useState(true);
   const searchInputRef = useRef(null);
 
-  // Filter patients based on search term
-  const filteredPatients = patients.filter(patient =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.phone.includes(searchTerm)
-  );
+  // Filter options
+  const filterOptions = [
+    { value: 'all', label: 'All Patients' },
+    { value: 'pending-followup', label: 'Pending Follow-up' },
+    { value: 'overdue-followup', label: 'Overdue Follow-up' },
+    { value: 'recent-visits', label: 'Recent Visits (Last 7 days)' },
+    { value: 'no-followup', label: 'No Pending Follow-up' }
+  ];
+
+  // Sort options
+  const sortOptions = [
+    { value: 'original', label: 'Original Order' },
+    { value: 'name-asc', label: 'Name (A-Z)' },
+    { value: 'name-desc', label: 'Name (Z-A)' },
+    { value: 'last-visit-desc', label: 'Last Visit (Recent First)' },
+    { value: 'last-visit-asc', label: 'Last Visit (Oldest First)' }
+  ];
+
+  // Filter patients based on search term and filter criteria
+  const getFilteredPatients = () => {
+    let filtered = patients.filter(patient =>
+      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.phone.includes(searchTerm)
+    );
+
+    // Apply filter
+    switch (filterBy) {
+      case 'pending-followup':
+        filtered = filtered.filter(patient => patient.followUpStatus === 'pending');
+        break;
+      case 'overdue-followup':
+        filtered = filtered.filter(patient => patient.followUpStatus === 'overdue');
+        break;
+      case 'recent-visits':
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        filtered = filtered.filter(patient => new Date(patient.lastVisited) >= sevenDaysAgo);
+        break;
+      case 'no-followup':
+        filtered = filtered.filter(patient => patient.followUpStatus === 'none');
+        break;
+      default:
+        // 'all' - no additional filtering
+        break;
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case 'name-asc':
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'name-desc':
+        filtered.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case 'last-visit-desc':
+        filtered.sort((a, b) => new Date(b.lastVisited) - new Date(a.lastVisited));
+        break;
+      case 'last-visit-asc':
+        filtered.sort((a, b) => new Date(a.lastVisited) - new Date(b.lastVisited));
+        break;
+      default:
+        // 'original' - keep original order
+        break;
+    }
+
+    return filtered;
+  };
+
+  const filteredPatients = getFilteredPatients();
 
   const handleDeletePatient = (patient, e) => {
     e.stopPropagation();
@@ -35,7 +102,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownOpen && !Object.values(dropdownRefs.current).some(ref => 
+      if (dropdownOpen && !Object.values(dropdownRefs.current).some(ref =>
         ref && ref.contains(event.target)
       )) {
         setDropdownOpen(null);
@@ -49,7 +116,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
   // Intersection Observer for patient-header visibility
   useEffect(() => {
     const patientHeaderElement = patientHeaderRef.current;
-    
+
     if (!patientHeaderElement) {
       return;
     }
@@ -201,14 +268,36 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
         </div>
 
         <div className="max-w-5xl mx-auto px-6">
-          <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-            <div className="px-5 py-3 border-b border-gray-200 bg-gray-50">
-              <h2 className="text-sm font-medium text-gray-900">
+          <div className="pl-4 py-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-md font-medium text-gray-900">
                 {filteredPatients.length} {filteredPatients.length === 1 ? 'Patient' : 'Patients'}
                 {searchTerm && ` matching "${searchTerm}"`}
               </h2>
+              <div className="flex items-center space-x-3">
+                <div className="w-48">
+                  <CustomDropdown
+                    options={filterOptions}
+                    value={filterBy}
+                    onChange={setFilterBy}
+                    placeholder="Filter patients..."
+                  />
+                </div>
+                <div className="w-48">
+                  <CustomDropdown
+                    options={sortOptions}
+                    value={sortBy}
+                    onChange={setSortBy}
+                    placeholder="Sort by..."
+                  />
+                </div>
+              </div>
             </div>
-            
+          </div>
+          <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+            {/* Subheading with patient count and controls */}
+
+
             {/* Mobile view */}
             <div className="block sm:hidden">
               <div className="divide-y divide-gray-200">
@@ -225,7 +314,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                           {patient.phone}
                         </div>
                       </div>
-                      
+
                       <div className="relative ml-2" ref={el => dropdownRefs.current[patient.id] = el}>
                         <button
                           onClick={(e) => handleDropdownToggle(patient.id, e)}
@@ -233,11 +322,10 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                         >
                           <MoreVertical className="w-4 h-4" />
                         </button>
-                        
+
                         {dropdownOpen === patient.id && (
-                          <div className={`absolute ${
-                            index >= filteredPatients.length - 3 ? 'bottom-full mb-2' : 'top-full mt-2'
-                          } right-0 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200`}>
+                          <div className={`absolute ${index >= filteredPatients.length - 3 ? 'bottom-full mb-2' : 'top-full mt-2'
+                            } right-0 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200`}>
                             <div className="py-1">
                               <button
                                 onClick={(e) => {
@@ -262,7 +350,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       <div>
                         <span className="text-gray-500">Last Visit:</span>
@@ -270,23 +358,22 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                       </div>
                       <div>
                         <span className="text-gray-500">Follow-up Status:</span>
-                        <div className={`font-medium ${
-                          patient.followUpStatus === 'pending' 
-                            ? 'text-orange-600' 
+                        <div className={`font-medium ${patient.followUpStatus === 'pending'
+                            ? 'text-orange-600'
                             : patient.followUpStatus === 'overdue'
-                            ? 'text-red-600'
-                            : 'text-green-600'
-                        }`}>
-                          {patient.followUpStatus === 'pending' 
+                              ? 'text-red-600'
+                              : 'text-green-600'
+                          }`}>
+                          {patient.followUpStatus === 'pending'
                             ? `Due: ${formatDate(patient.nextExpected)}`
                             : patient.followUpStatus === 'overdue'
-                            ? `Overdue: ${formatDate(patient.nextExpected)}`
-                            : 'No pending follow-up'
+                              ? `Overdue: ${formatDate(patient.nextExpected)}`
+                              : 'No pending follow-up'
                           }
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="mt-3">
                       <button
                         onClick={(e) => {
@@ -367,8 +454,8 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                             <FileText className="w-3 h-3" />
                             <span>New Prescription</span>
                           </button>
-                          
-                          <div 
+
+                          <div
                             className="relative"
                             ref={el => dropdownRefs.current[patient.id] = el}
                           >
@@ -378,11 +465,10 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                             >
                               <MoreVertical className="w-3 h-3" />
                             </button>
-                            
+
                             {dropdownOpen === patient.id && (
-                              <div className={`absolute ${
-                                index >= filteredPatients.length - 3 ? 'bottom-full mb-2' : 'top-full mt-2'
-                              } right-0 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200`}>
+                              <div className={`absolute ${index >= filteredPatients.length - 3 ? 'bottom-full mb-2' : 'top-full mt-2'
+                                } right-0 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200`}>
                                 <div className="py-1">
                                   <button
                                     onClick={(e) => handleDeletePatient(patient, e)}
