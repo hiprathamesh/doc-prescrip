@@ -5,6 +5,7 @@ import { ArrowLeft, FileText, Phone, User, Trash2, MoreVertical, Pill, Download,
 import { storage } from '../utils/storage';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import SharePDFButton from './SharePDFButton';
+import ConfirmationDialog from './ConfirmationDialog';
 import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
 
@@ -14,6 +15,15 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   const [showFloatingHeader, setShowFloatingHeader] = useState(false);
   const headerRef = useRef(null);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  
+  // Confirmation dialog state
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    isLoading: false,
+    onConfirm: null
+  });
 
   useEffect(() => {
     if (patient) {
@@ -178,57 +188,74 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   };
 
   const deleteVisit = async (visitId, billId, visitType = 'prescription') => {
-    const confirmMessage = visitType === 'certificate' 
+    const title = visitType === 'certificate' ? 'Delete Medical Certificate' : 'Delete Visit Record';
+    const message = visitType === 'certificate' 
       ? 'Are you sure you want to delete this medical certificate? This action cannot be undone.'
       : 'Are you sure you want to delete this visit record? This action cannot be undone.';
       
-    if (window.confirm(confirmMessage)) {
-      try {
-        if (visitType === 'certificate') {
-          // Delete medical certificate
-          const allCertificates = JSON.parse(localStorage.getItem('medicalCertificates') || '[]');
-          const updatedCertificates = allCertificates.filter(cert => cert.id !== visitId.replace('_cert', ''));
-          localStorage.setItem('medicalCertificates', JSON.stringify(updatedCertificates));
-        } else {
-          // Delete prescription
-          const allPrescriptions = await storage.getPrescriptions();
-          const updatedPrescriptions = allPrescriptions.filter(p => p.id !== visitId);
-          await storage.savePrescriptions(updatedPrescriptions);
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      isLoading: false,
+      onConfirm: () => handleDeleteConfirm(visitId, billId, visitType)
+    });
+  };
 
-          // Delete bill if exists
-          if (billId) {
-            const allBills = await storage.getBills();
-            const updatedBills = allBills.filter(b => b.id !== billId);
-            await storage.saveBills(updatedBills);
-          }
+  const handleDeleteConfirm = async (visitId, billId, visitType) => {
+    setConfirmDialog(prev => ({ ...prev, isLoading: true }));
+    
+    try {
+      if (visitType === 'certificate') {
+        // Delete medical certificate
+        const allCertificates = JSON.parse(localStorage.getItem('medicalCertificates') || '[]');
+        const updatedCertificates = allCertificates.filter(cert => cert.id !== visitId.replace('_cert', ''));
+        localStorage.setItem('medicalCertificates', JSON.stringify(updatedCertificates));
+      } else {
+        // Delete prescription
+        const allPrescriptions = await storage.getPrescriptions();
+        const updatedPrescriptions = allPrescriptions.filter(p => p.id !== visitId);
+        await storage.savePrescriptions(updatedPrescriptions);
+
+        // Delete bill if exists
+        if (billId) {
+          const allBills = await storage.getBills();
+          const updatedBills = allBills.filter(b => b.id !== billId);
+          await storage.saveBills(updatedBills);
         }
-
-        // Log activity
-        if (visitType === 'certificate') {
-          await activityLogger.logActivity('certificate_deleted', {
-            patientId: patient.id,
-            patientName: patient.name,
-            description: `Deleted medical certificate for ${patient.name}`
-          });
-        } else {
-          await activityLogger.logVisitDeleted(patient.name);
-        }
-
-        loadPatientData();
-        setDropdownOpen(null);
-
-        toast.success(visitType === 'certificate' ? 'Certificate Deleted' : 'Visit Deleted', {
-          description: visitType === 'certificate' 
-            ? 'Medical certificate has been deleted successfully'
-            : 'Visit record has been deleted successfully'
-        });
-      } catch (error) {
-        console.error('Error deleting visit:', error);
-        toast.error('Error', {
-          description: `Failed to delete ${visitType === 'certificate' ? 'certificate' : 'visit record'}`
-        });
       }
+
+      // Log activity
+      if (visitType === 'certificate') {
+        await activityLogger.logActivity('certificate_deleted', {
+          patientId: patient.id,
+          patientName: patient.name,
+          description: `Deleted medical certificate for ${patient.name}`
+        });
+      } else {
+        await activityLogger.logVisitDeleted(patient.name);
+      }
+
+      loadPatientData();
+      setDropdownOpen(null);
+      setConfirmDialog({ isOpen: false, title: '', message: '', isLoading: false, onConfirm: null });
+
+      toast.success(visitType === 'certificate' ? 'Certificate Deleted' : 'Visit Deleted', {
+        description: visitType === 'certificate' 
+          ? 'Medical certificate has been deleted successfully'
+          : 'Visit record has been deleted successfully'
+      });
+    } catch (error) {
+      console.error('Error deleting visit:', error);
+      setConfirmDialog(prev => ({ ...prev, isLoading: false }));
+      toast.error('Error', {
+        description: `Failed to delete ${visitType === 'certificate' ? 'certificate' : 'visit record'}`
+      });
     }
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDialog({ isOpen: false, title: '', message: '', isLoading: false, onConfirm: null });
   };
 
   const downloadPrescription = async (prescription) => {
@@ -803,6 +830,16 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
           onClick={() => setDropdownOpen(null)}
         />
       )}
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={handleCancelDelete}
+        isLoading={confirmDialog.isLoading}
+      />
     </div>
   );
 }
