@@ -31,6 +31,7 @@ import { storage } from '../utils/storage';
 import { formatDate, formatTimeAgo } from '../utils/dateUtils';
 import { activityLogger, ACTIVITY_ICONS, ACTIVITY_COLORS } from '../utils/activityLogger';
 import useScrollToTop from '../hooks/useScrollToTop';
+import DarkModeToggle from './DarkModeToggle';
 
 export default function Dashboard() {
   const [patients, setPatients] = useState([]);
@@ -49,7 +50,7 @@ export default function Dashboard() {
     loadAllData();
     loadRecentActivities();
     updateGreeting();
-    
+
     // Update greeting every minute to check for time period changes
     const greetingInterval = setInterval(() => {
       updateGreeting();
@@ -237,7 +238,7 @@ export default function Dashboard() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         // Force a page reload to ensure middleware takes effect
         window.location.href = '/pin-entry';
@@ -262,7 +263,7 @@ export default function Dashboard() {
     const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
     const month = now.getMonth(); // 0 = January, 11 = December
     const date = now.getDate();
-    
+
     // Create a stable seed based on current date and hour for consistent message selection
     const seed = `${now.getFullYear()}-${month}-${date}-${hour}`;
     const getSeedBasedIndex = (arrayLength) => {
@@ -274,11 +275,11 @@ export default function Dashboard() {
       }
       return Math.abs(hash) % arrayLength;
     };
-    
+
     // Performance metrics for pep talk
     const hasGoodPerformance = (stats.visitsThisWeek || 0) >= 10 || (stats.newPatientsThisWeek || 0) >= 3;
     const hasExcellentPerformance = (stats.visitsThisWeek || 0) >= 20 || (stats.newPatientsThisWeek || 0) >= 5;
-    
+
     // Indian festivals and special days (approximate dates)
     const specialDays = {
       // Diwali (varies each year, but typically October/November)
@@ -308,49 +309,49 @@ export default function Dashboard() {
         subtitle: "May this festival of lights brighten your practice and bring prosperity to all your patients"
       };
     }
-    
+
     if (specialDays.holi2024) {
       return {
         title: "Happy Holi, Dr. Nikam!",
         subtitle: "Let the colors of joy and healing fill your practice today"
       };
     }
-    
+
     if (specialDays.doctorsDay) {
       return {
         title: "Happy National Doctors' Day, Dr. Nikam!",
         subtitle: "Thank you for your dedication to healing and caring for the community"
       };
     }
-    
+
     if (specialDays.worldHealthDay) {
       return {
         title: "Happy World Health Day, Dr. Nikam!",
         subtitle: "Your commitment to health makes the world a better place"
       };
     }
-    
+
     if (specialDays.independenceDay) {
       return {
         title: "Happy Independence Day, Dr. Nikam!",
         subtitle: "Freedom through health - your service strengthens our nation"
       };
     }
-    
+
     if (specialDays.republicDay) {
       return {
         title: "Happy Republic Day, Dr. Nikam!",
         subtitle: "Serving the republic with compassion and care"
       };
     }
-    
+
     if (specialDays.newYear) {
       return {
         title: "Happy New Year, Dr. Nikam!",
         subtitle: "Here's to another year of healing hearts and changing lives"
       };
     }
-    
+
     if (specialDays.christmas) {
       return {
         title: "Merry Christmas, Dr. Nikam!",
@@ -372,7 +373,7 @@ export default function Dashboard() {
       ];
       return fridayMessages[getSeedBasedIndex(fridayMessages.length)];
     }
-    
+
     if (day === 1) { // Monday
       const mondayMessages = [
         {
@@ -382,7 +383,7 @@ export default function Dashboard() {
       ];
       return mondayMessages[getSeedBasedIndex(mondayMessages.length)];
     }
-    
+
     if (day === 0 || day === 6) { // Weekend
       return {
         title: "Weekend warrior, Dr. Nikam!",
@@ -449,7 +450,7 @@ export default function Dashboard() {
   const updateGreeting = () => {
     const now = new Date();
     const currentPeriod = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${now.getHours()}`;
-    
+
     // Only update greeting if the time period has changed
     if (currentPeriod !== lastGreetingUpdate) {
       const newGreeting = generateContextualGreeting();
@@ -472,7 +473,7 @@ export default function Dashboard() {
       UserMinus: Trash2, // Using Trash2 as UserMinus might not be available
       Activity
     };
-    
+
     const IconComponent = iconMap[iconName] || Activity;
     return IconComponent;
   };
@@ -540,17 +541,19 @@ export default function Dashboard() {
         {currentView === 'dashboard' && (
           <div className="space-y-8">
             {/* Dynamic Welcome Section */}
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                {currentGreeting.title}
-              </h2>
-              <p className="text-gray-600">
-                {currentGreeting.subtitle}
-              </p>
+            <div className="flex items-center justify-between ">
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                  {currentGreeting.title}
+                </h2>
+                <p className="text-gray-600">
+                  {currentGreeting.subtitle}
+                </p>
+              </div>
+              <DarkModeToggle />
             </div>
-
             {/* Stats Grid with Hover Expansion */}
-            <div 
+            <div
               className={`bg-gray-100 rounded-2xl p-4 transition-all duration-500 ease-out `}
               onMouseEnter={() => setIsStatsHovered(true)}
               onMouseLeave={() => setIsStatsHovered(false)}
@@ -568,7 +571,7 @@ export default function Dashboard() {
                     <p className="text-2xl font-semibold text-gray-900">{stats.totalPatients || 0}</p>
                     <p className="text-sm text-gray-600">Total registered</p>
                   </div>
-                  
+
                   {/* Expanded content on hover */}
                   <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
                     <div className="flex justify-between items-center text-[13px]">
@@ -600,7 +603,7 @@ export default function Dashboard() {
                     <p className="text-2xl font-semibold text-gray-900">{stats.visitsThisWeek || 0}</p>
                     <p className="text-sm text-gray-600">This week</p>
                   </div>
-                  
+
                   <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
                     <div className="flex justify-between items-center text-[13px]">
                       <div className="flex items-center space-x-2">
@@ -631,7 +634,7 @@ export default function Dashboard() {
                     <p className="text-2xl font-semibold text-gray-900">₹{stats.paidRevenue || 0}</p>
                     <p className="text-sm text-gray-600">Collected</p>
                   </div>
-                  
+
                   <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
                     <div className="flex justify-between items-center text-[13px]">
                       <div className="flex items-center space-x-2">
@@ -662,7 +665,7 @@ export default function Dashboard() {
                     <p className="text-2xl font-semibold text-gray-900">{stats.upcomingFollowUps?.length || 0}</p>
                     <p className="text-sm text-gray-600">Upcoming</p>
                   </div>
-                  
+
                   <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
                     <div className="flex justify-between items-center text-[13px]">
                       <div className="flex items-center space-x-2">
@@ -785,7 +788,7 @@ export default function Dashboard() {
                       recentActivities.map((activity, index) => {
                         const IconComponent = getActivityIcon(activity.type);
                         const colorClass = getActivityColor(activity.type);
-                        
+
                         return (
                           <div key={activity.id}>
                             <div className="flex items-center space-x-3 py-3 hover:bg-gray-50 transition-colors cursor-pointer rounded-lg px-2 -mx-2">
@@ -833,15 +836,13 @@ export default function Dashboard() {
                         const patient = patients.find(p => p.id === prescription.patientId);
                         return (
                           <div key={prescription.id}>
-                            <div className={`flex items-center space-x-3 py-3 transition-colors cursor-pointer rounded-lg px-2 -mx-2 ${
-                              prescription.isOverdue 
-                                ? 'hover:bg-red-50' 
+                            <div className={`flex items-center space-x-3 py-3 transition-colors cursor-pointer rounded-lg px-2 -mx-2 ${prescription.isOverdue
+                                ? 'hover:bg-red-50'
                                 : 'hover:bg-gray-50'
-                            }`}
+                              }`}
                               onClick={() => patient && handlePatientSelect(patient)}>
-                              <div className={`p-1.5 rounded-full ${
-                                prescription.isOverdue ? 'bg-red-600' : 'bg-purple-600'
-                              }`}>
+                              <div className={`p-1.5 rounded-full ${prescription.isOverdue ? 'bg-red-600' : 'bg-purple-600'
+                                }`}>
                                 <Clock className="w-3 h-3 text-white" />
                               </div>
                               <div className="flex-1 min-w-0">
