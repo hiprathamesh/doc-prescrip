@@ -187,9 +187,9 @@ Dr. Prashant Nikam`
       <button 
         onClick={handleClick}
         disabled={disabled || status === 'loading'}
-        className={className || "w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"}
+        className={className || "w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2"}
       >
-        <Share2 className="w-4 h-4 text-gray-500" />
+        <Share2 className="w-4 h-4 text-gray-500 dark:text-gray-400" />
         <span>{status === 'loading' ? 'Loading...' : (customText || 'Share PDF')}</span>
       </button>
     )
@@ -200,7 +200,7 @@ Dr. Prashant Nikam`
     <button 
       onClick={handleClick}
       disabled={disabled || status === 'loading' || isUploading}
-      className={className || "flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"}
+      className={className || "flex items-center space-x-2 px-4 py-2 bg-green-600 dark:bg-green-500 text-white dark:text-gray-900 rounded-md hover:bg-green-700 dark:hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"}
     >
       {isUploading ? (
         <Loader2 className="w-4 h-4 animate-spin" />

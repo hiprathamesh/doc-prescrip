@@ -139,7 +139,7 @@ const CustomDropdown = forwardRef(function CustomDropdown({
   return (
     <div className="relative w-full" ref={wrapperRef}>
       <div
-        className={`w-full bg-white border border-gray-300 rounded-lg hover:border-[#BFDBFE] text-left cursor-default focus-within:outline-none focus-within:ring-3 focus-within:ring-[#BFDBFE] focus-within:border-[#3B82F6] text-sm flex items-center justify-between h-12 transition-colors ${disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''
+        className={`w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg hover:border-[#BFDBFE] text-left cursor-default focus-within:outline-none focus-within:ring-3 focus-within:ring-[#BFDBFE] focus-within:border-[#3B82F6] text-sm flex items-center justify-between h-12 transition-colors ${disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''
           }`}
       >
         <button
@@ -150,7 +150,7 @@ const CustomDropdown = forwardRef(function CustomDropdown({
           disabled={disabled}
           className="flex-1 p-3 text-left focus:outline-none flex items-center justify-between"
         >
-          <span className={`block truncate ${selectedOption ? 'text-gray-900' : 'text-gray-400'}`}>
+          <span className={`block truncate ${selectedOption ? 'text-gray-900 dark:text-gray-400' : 'text-gray-400'}`}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           <div className="flex items-center space-x-1">
@@ -168,7 +168,7 @@ const CustomDropdown = forwardRef(function CustomDropdown({
         </button>
       </div>
 
-      <div className={`absolute z-20 mt-2 w-full bg-white max-h-60 rounded-xl p-2 overflow-auto focus:outline-none text-sm border border-gray-200 transition-all duration-300 ease-out origin-top ${
+      <div className={`absolute z-20 mt-2 w-full bg-white dark:bg-gray-900 max-h-60 rounded-xl p-2 overflow-auto focus:outline-none text-sm border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-out origin-top ${
         isOpen && !disabled 
           ? 'opacity-100 scale-y-100 translate-y-0 pointer-events-auto' 
           : 'opacity-0 scale-y-95 -translate-y-2 pointer-events-none'
@@ -179,8 +179,8 @@ const CustomDropdown = forwardRef(function CustomDropdown({
             onClick={() => handleSelect(option.value)}
             onMouseEnter={() => setHighlightedIndex(index)}
             className={`cursor-pointer mb-1 rounded-lg select-none relative py-2.5 px-3 font-medium transition-colors ${index === highlightedIndex
-                ? 'bg-blue-50 text-blue-600'
-                : option.value === value ? 'bg-[#EFF6FF] text-[#1D4ED8]' : 'text-[#374151] hover:bg-[#F3F4F6]'
+                ? 'bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-300'
+                : option.value === value ? 'bg-[#EFF6FF] dark:bg-gray-800 text-[#1D4ED8] dark:text-blue-300' : 'text-[#374151] dark:text-gray-600 hover:bg-[#F3F4F6]'
               }`}
           >
             <span className="block truncate">

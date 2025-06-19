@@ -1,6 +1,7 @@
 // utils/theme.js or inside a useEffect
 export const toggleDarkMode = () => {
   const html = document.documentElement;
+  
   if (html.classList.contains('dark')) {
     html.classList.remove('dark');
     localStorage.setItem('theme', 'light');

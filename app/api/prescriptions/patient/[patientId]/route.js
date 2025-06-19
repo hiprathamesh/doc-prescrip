@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
  */
 export async function GET(request, { params }) {
   try {
-    const { patientId } = params;
+    const { patientId } = await params;
     const prescriptions = await databaseService.getPrescriptionsByPatient(patientId);
     
     return NextResponse.json({ success: true, data: prescriptions || [] });

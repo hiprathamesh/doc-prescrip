@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
  */
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const success = await databaseService.deleteTemplate(id);
     
     if (success) {

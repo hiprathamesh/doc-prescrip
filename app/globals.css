@@ -6,24 +6,109 @@
 @layer base {
   html {
     font-family: Inter, system-ui, sans-serif;
+    /* Force scrollbar to always be visible to prevent horizontal shifts */
+    overflow-y: scroll;
+  }
+
+  /* Smooth transitions for theme switching */
+  * {
+    transition: background-color 200ms ease-in-out, border-color 200ms ease-in-out, color 200ms ease-in-out;
+  }
+
+  /* Ensure consistent scrollbar width across themes */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgb(243 244 246); /* gray-100 for light mode */
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgb(156 163 175); /* gray-400 for light mode */
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(107 114 128); /* gray-500 for light mode */
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors;
+    @apply bg-blue-600 dark:bg-blue-500 text-white dark:text-gray-900 px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors;
+    @apply bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 dark:bg-red-500 text-white dark:text-gray-900 px-4 py-2 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors;
+  }
+
+  .btn-success {
+    @apply bg-green-600 dark:bg-green-500 text-white dark:text-gray-900 px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors;
   }
 
   .input-field {
-    @apply w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    @apply w-full p-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400;
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+    @apply bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6;
+  }
+
+  .text-primary {
+    @apply text-gray-900 dark:text-gray-200;
+  }
+
+  .text-secondary {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  .text-muted {
+    @apply text-gray-500 dark:text-gray-500;
+  }
+
+  .bg-surface {
+    @apply bg-white dark:bg-gray-900;
+  }
+
+  .bg-surface-secondary {
+    @apply bg-gray-50 dark:bg-gray-800;
+  }
+
+  .border-default {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+
+  .hover-surface {
+    @apply hover:bg-gray-50 dark:hover:bg-gray-800;
+  }
+
+  .hover-surface-secondary {
+    @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+  }
+
+  /* Dark mode scrollbar styling */
+  .dark ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background: rgb(30 41 59); /* slate-800 */
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgb(71 85 105); /* slate-600 */
+    border-radius: 4px;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgb(100 116 139); /* slate-500 */
   }
 }
 
@@ -111,37 +196,37 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: rgb(15 23 42); /* slate-900 */
+  --foreground: rgb(248 250 252); /* slate-50 */
+  --card: rgb(30 41 59); /* slate-800 */
+  --card-foreground: rgb(248 250 252); /* slate-50 */
+  --popover: rgb(30 41 59); /* slate-800 */
+  --popover-foreground: rgb(248 250 252); /* slate-50 */
+  --primary: rgb(59 130 246); /* blue-500 */
+  --primary-foreground: rgb(255 255 255);
+  --secondary: rgb(51 65 85); /* slate-700 */
+  --secondary-foreground: rgb(248 250 252); /* slate-50 */
+  --muted: rgb(51 65 85); /* slate-700 */
+  --muted-foreground: rgb(148 163 184); /* slate-400 */
+  --accent: rgb(51 65 85); /* slate-700 */
+  --accent-foreground: rgb(248 250 252); /* slate-50 */
+  --destructive: rgb(239 68 68); /* red-500 */
+  --border: rgb(51 65 85); /* slate-700 */
+  --input: rgb(51 65 85); /* slate-700 */
+  --ring: rgb(148 163 184); /* slate-400 */
+  --chart-1: rgb(139 92 246); /* violet-500 */
+  --chart-2: rgb(34 197 94); /* green-500 */
+  --chart-3: rgb(251 191 36); /* amber-400 */
+  --chart-4: rgb(236 72 153); /* pink-500 */
+  --chart-5: rgb(245 101 101); /* red-400 */
+  --sidebar: rgb(30 41 59); /* slate-800 */
+  --sidebar-foreground: rgb(248 250 252); /* slate-50 */
+  --sidebar-primary: rgb(59 130 246); /* blue-500 */
+  --sidebar-primary-foreground: rgb(255 255 255);
+  --sidebar-accent: rgb(51 65 85); /* slate-700 */
+  --sidebar-accent-foreground: rgb(248 250 252); /* slate-50 */
+  --sidebar-border: rgb(51 65 85); /* slate-700 */
+  --sidebar-ring: rgb(148 163 184); /* slate-400 */
 }
 
 @layer base {
@@ -151,4 +236,16 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Prevent layout shift during view transitions */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Ensure smooth transition without layout shifts */
+.dark-mode-transitioning {
+  overflow: hidden !important;
 }

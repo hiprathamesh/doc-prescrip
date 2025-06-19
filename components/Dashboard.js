@@ -495,30 +495,31 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Minimal Header */}
-      <header className="dashboard-header bg-white border-b border-gray-200 sticky top-0 z-40">
+      <header className="dashboard-header bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div
               className="flex items-center space-x-3 cursor-pointer"
               onClick={() => setCurrentView('dashboard')}
             >
-              <div className="p-2 bg-blue-600 rounded">
+              <div className="p-2 bg-blue-600 dark:bg-blue-500 rounded">
                 <Stethoscope className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Chaitanya Hospital, Deola
                 </h1>
-                <p className="text-sm text-gray-500">Practice Management</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Practice Management</p>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
+              <DarkModeToggle />
               <button
                 onClick={handleLogout}
-                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded hover:bg-gray-100 transition-all duration-200 flex items-center space-x-2 text-sm"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center space-x-2 text-sm"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
@@ -526,7 +527,7 @@ export default function Dashboard() {
 
               <button
                 onClick={() => handleNewPrescription()}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center space-x-2 transition-all duration-200"
+                className="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white dark:text-gray-900 px-4 py-2 rounded text-sm font-medium flex items-center space-x-2 transition-all duration-200"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Prescription</span>
@@ -541,145 +542,142 @@ export default function Dashboard() {
         {currentView === 'dashboard' && (
           <div className="space-y-8">
             {/* Dynamic Welcome Section */}
-            <div className="flex items-center justify-between ">
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                  {currentGreeting.title}
-                </h2>
-                <p className="text-gray-600">
-                  {currentGreeting.subtitle}
-                </p>
-              </div>
-              <DarkModeToggle />
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                {currentGreeting.title}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300">
+                {currentGreeting.subtitle}
+              </p>
             </div>
             {/* Stats Grid with Hover Expansion */}
             <div
-              className={`bg-gray-100 rounded-2xl p-4 transition-all duration-500 ease-out `}
+              className={`bg-gray-100 dark:bg-gray-800 rounded-2xl p-4 transition-all duration-500 ease-out `}
               onMouseEnter={() => setIsStatsHovered(true)}
               onMouseLeave={() => setIsStatsHovered(false)}
             >
               <div className="grid grid-cols-4 gap-4">
                 {/* Total Patients */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-600 p-4 hover:shadow-lg dark:hover:shadow-slate-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-blue-50 rounded">
-                      <Users className="w-4 h-4 text-blue-600" />
+                    <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded">
+                      <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <span className="text-xs text-gray-500 font-medium">PATIENTS</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">PATIENTS</span>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-2xl font-semibold text-gray-900">{stats.totalPatients || 0}</p>
-                    <p className="text-sm text-gray-600">Total registered</p>
+                    <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.totalPatients || 0}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Total registered</p>
                   </div>
 
                   {/* Expanded content on hover */}
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-slate-600`}>
                     <div className="flex justify-between items-center text-[13px]">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                        <span className="text-gray-600">New this month</span>
+                        <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
+                        <span className="text-gray-600 dark:text-gray-300">New this month</span>
                       </div>
-                      <span className="font-medium text-gray-600">+{stats.newPatientsThisMonth || 0}</span>
+                      <span className="font-medium text-gray-600 dark:text-gray-300">+{stats.newPatientsThisMonth || 0}</span>
                     </div>
                     <div className="flex justify-between items-center text-[13px] mt-1">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                        <span className="text-gray-600">New this week</span>
+                        <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+                        <span className="text-gray-600 dark:text-gray-300">New this week</span>
                       </div>
-                      <span className="font-medium text-gray-600">+{stats.newPatientsThisWeek || 0}</span>
+                      <span className="font-medium text-gray-600 dark:text-gray-300">+{stats.newPatientsThisWeek || 0}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Visits This Week */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-600 p-4 hover:shadow-lg dark:hover:shadow-slate-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-green-50 rounded">
-                      <Calendar className="w-4 h-4 text-green-600" />
+                    <div className="p-2 bg-green-50 dark:bg-green-500/10 rounded">
+                      <Calendar className="w-4 h-4 text-green-600 dark:text-green-400" />
                     </div>
-                    <span className="text-xs text-gray-500 font-medium">VISITS</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">VISITS</span>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-2xl font-semibold text-gray-900">{stats.visitsThisWeek || 0}</p>
-                    <p className="text-sm text-gray-600">This week</p>
+                    <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.visitsThisWeek || 0}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">This week</p>
                   </div>
 
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-slate-600`}>
                     <div className="flex justify-between items-center text-[13px]">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                        <span className="text-gray-600">This month</span>
+                        <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
+                        <span className="text-gray-600 dark:text-gray-300">This month</span>
                       </div>
-                      <span className="font-medium text-gray-600">{stats.visitsThisMonth || 0}</span>
+                      <span className="font-medium text-gray-600 dark:text-gray-300">{stats.visitsThisMonth || 0}</span>
                     </div>
                     <div className="flex justify-between items-center text-[13px] mt-1">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                        <span className="text-gray-600">Average per day</span>
+                        <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+                        <span className="text-gray-600 dark:text-gray-300">Average per day</span>
                       </div>
-                      <span className="font-medium text-gray-600">{Math.round((stats.visitsThisWeek || 0) / 7)}</span>
+                      <span className="font-medium text-gray-600 dark:text-gray-300">{Math.round((stats.visitsThisWeek || 0) / 7)}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Revenue */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-600 p-4 hover:shadow-lg dark:hover:shadow-slate-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-orange-50 rounded">
-                      <DollarSign className="w-4 h-4 text-orange-600" />
+                    <div className="p-2 bg-orange-50 dark:bg-orange-500/10 rounded">
+                      <DollarSign className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                     </div>
-                    <span className="text-xs text-gray-500 font-medium">REVENUE</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">REVENUE</span>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-2xl font-semibold text-gray-900">₹{stats.paidRevenue || 0}</p>
-                    <p className="text-sm text-gray-600">Collected</p>
+                    <p className="text-2xl font-semibold text-gray-900 dark:text-white">₹{stats.paidRevenue || 0}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Collected</p>
                   </div>
 
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-slate-600`}>
                     <div className="flex justify-between items-center text-[13px]">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
-                        <span className="text-gray-600">Pending</span>
+                        <div className="w-2 h-2 bg-orange-600 dark:bg-orange-400 rounded-full"></div>
+                        <span className="text-gray-600 dark:text-gray-300">Pending</span>
                       </div>
-                      <span className="font-medium text-gray-600">₹{stats.pendingRevenue || 0}</span>
+                      <span className="font-medium text-gray-600 dark:text-gray-300">₹{stats.pendingRevenue || 0}</span>
                     </div>
                     <div className="flex justify-between items-end text-[13px] mt-1">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                        <span className="text-gray-600">This month</span>
+                        <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
+                        <span className="text-gray-600 dark:text-gray-300">This month</span>
                       </div>
-                      <span className="font-medium text-gray-600">₹{stats.revenueThisMonth || 0}</span>
+                      <span className="font-medium text-gray-600 dark:text-gray-300">₹{stats.revenueThisMonth || 0}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Follow-ups */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-lg transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-600 p-4 hover:shadow-lg dark:hover:shadow-slate-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-purple-50 rounded">
-                      <Clock className="w-4 h-4 text-purple-600" />
+                    <div className="p-2 bg-purple-50 dark:bg-purple-500/10 rounded">
+                      <Clock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <span className="text-xs text-gray-500 font-medium">FOLLOW-UPS</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">FOLLOW-UPS</span>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-2xl font-semibold text-gray-900">{stats.upcomingFollowUps?.length || 0}</p>
-                    <p className="text-sm text-gray-600">Upcoming</p>
+                    <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.upcomingFollowUps?.length || 0}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Upcoming</p>
                   </div>
 
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100`}>
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-slate-600`}>
                     <div className="flex justify-between items-center text-[13px]">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                        <span className="text-gray-600">Next 7 days</span>
+                        <div className="w-2 h-2 bg-purple-600 dark:bg-purple-400 rounded-full"></div>
+                        <span className="text-gray-600 dark:text-gray-300">Next 7 days</span>
                       </div>
-                      <span className="font-medium text-gray-600">{stats.upcomingFollowUps?.length || 0}</span>
+                      <span className="font-medium text-gray-600 dark:text-gray-300">{stats.upcomingFollowUps?.length || 0}</span>
                     </div>
                     <div className="flex justify-between items-center text-[13px] mt-1">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-red-600 rounded-full"></div>
-                        <span className="text-gray-600">Overdue</span>
+                        <div className="w-2 h-2 bg-red-600 dark:bg-red-400 rounded-full"></div>
+                        <span className="text-gray-600 dark:text-gray-300">Overdue</span>
                       </div>
-                      <span className="font-medium text-gray-600">{stats.upcomingFollowUps?.filter(f => f.isOverdue).length || 0}</span>
+                      <span className="font-medium text-gray-600 dark:text-gray-300">{stats.upcomingFollowUps?.filter(f => f.isOverdue).length || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -691,80 +689,80 @@ export default function Dashboard() {
               {/* Left Column - Quick Actions & Recent Activity */}
               <div className="col-span-2 space-y-6">
                 {/* Quick Actions */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-5">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => handleNewPrescription()}
-                      className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-600 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-blue-600 rounded">
+                        <div className="p-2 bg-blue-600 dark:bg-blue-500 rounded">
                           <FileText className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">New Prescription</p>
-                          <p className="text-xs text-gray-600">Create prescription</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">New Prescription</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-300">Create prescription</p>
                         </div>
                       </div>
                     </button>
 
                     <button
                       onClick={handleViewAllPatients}
-                      className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-600 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-green-600 rounded">
+                        <div className="p-2 bg-green-600 dark:bg-green-500 rounded">
                           <Users className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">View Patients</p>
-                          <p className="text-xs text-gray-600">Manage patients</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">View Patients</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-300">Manage patients</p>
                         </div>
                       </div>
                     </button>
 
                     <button
                       onClick={handleViewTemplates}
-                      className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-600 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-purple-600 rounded">
+                        <div className="p-2 bg-purple-600 dark:bg-purple-500 rounded">
                           <FileText className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">Templates</p>
-                          <p className="text-xs text-gray-600">Manage templates</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">Templates</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-300">Manage templates</p>
                         </div>
                       </div>
                     </button>
 
                     <button
                       onClick={handleViewMedicalData}
-                      className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-600 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-orange-600 rounded">
+                        <div className="p-2 bg-orange-600 dark:bg-orange-500 rounded">
                           <Plus className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">Medical Data</p>
-                          <p className="text-xs text-gray-600">Symptoms & diagnoses</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">Medical Data</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-300">Symptoms & diagnoses</p>
                         </div>
                       </div>
                     </button>
 
                     <button
                       onClick={() => handleNewMedicalCertificate()}
-                      className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all duration-200 text-left col-span-2"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-600 transition-all duration-200 text-left col-span-2"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-cyan-600 rounded">
+                        <div className="p-2 bg-cyan-600 dark:bg-cyan-500 rounded">
                           <FileText className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">Medical Certificate</p>
-                          <p className="text-xs text-gray-600">Generate fitness certificate</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">Medical Certificate</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-300">Generate fitness certificate</p>
                         </div>
                       </div>
                     </button>
@@ -772,12 +770,12 @@ export default function Dashboard() {
                 </div>
 
                 {/* Recent Activity */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-5">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
                     <button
                       onClick={handleViewAllPatients}
-                      className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm"
                     >
                       View All
                     </button>
@@ -791,33 +789,33 @@ export default function Dashboard() {
 
                         return (
                           <div key={activity.id}>
-                            <div className="flex items-center space-x-3 py-3 hover:bg-gray-50 transition-colors cursor-pointer rounded-lg px-2 -mx-2">
+                            <div className="flex items-center space-x-3 py-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer rounded-lg px-2 -mx-2">
                               <div className={`p-2 rounded ${colorClass}`}>
                                 <IconComponent className="w-4 h-4" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">{activity.description}</p>
-                                <p className="text-xs text-gray-600">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{activity.description}</p>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
                                   {formatTimeAgo(activity.timestamp)}
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
                                   {formatDate(activity.timestamp)}
                                 </p>
                               </div>
                             </div>
                             {index < recentActivities.length - 1 && (
-                              <div className="border-b border-gray-100"></div>
+                              <div className="border-b border-gray-100 dark:border-slate-700"></div>
                             )}
                           </div>
                         );
                       })
                     ) : (
                       <div className="text-center py-8">
-                        <Activity className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                        <p className="text-gray-500">No recent activity</p>
-                        <p className="text-sm text-gray-400">Your activities will appear here</p>
+                        <Activity className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+                        <p className="text-gray-500 dark:text-gray-400">No recent activity</p>
+                        <p className="text-sm text-gray-400 dark:text-gray-500">Your activities will appear here</p>
                       </div>
                     )}
                   </div>
@@ -827,8 +825,8 @@ export default function Dashboard() {
               {/* Right Column - Follow-ups & Monthly Overview */}
               <div className="space-y-6">
                 {/* Upcoming Follow-ups */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Follow-ups</h3>
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-5">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Upcoming Follow-ups</h3>
 
                   <div className="space-y-0">
                     {stats.upcomingFollowUps?.length > 0 ? (
@@ -837,57 +835,57 @@ export default function Dashboard() {
                         return (
                           <div key={prescription.id}>
                             <div className={`flex items-center space-x-3 py-3 transition-colors cursor-pointer rounded-lg px-2 -mx-2 ${prescription.isOverdue
-                                ? 'hover:bg-red-50'
-                                : 'hover:bg-gray-50'
+                              ? 'hover:bg-red-50 dark:hover:bg-red-900/20'
+                              : 'hover:bg-gray-50 dark:hover:bg-slate-700'
                               }`}
                               onClick={() => patient && handlePatientSelect(patient)}>
-                              <div className={`p-1.5 rounded-full ${prescription.isOverdue ? 'bg-red-600' : 'bg-purple-600'
+                              <div className={`p-1.5 rounded-full ${prescription.isOverdue ? 'bg-red-600 dark:bg-red-500' : 'bg-purple-600 dark:bg-purple-500'
                                 }`}>
                                 <Clock className="w-3 h-3 text-white" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">{patient?.name}</p>
-                                <p className={`text-xs ${prescription.isOverdue ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{patient?.name}</p>
+                                <p className={`text-xs ${prescription.isOverdue ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-600 dark:text-gray-400'}`}>
                                   {prescription.isOverdue ? 'Overdue: ' : ''}{formatDate(prescription.followUpDate)}
                                 </p>
                               </div>
                             </div>
                             {index < stats.upcomingFollowUps.slice(0, 5).length - 1 && (
-                              <div className="border-b border-gray-100"></div>
+                              <div className="border-b border-gray-100 dark:border-slate-700"></div>
                             )}
                           </div>
                         );
                       })
                     ) : (
                       <div className="text-center py-6">
-                        <Calendar className="mx-auto h-8 w-8 text-gray-300 mb-2" />
-                        <p className="text-gray-500 text-sm">No upcoming follow-ups</p>
+                        <Calendar className="mx-auto h-8 w-8 text-gray-300 dark:text-gray-600 mb-2" />
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">No upcoming follow-ups</p>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Monthly Overview */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">This Month</h3>
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-5">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">This Month</h3>
 
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">New Patients</span>
-                      <span className="text-sm font-semibold text-gray-900">{stats.newPatientsThisMonth || 0}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-300">New Patients</span>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-white">{stats.newPatientsThisMonth || 0}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Total Visits</span>
-                      <span className="text-sm font-semibold text-gray-900">{stats.visitsThisMonth || 0}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-300">Total Visits</span>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-white">{stats.visitsThisMonth || 0}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Revenue</span>
-                      <span className="text-sm font-semibold text-green-600">₹{stats.revenueThisMonth || 0}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-300">Revenue</span>
+                      <span className="text-sm font-semibold text-green-600 dark:text-green-400">₹{stats.revenueThisMonth || 0}</span>
                     </div>
-                    <div className="pt-3 border-t border-gray-200">
+                    <div className="pt-3 border-t border-gray-200 dark:border-slate-700">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-700">Pending Payments</span>
-                        <span className="text-sm font-semibold text-orange-600">₹{stats.pendingRevenue || 0}</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Pending Payments</span>
+                        <span className="text-sm font-semibold text-orange-600 dark:text-orange-400">₹{stats.pendingRevenue || 0}</span>
                       </div>
                     </div>
                   </div>

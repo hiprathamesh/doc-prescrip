@@ -69,11 +69,11 @@ export default function PillSelector({
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
-        <h4 className="text-base sm:text-lg font-semibold text-gray-800">{title}</h4>
+        <h4 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-white">{title}</h4>
         <div className="flex items-center justify-end space-x-2">
           <button
             onClick={() => setShowSearch(!showSearch)}
-            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-600 rounded-lg transition-colors"
             title="Search"
           >
             <Search className="w-4 h-4" />
@@ -81,7 +81,7 @@ export default function PillSelector({
           {canScrollLeft && (
             <button
               onClick={() => scroll('left')}
-              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-600 rounded-lg transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -89,7 +89,7 @@ export default function PillSelector({
           {canScrollRight && (
             <button
               onClick={() => scroll('right')}
-              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800  dark:hover:text-gray-600 rounded-lg transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -106,7 +106,7 @@ export default function PillSelector({
               placeholder={searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               autoFocus
             />
           </div>
@@ -155,7 +155,7 @@ export default function PillSelector({
             <button
               key={index}
               onClick={() => handleSelect(item)}
-              className="flex-shrink-0 px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-700 rounded-full text-sm font-medium transition-colors duration-200 border border-gray-300 hover:border-gray-300 whitespace-nowrap"
+              className="flex-shrink-0 px-3 sm:px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-400 hover:text-gray-700 rounded-full text-sm font-medium transition-colors duration-200 border border-gray-300 dark:border-gray-700 whitespace-nowrap cursor-pointer"
             >
               {item}
             </button>

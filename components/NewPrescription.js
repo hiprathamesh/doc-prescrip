@@ -821,21 +821,21 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         `}
         style={{ top: '81px' }}
       >
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-slate-700">
           <div className="max-w-5xl mx-auto px-6 py-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
-                <span className="text-md font-semibold text-gray-900">New Prescription</span>
+                <span className="text-md font-semibold text-gray-900 dark:text-white">New Prescription</span>
               </div>
               <button
                 onClick={handleSavePrescription}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
               >
                 <Save className="w-4 h-4" />
                 <span>Save & Send</span>
@@ -853,16 +853,16 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100  dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
-                  <ArrowLeft className="w-5 h-5 text-gray-600" />
+                  <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-500 dark:hover:text-gray-200" />
                 </button>
-                <span className="text-xl font-semibold text-gray-900">New Prescription</span>
+                <span className="text-xl font-semibold text-gray-900 dark:text-white">New Prescription</span>
               </div>
               <div className="flex space-x-3">
                 <button
                   onClick={handleSavePrescription}
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save & Send</span>
@@ -875,8 +875,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Patient Selection */}
           {!selectedPatient && (
-            <div className="bg-white p-6 rounded-xl border border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-5">Select Patient</h2>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-600">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-5">Select Patient</h2>
               <div className="space-y-5">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
                   <div className="flex-1 relative">
@@ -899,7 +899,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   </div>
                   <button
                     onClick={toggleNewPatient}
-                    className={`w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-medium transition-all duration-200 ${isNewPatient ? 'bg-gray-600 hover:bg-gray-700' : ''
+                    className={`w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-medium transition-all duration-200 ${isNewPatient ? 'bg-gray-600 hover:bg-gray-700' : ''
                       }`}
                   >
                     <Plus className={`w-5 h-5 transition-transform duration-300 ease-out ${isNewPatient ? 'rotate-45' : 'rotate-0'
@@ -917,34 +917,34 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                     ? 'opacity-100 transform translate-y-0'
                     : 'opacity-0 transform translate-y-2'
                     }`}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 p-5 bg-gray-50 rounded-xl border border-gray-200 mt-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 p-5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 mt-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Name *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Name *</label>
                         <input
                           ref={nameRef}
                           type="text"
                           value={newPatientData.name}
                           onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
                           onKeyPress={(e) => handleKeyPress(e, ageRef)}
-                          className="w-full text-sm p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                          className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
                           placeholder="Enter patient name"
                           autoFocus={isNewPatient && !isAnimating}
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Age *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Age *</label>
                         <input
                           ref={ageRef}
                           type="number"
                           value={newPatientData.age}
                           onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
                           onKeyPress={(e) => handleKeyPress(e, genderRef)}
-                          className="w-full text-sm p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                          className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
                           placeholder="Enter age"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Gender</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Gender</label>
                         <CustomDropdown
                           ref={genderRef}
                           options={[
@@ -959,14 +959,14 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Phone *</label>
                         <input
                           ref={phoneRef}
                           type="tel"
                           value={newPatientData.phone}
                           onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
                           onKeyPress={handleLastFieldKeyPress}
-                          className="w-full text-sm p-3 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                          className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
                           placeholder="Enter phone number"
                         />
                       </div>
@@ -974,7 +974,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                         <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
                           <button
                             onClick={handleCreateNewPatient}
-                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors duration-200"
+                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg font-medium transition-colors duration-200"
                           >
                             Create Patient
                           </button>
@@ -993,34 +993,34 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
           {selectedPatient && (
             <div className="space-y-6">
               {/* Patient Info */}
-              <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                   <div className="flex items-center space-x-2">
                     <User className="w-4 h-4 text-gray-500" />
                     <div>
                       <span className="text-gray-600">Patient</span>
-                      <p className="font-medium text-gray-900">{selectedPatient.name}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{selectedPatient.name}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <User className="w-4 h-4 text-gray-500" />
                     <div>
                       <span className="text-gray-600">ID</span>
-                      <p className="font-medium text-gray-900">{selectedPatient.id}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{selectedPatient.id}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Calendar className="w-4 h-4 text-gray-500" />
                     <div>
                       <span className="text-gray-600">Age</span>
-                      <p className="font-medium text-gray-900">{selectedPatient.age} years</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{selectedPatient.age} years</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Phone className="w-4 h-4 text-gray-500" />
                     <div>
                       <span className="text-gray-600">Phone</span>
-                      <p className="font-medium text-gray-900">{selectedPatient.phone}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{selectedPatient.phone}</p>
                     </div>
                   </div>
                 </div>
@@ -1058,9 +1058,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               )}
 
               {/* Prescription Templates Section */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-5 space-y-3 sm:space-y-0">
-                  <h3 className="text-lg font-semibold text-gray-900">Prescription Templates</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Prescription Templates</h3>
                   <button
                     onClick={() => setShowTemplates(!showTemplates)}
                     className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 text-sm font-medium transition-colors duration-200"
@@ -1079,7 +1079,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                         placeholder="Search templates..."
                         value={templateSearch}
                         onChange={(e) => setTemplateSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-colors h-11"
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-colors h-11"
                       />
                     </div>
 
@@ -1089,9 +1089,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                           <div
                             key={template.id}
                             onClick={() => applyTemplate(template)}
-                            className="flex-shrink-0 w-80 p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 cursor-pointer group"
+                            className="flex-shrink-0 w-80 p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:border-purple-300 hover:bg-purple-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer group"
                           >
-                            <h4 className="font-semibold text-gray-800 mb-1.5 group-hover:text-purple-700">
+                            <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-1.5 group-hover:text-purple-700">
                               {template.name}
                             </h4>
                             <p className="text-sm text-gray-600 mb-2.5 line-clamp-2">{template.description}</p>
@@ -1100,12 +1100,12 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                               {(template.diagnosis || []).length > 0 && (
                                 <div className="flex flex-wrap gap-1">
                                   {template.diagnosis.slice(0, 2).map((diag, index) => (
-                                    <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                    <span key={index} className="text-xs bg-blue-100 text-blue-800 dark:text-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full">
                                       {diag.name}
                                     </span>
                                   ))}
                                   {template.diagnosis.length > 2 && (
-                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                                    <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-500 px-2 py-1 rounded-full">
                                       +{template.diagnosis.length - 2}
                                     </span>
                                   )}
@@ -1131,16 +1131,16 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
 
               {/* Enhanced Medical History */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-5">Medical History</h3>
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5">Medical History</h3>
                 <div className="flex flex-wrap gap-2.5">
                   {MEDICAL_CONDITIONS.map((condition) => (
                     <button
                       key={condition}
                       onClick={() => toggleMedicalCondition(condition)}
                       className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${selectedMedicalHistory.has(condition)
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                        ? 'bg-blue-600 text-white dark:text-gray-900 hover:bg-blue-700'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700'
                         }`}
                     >
                       {condition}
@@ -1152,8 +1152,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       <button
                         onClick={() => toggleMedicalCondition(condition)}
                         className={`px-3.5 py-1.5 pr-7 rounded-full text-sm font-medium transition-colors duration-200 ${selectedMedicalHistory.has(condition)
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                          ? 'bg-blue-600 text-white dark:text-gray-900 hover:bg-blue-700'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700'
                           }`}
                       >
                         {condition}
@@ -1206,9 +1206,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                 </div>
 
                 {selectedMedicalHistory.size > 0 && (
-                  <div className="mt-5 p-3.5 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 className="text-sm font-medium text-blue-700 mb-1.5">Selected Conditions:</h4>
-                    <div className="text-sm text-blue-600">
+                  <div className="mt-5 p-3.5 bg-blue-50 dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700">
+                    <h4 className="text-sm font-medium text-blue-700 dark:text-gray-400 mb-1.5">Selected Conditions:</h4>
+                    <div className="text-sm text-blue-600 dark:text-gray-500">
                       {Array.from(selectedMedicalHistory).join(', ')}
                     </div>
                   </div>
@@ -1216,7 +1216,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
 
               {/* Symptoms */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
                 <div className="space-y-5">
                   <PillSelector
                     title="Select Symptoms"
@@ -1246,11 +1246,11 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
                   {symptoms.length > 0 && (
                     <div className="space-y-0">
-                      <h4 className="text-base font-medium text-gray-800 mb-4">Selected Symptoms</h4>
+                      <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">Selected Symptoms</h4>
                       <div className="divide-y divide-gray-200">
                         {symptoms.map((symptom) => (
                           <div key={symptom.id} className="flex justify-between items-center py-4">
-                            <div className="font-normal text-gray-700">{symptom.name}</div>
+                            <div className="font-normal text-gray-700 dark:text-gray-400">{symptom.name}</div>
                             <div className="flex w-100 space-x-3 pl-3 items-center">
 
                               <CustomDropdown
@@ -1273,7 +1273,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
                               <button
                                 onClick={() => removeSymptom(symptom.id)}
-                                className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-md transition-colors sm:justify-self-end"
+                                className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors sm:justify-self-end"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -1287,7 +1287,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
 
               {/* Diagnosis */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
                 <div className="space-y-5">
                   <PillSelector
                     title="Select Diagnosis"
@@ -1315,11 +1315,11 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
                   {diagnoses.length > 0 && (
                     <div className="space-y-0">
-                      <h4 className="text-base font-medium text-gray-800 mb-4">Selected Diagnoses</h4>
+                      <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">Selected Diagnoses</h4>
                       <div className="divide-y divide-gray-200">
                         {diagnoses.map((diagnosis) => (
                           <div key={diagnosis.id} className="flex justify-between items-center py-4">
-                            <div className="font-normal text-gray-700">{diagnosis.name}</div>
+                            <div className="font-normal text-gray-700 dark:text-gray-400">{diagnosis.name}</div>
                             <div className="flex w-100 space-x-3 pl-3 items-center">
 
                               <input
@@ -1327,12 +1327,12 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                                 placeholder="Description (optional)"
                                 value={diagnosis.description}
                                 onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
-                                className="text-sm w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                                className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
                               />
 
                               <button
                                 onClick={() => removeDiagnosis(diagnosis.id)}
-                                className=" text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-md transition-colors sm:justify-self-end"
+                                className=" text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors sm:justify-self-end"
                               >
                                 <Trash2 className="w-4 h-4"></Trash2>
                               </button>
@@ -1346,7 +1346,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
 
               {/* Medications section */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
                 <div className="space-y-5">
                   {isLoadingCustomData ? (
                     <div className="text-center py-6">
@@ -1396,12 +1396,12 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
                   {medications.length > 0 && (
                     <div className="space-y-0">
-                      <h4 className="text-base font-medium text-gray-800 mb-4">Selected Medications</h4>
+                      <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">Selected Medications</h4>
                       <div className="divide-y divide-gray-200">
                         {medications.map((medication) => (
                           <div key={medication.id} className="py-4 space-y-3.5">
                             <div className="grid grid-cols-1 sm:grid-cols-6 gap-3 items-center">
-                              <div className="font-normal text-gray-700">{medication.name}</div>
+                              <div className="font-normal text-gray-700 dark:text-gray-400">{medication.name}</div>
 
                               <div className="col-span-1 sm:col-span-4 flex items-center space-x-2.5 justify-center sm:justify-start">
                                 {Object.entries(medication.timing).map(([key, value]) => (
@@ -1409,9 +1409,9 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                                     <button
                                       type="button"
                                       onClick={() => updateMedication(medication.id, `timing.${key}`, !value)}
-                                      className={`w-7 h-7 rounded-md border-1 transition-all duration-200 flex items-center justify-center ${value
-                                        ? 'border-blue-400 bg-blue-100'
-                                        : 'border-gray-300 hover:border-gray-400'
+                                      className={`w-7 h-7 rounded-md border-1 transition-all duration-200 flex items-center justify-center cursor-pointer ${value
+                                        ? 'border-blue-400 bg-blue-100 dark:bg-gray-900'
+                                        : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'
                                         }`}
                                     >
                                       {value && (
@@ -1425,7 +1425,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
                               <button
                                 onClick={() => removeMedication(medication.id)}
-                                className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-md transition-colors sm:justify-self-end"
+                                className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors sm:justify-self-end"
                               >
                                 <Trash2 className="w-4 h-4"></Trash2>
                               </button>
@@ -1437,7 +1437,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                                 placeholder="Dosage (e.g., 500mg)"
                                 value={medication.dosage}
                                 onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
-                                className="text-sm w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                                className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
                               />
                               <CustomDropdown
                                 options={MEDICATION_TIMING.map(option => ({ value: option.value, label: option.label }))}
@@ -1459,7 +1459,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                                 placeholder="Remarks"
                                 value={medication.remarks}
                                 onChange={(e) => updateMedication(medication.id, 'remarks', e.target.value)}
-                                className="text-sm w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                                className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
                               />
                             </div>
                           </div>
@@ -1471,7 +1471,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
 
               {/* Lab Results */}
-              <div className="bg-white p-6 rounded-xl border border-gray-200">
+              <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
                 <div className="space-y-5">
                   <PillSelector
                     title="Select Lab Tests"
@@ -1499,22 +1499,22 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
                   {labResults.length > 0 && (
                     <div className="space-y-0">
-                      <h4 className="text-base font-medium text-gray-800 mb-4">Selected Lab Tests</h4>
+                      <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">Selected Lab Tests</h4>
                       <div className="divide-y divide-gray-200">
                         {labResults.map((lab) => (
                           <div key={lab.id} className="flex justify-between items-center py-4">
-                            <div className="font-normal text-gray-700">{lab.testName}</div>
+                            <div className="font-normal text-gray-700 dark:text-gray-400">{lab.testName}</div>
                             <div className="flex w-100 space-x-3 pl-3 items-center">
                               <input
                                 type="text"
                                 placeholder="Remarks (optional)"
                                 value={lab.remarks}
                                 onChange={(e) => updateLabResult(lab.id, 'remarks', e.target.value)}
-                                className="text-sm w-full p-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                                className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
                               />
                               <button
                                 onClick={() => removeLabResult(lab.id)}
-                                className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-md transition-colors sm:justify-self-end"
+                                className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors sm:justify-self-end"
                               >
                                 <Trash2 className="w-4 h-4"></Trash2>
                               </button>
@@ -1529,8 +1529,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
               {/* Enhanced Doctor Notes and Advice */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-5">Doctor's Notes</h3>
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5">Doctor's Notes</h3>
 
                   <div className="mb-4">
                     <input
@@ -1539,7 +1539,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       onChange={(e) => setDoctorNotesInput(e.target.value)}
                       onKeyDown={handleDoctorNotesKeyPress}
                       placeholder="Add a note and press Enter..."
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm h-11"
+                      className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm h-11"
                     />
                   </div>
 
@@ -1551,11 +1551,11 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       </div>
                     ) : (
                       doctorNotesList.map((note) => (
-                        <div key={note.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg group hover:bg-gray-100 transition-colors border border-gray-200">
-                          <p className="text-sm text-gray-700 flex-1 mr-2.5 leading-relaxed">{note.text}</p>
+                        <div key={note.id} className="flex items-start justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700">
+                          <p className="text-sm text-gray-700 dark:text-gray-400 flex-1 mr-2.5 leading-relaxed">{note.text}</p>
                           <button
                             onClick={() => removeDoctorNote(note.id)}
-                            className="text-blue-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 hover:bg-blue-50 rounded-md"
+                            className="text-blue-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1565,8 +1565,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-5">Advice to Patient</h3>
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5">Advice to Patient</h3>
 
                   <div className="mb-4">
                     <input
@@ -1575,7 +1575,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       onChange={(e) => setAdviceInput(e.target.value)}
                       onKeyDown={handleAdviceKeyPress}
                       placeholder="Add advice and press Enter..."
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm h-11"
+                      className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm h-11"
                     />
                   </div>
 
@@ -1587,11 +1587,11 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       </div>
                     ) : (
                       adviceList.map((advice) => (
-                        <div key={advice.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg group hover:bg-gray-100 transition-colors border border-gray-200">
-                          <p className="text-sm text-gray-700 flex-1 mr-2.5 leading-relaxed">{advice.text}</p>
+                        <div key={advice.id} className="flex items-start justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg group hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700">
+                          <p className="text-sm text-gray-700 dark:text-gray-400 flex-1 mr-2.5 leading-relaxed">{advice.text}</p>
                           <button
                             onClick={() => removeAdvice(advice.id)}
-                            className="text-blue-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 hover:bg-blue-50 rounded-md"
+                            className="text-blue-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1604,19 +1604,19 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
               {/* Follow-up and Consultation Fee */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-5">Follow-up Date</h3>
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5">Follow-up Date</h3>
                   <input
                     type="date"
                     value={followUpDate}
                     onChange={(e) => setFollowUpDate(e.target.value)}
                     min={getTodayString()}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
                   />
                 </div>
 
-                <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-5">Consultation Fee</h3>
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5">Consultation Fee</h3>
                   <div className="flex items-center space-x-2.5">
                     <span className="text-gray-500 font-medium text-md">₹</span>
                     <input
@@ -1624,7 +1624,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       value={consultationFee}
                       onChange={(e) => setConsultationFee(e.target.value)}
                       placeholder="500"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
+                      className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-12"
                     />
                   </div>
                 </div>

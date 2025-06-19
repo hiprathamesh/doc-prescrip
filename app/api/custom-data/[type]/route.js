@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {
   try {
-    const { type } = params;
+    const { type } = await params;
     
     let data;
     switch (type) {
@@ -38,7 +38,7 @@ export async function GET(request, { params }) {
 
 export async function POST(request, { params }) {
   try {
-    const { type } = params;
+    const { type } = await params;
     const { items } = await request.json();
     
     let success;

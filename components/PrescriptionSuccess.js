@@ -216,17 +216,17 @@ Dr. Prashant Nikam`;
         `}
         style={{ top: '81px' }}
       >
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-6 py-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
-                <span className="text-md font-semibold text-gray-900">Prescription Saved Successfully</span>
+                <span className="text-md font-semibold text-gray-900 dark:text-gray-100">Prescription Saved Successfully</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />
@@ -245,11 +245,11 @@ Dr. Prashant Nikam`;
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
-                <span className="text-xl font-semibold text-gray-900">Prescription Saved Successfully</span>
+                <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">Prescription Saved Successfully</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle className="w-6 h-6 text-green-600" />
@@ -261,42 +261,42 @@ Dr. Prashant Nikam`;
 
         <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Patient Info Card */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
               <div className="flex items-center space-x-2">
                 <User className="w-4 h-4 text-gray-500" />
                 <div>
                   <span className="text-gray-600">Patient</span>
-                  <p className="font-medium text-gray-900">{patient.name}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{patient.name}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4 text-gray-500" />
                 <div>
                   <span className="text-gray-600">Age</span>
-                  <p className="font-medium text-gray-900">{patient.age} years</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{patient.age} years</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-gray-500" />
                 <div>
                   <span className="text-gray-600">Phone</span>
-                  <p className="font-medium text-gray-900">{patient.phone}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{patient.phone}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4 text-gray-500" />
                 <div>
                   <span className="text-gray-600">Date</span>
-                  <p className="font-medium text-gray-900">{formatDate(prescription.visitDate)}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{formatDate(prescription.visitDate)}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Prescription Summary */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h2 className="text-lg font-semibold text-gray-900 mb-5">Prescription Summary</h2>
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-5">Prescription Summary</h2>
 
             {/* Visit Content */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-sm">
@@ -372,7 +372,7 @@ Dr. Prashant Nikam`;
 
             {/* Doctor Notes and Advice */}
             {(prescription.doctorNotes || prescription.advice) && (
-              <div className="mt-5 pt-4 border-t border-gray-200 space-y-3">
+              <div className="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
                 {prescription.doctorNotes && (
                   <div>
                     <h4 className="font-medium text-gray-800 mb-2">Doctor's Notes</h4>
@@ -401,11 +401,11 @@ Dr. Prashant Nikam`;
           {/* PDF Actions */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Prescription PDF */}
-            <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
                   <FileText className="w-5 h-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Prescription PDF</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Prescription PDF</h3>
                 </div>
               </div>
 
@@ -421,7 +421,7 @@ Dr. Prashant Nikam`;
               ) : prescriptionPdfUrl ? (
                 <iframe
                   src={prescriptionPdfUrl}
-                  className="w-full flex-1 h-70 border border-gray-300 rounded-lg"
+                  className="w-full flex-1 h-70 border border-gray-300 dark:border-gray-700 rounded-lg"
                   title="Prescription PDF Preview"
                 />
               ) : (
@@ -433,7 +433,7 @@ Dr. Prashant Nikam`;
                 <button
                   onClick={downloadPrescription}
                   disabled={!prescriptionPdfUrl || isGeneratingPdfs}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white dark:text-gray-900 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download</span>
@@ -454,11 +454,11 @@ Dr. Prashant Nikam`;
 
             {/* Bill PDF */}
             {currentBill && (
-              <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
                     <DollarSign className="w-5 h-5 text-green-600" />
-                    <h3 className="text-lg font-semibold text-gray-900">Bill PDF</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Bill PDF</h3>
                   </div>
                 </div>
 
@@ -474,7 +474,7 @@ Dr. Prashant Nikam`;
                 ) : billPdfUrl ? (
                   <iframe
                     src={billPdfUrl}
-                    className="w-full h-48 border border-gray-300 rounded-lg"
+                    className="w-full h-48 border border-gray-300 dark:border-gray-700 rounded-lg"
                     title="Bill PDF Preview"
                   />
                 ) : (
@@ -509,7 +509,7 @@ Dr. Prashant Nikam`;
                   <button
                     onClick={downloadBill}
                     disabled={!billPdfUrl || isGeneratingPdfs}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-normal"
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white dark:text-gray-900 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-normal"
                   >
                     <Download className="w-4 h-4" />
                     <span>Download</span>
