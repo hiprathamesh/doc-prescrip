@@ -1,28 +1,35 @@
 import { getCollection } from '../lib/mongodb';
-import { ObjectId } from 'mongodb'; // Add this import
+import { ObjectId } from 'mongodb';
 
-const COLLECTIONS = {
-  PATIENTS: 'patients',
-  PRESCRIPTIONS: 'prescriptions',
-  BILLS: 'bills',
-  TEMPLATES: 'templates',
-  CUSTOM_DATA: 'custom_data'
-};
-
-/**
- * Database service class to handle all MongoDB operations
- */
 class DatabaseService {
-  
+  constructor() {
+    this.collections = {
+      patients: 'patients',
+      prescriptions: 'prescriptions', 
+      bills: 'bills',
+      templates: 'templates',
+      customData: 'customData',
+      doctors: 'doctors'
+    };
+  }
+
+  // Helper method to ensure doctor context
+  validateDoctorId(doctorId) {
+    if (!doctorId || doctorId === 'default-doctor') {
+      throw new Error('Invalid doctor context - multi-tenant violation');
+    }
+    return doctorId;
+  }
+
   // ==================== PATIENTS OPERATIONS ====================
   
-  async getPatients() {
+  async getPatients(doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.PATIENTS);
-      const patients = await collection.find({}).sort({ createdAt: -1 }).toArray();
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.patients);
+      const patients = await collection.find({ doctorId: validDoctorId }).sort({ createdAt: -1 }).toArray();
       return patients.map(patient => ({ 
         ...patient, 
-        // Use patientId if available, otherwise fall back to _id conversion
         id: patient.patientId || patient._id.toString() 
       }));
     } catch (error) {
@@ -31,25 +38,26 @@ class DatabaseService {
     }
   }
 
-  async savePatients(patients) {
+  async savePatients(patients, doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.PATIENTS);
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.patients);
       
-      // Clear existing patients
-      const deleteResult = await collection.deleteMany({});
-      console.log(`Deleted ${deleteResult.deletedCount} existing patients`);
+      // Clear existing patients for this doctor only
+      const deleteResult = await collection.deleteMany({ doctorId: validDoctorId });
+      console.log(`Deleted ${deleteResult.deletedCount} existing patients for doctor ${doctorId}`);
       
       if (patients.length > 0) {
         const patientsToInsert = patients.map(({ id, ...patient }) => ({
           ...patient,
-          // Store the original string ID as a custom field to maintain consistency
+          doctorId: validDoctorId,
           patientId: id,
           createdAt: patient.createdAt || new Date(),
           updatedAt: new Date()
         }));
         
         const insertResult = await collection.insertMany(patientsToInsert);
-        console.log(`Inserted ${insertResult.insertedCount} patients`);
+        console.log(`Inserted ${insertResult.insertedCount} patients for doctor ${doctorId}`);
       }
       
       return true;
@@ -61,10 +69,11 @@ class DatabaseService {
 
   // ==================== PRESCRIPTIONS OPERATIONS ====================
   
-  async getPrescriptions() {
+  async getPrescriptions(doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.PRESCRIPTIONS);
-      const prescriptions = await collection.find({}).sort({ createdAt: -1 }).toArray();
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.prescriptions);
+      const prescriptions = await collection.find({ doctorId: validDoctorId }).sort({ createdAt: -1 }).toArray();
       return prescriptions.map(prescription => ({ ...prescription, id: prescription._id.toString() }));
     } catch (error) {
       console.error('Error fetching prescriptions:', error);
@@ -72,14 +81,16 @@ class DatabaseService {
     }
   }
 
-  async savePrescriptions(prescriptions) {
+  async savePrescriptions(prescriptions, doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.PRESCRIPTIONS);
-      await collection.deleteMany({});
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.prescriptions);
+      await collection.deleteMany({ doctorId: validDoctorId });
       
       if (prescriptions.length > 0) {
         const prescriptionsToInsert = prescriptions.map(({ id, ...prescription }) => ({
           ...prescription,
+          doctorId: validDoctorId,
           createdAt: prescription.createdAt || new Date(),
           updatedAt: new Date()
         }));
@@ -94,11 +105,12 @@ class DatabaseService {
     }
   }
 
-  async getPrescriptionsByPatient(patientId) {
+  async getPrescriptionsByPatient(patientId, doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.PRESCRIPTIONS);
-      // Search by both patientId field and the string patientId to handle both cases
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.prescriptions);
       const prescriptions = await collection.find({ 
+        doctorId: validDoctorId,
         $or: [
           { patientId: patientId },
           { patientId: patientId.toString() }
@@ -111,9 +123,10 @@ class DatabaseService {
     }
   }
 
-  async savePrescription(prescription) {
+  async savePrescription(prescription, doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.PRESCRIPTIONS);
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.prescriptions);
 
       // Helper to check for valid ObjectId
       const isValidObjectId = (id) => {
@@ -125,16 +138,17 @@ class DatabaseService {
         const { id, ...updateData } = prescription;
         const prescriptionToUpdate = {
           ...updateData,
+          doctorId: validDoctorId,
           updatedAt: new Date()
         };
 
         const result = await collection.replaceOne(
-          { _id: new ObjectId(id) },
+          { _id: new ObjectId(id), doctorId: validDoctorId },
           prescriptionToUpdate
         );
 
         if (result.matchedCount === 0) {
-          throw new Error(`Prescription with id ${id} not found`);
+          throw new Error(`Prescription with id ${id} not found for doctor ${doctorId}`);
         }
 
         return { ...prescriptionToUpdate, id };
@@ -142,6 +156,7 @@ class DatabaseService {
         // Insert new prescription (either no id or not a valid ObjectId)
         const prescriptionToSave = {
           ...prescription,
+          doctorId: validDoctorId,
           createdAt: prescription.createdAt || new Date(),
           updatedAt: new Date()
         };
@@ -160,10 +175,11 @@ class DatabaseService {
 
   // ==================== BILLS OPERATIONS ====================
   
-  async getBills() {
+  async getBills(doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.BILLS);
-      const bills = await collection.find({}).sort({ createdAt: -1 }).toArray();
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.bills);
+      const bills = await collection.find({ doctorId: validDoctorId }).sort({ createdAt: -1 }).toArray();
       return bills.map(bill => ({ ...bill, id: bill._id.toString() }));
     } catch (error) {
       console.error('Error fetching bills:', error);
@@ -171,14 +187,16 @@ class DatabaseService {
     }
   }
 
-  async saveBills(bills) {
+  async saveBills(bills, doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.BILLS);
-      await collection.deleteMany({});
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.bills);
+      await collection.deleteMany({ doctorId: validDoctorId });
       
       if (bills.length > 0) {
         const billsToInsert = bills.map(({ id, ...bill }) => ({
           ...bill,
+          doctorId: validDoctorId,
           createdAt: bill.createdAt || new Date(),
           updatedAt: new Date()
         }));
@@ -193,11 +211,12 @@ class DatabaseService {
     }
   }
 
-  async getBillsByPatient(patientId) {
+  async getBillsByPatient(patientId, doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.BILLS);
-      // Search by both patientId field and the string patientId to handle both cases
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.bills);
       const bills = await collection.find({ 
+        doctorId: validDoctorId,
         $or: [
           { patientId: patientId },
           { patientId: patientId.toString() }
@@ -212,10 +231,11 @@ class DatabaseService {
 
   // ==================== TEMPLATES OPERATIONS ====================
   
-  async getTemplates() {
+  async getTemplates(doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.TEMPLATES);
-      const templates = await collection.find({}).sort({ createdAt: -1 }).toArray();
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.templates);
+      const templates = await collection.find({ doctorId: validDoctorId }).sort({ createdAt: -1 }).toArray();
       return templates.map(template => ({ ...template, id: template._id.toString() }));
     } catch (error) {
       console.error('Error fetching templates:', error);
@@ -223,14 +243,16 @@ class DatabaseService {
     }
   }
 
-  async saveTemplates(templates) {
+  async saveTemplates(templates, doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.TEMPLATES);
-      await collection.deleteMany({});
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.templates);
+      await collection.deleteMany({ doctorId: validDoctorId });
       
       if (templates.length > 0) {
         const templatesToInsert = templates.map(({ id, ...template }) => ({
           ...template,
+          doctorId: validDoctorId,
           createdAt: template.createdAt || new Date(),
           updatedAt: new Date()
         }));
@@ -245,11 +267,13 @@ class DatabaseService {
     }
   }
 
-  async saveTemplate(template) {
+  async saveTemplate(template, doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.TEMPLATES);
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.templates);
       const templateToSave = {
         ...template,
+        doctorId: validDoctorId,
         createdAt: template.createdAt || new Date(),
         updatedAt: new Date()
       };
@@ -258,7 +282,7 @@ class DatabaseService {
         // Update existing template
         const { id, ...updateData } = templateToSave;
         await collection.replaceOne(
-          { _id: new ObjectId(id) },
+          { _id: new ObjectId(id), doctorId: validDoctorId },
           updateData
         );
         templateToSave.id = id;
@@ -275,10 +299,11 @@ class DatabaseService {
     }
   }
 
-  async deleteTemplate(templateId) {
+  async deleteTemplate(templateId, doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.TEMPLATES);
-      await collection.deleteOne({ _id: new ObjectId(templateId) });
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.templates);
+      await collection.deleteOne({ _id: new ObjectId(templateId), doctorId: validDoctorId });
       return true;
     } catch (error) {
       console.error('Error deleting template:', error);
@@ -288,10 +313,11 @@ class DatabaseService {
 
   // ==================== CUSTOM DATA OPERATIONS ====================
   
-  async getCustomData(type) {
+  async getCustomData(type, doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.CUSTOM_DATA);
-      const result = await collection.findOne({ type });
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.customData);
+      const result = await collection.findOne({ type, doctorId: validDoctorId });
       return result ? result.items : [];
     } catch (error) {
       console.error(`Error fetching custom ${type}:`, error);
@@ -299,13 +325,15 @@ class DatabaseService {
     }
   }
 
-  async saveCustomData(type, items) {
+  async saveCustomData(type, items, doctorId = 'default-doctor') {
     try {
-      const collection = await getCollection(COLLECTIONS.CUSTOM_DATA);
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection(this.collections.customData);
       await collection.replaceOne(
-        { type },
+        { type, doctorId: validDoctorId },
         { 
           type, 
+          doctorId: validDoctorId,
           items: Array.isArray(items) ? items : [],
           updatedAt: new Date(),
           createdAt: new Date()
@@ -320,36 +348,146 @@ class DatabaseService {
   }
 
   // Custom data helpers
-  async getCustomSymptoms() {
-    return this.getCustomData('symptoms');
+  async getCustomSymptoms(doctorId = 'default-doctor') {
+    return this.getCustomData('symptoms', doctorId);
   }
 
-  async saveCustomSymptoms(symptoms) {
-    return this.saveCustomData('symptoms', symptoms);
+  async saveCustomSymptoms(symptoms, doctorId = 'default-doctor') {
+    return this.saveCustomData('symptoms', symptoms, doctorId);
   }
 
-  async getCustomDiagnoses() {
-    return this.getCustomData('diagnoses');
+  async getCustomDiagnoses(doctorId = 'default-doctor') {
+    return this.getCustomData('diagnoses', doctorId);
   }
 
-  async saveCustomDiagnoses(diagnoses) {
-    return this.saveCustomData('diagnoses', diagnoses);
+  async saveCustomDiagnoses(diagnoses, doctorId = 'default-doctor') {
+    return this.saveCustomData('diagnoses', diagnoses, doctorId);
   }
 
-  async getCustomLabTests() {
-    return this.getCustomData('lab-tests');
+  async getCustomLabTests(doctorId = 'default-doctor') {
+    return this.getCustomData('lab-tests', doctorId);
   }
 
-  async saveCustomLabTests(labTests) {
-    return this.saveCustomData('lab-tests', labTests);
+  async saveCustomLabTests(labTests, doctorId = 'default-doctor') {
+    return this.saveCustomData('lab-tests', labTests, doctorId);
   }
 
-  async getCustomMedications() {
-    return this.getCustomData('medications');
+  async getCustomMedications(doctorId = 'default-doctor') {
+    return this.getCustomData('medications', doctorId);
   }
 
-  async saveCustomMedications(medications) {
-    return this.saveCustomData('medications', medications);
+  async saveCustomMedications(medications, doctorId = 'default-doctor') {
+    return this.saveCustomData('medications', medications, doctorId);
+  }
+
+  // ==================== DOCTOR OPERATIONS ====================
+  
+  async getDoctorById(doctorId) {
+    try {
+      const collection = await getCollection(this.collections.doctors);
+      const doctor = await collection.findOne({ doctorId });
+      return doctor;
+    } catch (error) {
+      console.error('Error fetching doctor by ID:', error);
+      return null;
+    }
+  }
+
+  async getDoctorByEmail(email) {
+    try {
+      const collection = await getCollection(this.collections.doctors);
+      const doctor = await collection.findOne({ email });
+      return doctor;
+    } catch (error) {
+      console.error('Error fetching doctor by email:', error);
+      return null;
+    }
+  }
+
+  async saveDoctor(doctor) {
+    try {
+      const collection = await getCollection(this.collections.doctors);
+      const doctorToSave = {
+        ...doctor,
+        createdAt: doctor.createdAt || new Date(),
+        updatedAt: new Date()
+      };
+      
+      const result = await collection.insertOne(doctorToSave);
+      return result.acknowledged;
+    } catch (error) {
+      console.error('Error saving doctor:', error);
+      return false;
+    }
+  }
+
+  async updateDoctorPassword(doctorId, passwordHash) {
+    try {
+      const collection = await getCollection(this.collections.doctors);
+      const result = await collection.updateOne(
+        { doctorId },
+        { 
+          $set: { 
+            passwordHash,
+            updatedAt: new Date()
+          }
+        }
+      );
+      return result.modifiedCount > 0;
+    } catch (error) {
+      console.error('Error updating doctor password:', error);
+      return false;
+    }
+  }
+
+  async getAllDoctors() {
+    try {
+      const collection = await getCollection(this.collections.doctors);
+      const doctors = await collection.find({}).sort({ createdAt: -1 }).toArray();
+      // Remove password hashes from response
+      return doctors.map(({ passwordHash, ...doctor }) => doctor);
+    } catch (error) {
+      console.error('Error fetching all doctors:', error);
+      return [];
+    }
+  }
+
+  async updateDoctorStatus(doctorId, isActive) {
+    try {
+      const collection = await getCollection(this.collections.doctors);
+      const result = await collection.updateOne(
+        { doctorId },
+        { 
+          $set: { 
+            isActive,
+            updatedAt: new Date()
+          }
+        }
+      );
+      return result.modifiedCount > 0;
+    } catch (error) {
+      console.error('Error updating doctor status:', error);
+      return false;
+    }
+  }
+
+  async updateDoctorProfile(doctorId, updates) {
+    try {
+      const collection = await getCollection(this.collections.doctors);
+      const result = await collection.updateOne(
+        { doctorId },
+        { 
+          $set: { 
+            ...updates,
+            updatedAt: new Date()
+          }
+        }
+      );
+      return result.modifiedCount > 0;
+    } catch (error) {
+      console.error('Error updating doctor profile:', error);
+      return false;
+    }
   }
 }
 

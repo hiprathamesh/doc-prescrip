@@ -7,7 +7,16 @@ import { NextResponse } from 'next/server';
 export async function GET(request, { params }) {
   try {
     const { patientId } = await params;
-    const bills = await databaseService.getBillsByPatient(patientId);
+    const doctorId = request.headers.get('X-Doctor-ID');
+    
+    if (!doctorId || doctorId === 'default-doctor') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid doctor context', data: [] },
+        { status: 403 }
+      );
+    }
+    
+    const bills = await databaseService.getBillsByPatient(patientId, doctorId);
     
     return NextResponse.json({ success: true, data: bills || [] });
   } catch (error) {

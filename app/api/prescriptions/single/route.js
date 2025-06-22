@@ -2,42 +2,42 @@ import { databaseService } from '../../../../services/databaseService';
 import { NextResponse } from 'next/server';
 
 /**
- * POST /api/prescriptions/single - Save single prescription
+ * POST /api/prescriptions/single - Save a single prescription
  */
 export async function POST(request) {
   try {
-    const { prescription } = await request.json();
+    const doctorId = request.headers.get('X-Doctor-ID');
     
-    if (!prescription) {
+    if (!doctorId || doctorId === 'default-doctor') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid doctor context' },
+        { status: 403 }
+      );
+    }
+    
+    const body = await request.json();
+    
+    if (!body.prescription) {
       return NextResponse.json(
         { success: false, error: 'Prescription data is required' },
         { status: 400 }
       );
     }
 
-    // Validate required fields
-    if (!prescription.patientId) {
-      return NextResponse.json(
-        { success: false, error: 'Patient ID is required' },
-        { status: 400 }
-      );
-    }
-
-    const savedPrescription = await databaseService.savePrescription(prescription);
+    const savedPrescription = await databaseService.savePrescription(body.prescription, doctorId);
     
     if (savedPrescription) {
       return NextResponse.json({ success: true, data: savedPrescription });
     } else {
-      console.error('Database service returned null for prescription save');
       return NextResponse.json(
-        { success: false, error: 'Failed to save prescription - database error' },
+        { success: false, error: 'Failed to save prescription' },
         { status: 500 }
       );
     }
   } catch (error) {
-    console.error('API Error saving prescription:', error);
+    console.error('API Error saving single prescription:', error);
     return NextResponse.json(
-      { success: false, error: `Failed to save prescription - ${error.message}` },
+      { success: false, error: error.message || 'Failed to save prescription' },
       { status: 500 }
     );
   }

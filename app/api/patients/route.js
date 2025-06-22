@@ -4,9 +4,18 @@ import { NextResponse } from 'next/server';
 /**
  * GET /api/patients - Fetch all patients
  */
-export async function GET() {
+export async function GET(request) {
   try {
-    const patients = await databaseService.getPatients();
+    const doctorId = request.headers.get('X-Doctor-ID');
+    
+    if (!doctorId || doctorId === 'default-doctor') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid doctor context', data: [] },
+        { status: 403 }
+      );
+    }
+    
+    const patients = await databaseService.getPatients(doctorId);
     return NextResponse.json({ success: true, data: patients });
   } catch (error) {
     console.error('API Error fetching patients:', error);
@@ -22,6 +31,15 @@ export async function GET() {
  */
 export async function POST(request) {
   try {
+    const doctorId = request.headers.get('X-Doctor-ID');
+    
+    if (!doctorId || doctorId === 'default-doctor') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid doctor context' },
+        { status: 403 }
+      );
+    }
+    
     const body = await request.json();
     
     if (!body.patients || !Array.isArray(body.patients)) {
@@ -32,7 +50,7 @@ export async function POST(request) {
     }
 
     const { patients } = body;
-    const success = await databaseService.savePatients(patients);
+    const success = await databaseService.savePatients(patients, doctorId);
     
     if (success) {
       return NextResponse.json({ success: true, message: 'Patients saved successfully' });

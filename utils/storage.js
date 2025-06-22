@@ -1,5 +1,5 @@
 /**
- * Storage service that uses MongoDB Atlas through API calls
+ * Storage service that uses MongoDB Atlas through API calls with multi-tenant support
  */
 
 // API endpoints
@@ -12,13 +12,32 @@ const API_ENDPOINTS = {
 };
 
 /**
- * Helper function to make API calls
+ * Get current doctor ID from session/context
+ */
+function getCurrentDoctorId() {
+  // Check if we're in browser environment
+  if (typeof window !== 'undefined') {
+    const doctorId = localStorage.getItem('currentDoctorId');
+    if (!doctorId) {
+      console.error('No doctor ID found in localStorage');
+      throw new Error('Doctor not authenticated');
+    }
+    return doctorId;
+  }
+  throw new Error('Doctor context not available');
+}
+
+/**
+ * Helper function to make API calls with doctor context
  */
 async function apiCall(url, options = {}) {
   try {
+    const doctorId = getCurrentDoctorId();
+    
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
+        'X-Doctor-ID': doctorId,
         ...options.headers
       },
       ...options
@@ -34,17 +53,32 @@ async function apiCall(url, options = {}) {
     return data;
   } catch (error) {
     console.error('API call error:', error);
-    // Don't return empty structure for non-GET requests
-    if (options.method && options.method !== 'GET') {
-      throw error;
-    }
-    // Return empty structure for GET requests
-    return { success: true, data: [] };
+    // Don't return fallback data for multi-tenant security
+    throw error;
   }
 }
 
 export const storage = {
   
+  // Doctor context management
+  setCurrentDoctor: (doctorId) => {
+    if (typeof window !== 'undefined') {
+      if (!doctorId) {
+        throw new Error('Doctor ID is required');
+      }
+      localStorage.setItem('currentDoctorId', doctorId);
+    }
+  },
+
+  getCurrentDoctorId,
+
+  // Clear doctor context on logout
+  clearDoctorContext: () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('currentDoctorId');
+    }
+  },
+
   // PATIENTS
   getPatients: async () => {
     try {
@@ -93,10 +127,8 @@ export const storage = {
     }
   },
 
-  // Add new function for saving single prescription
   savePrescription: async (prescription) => {
     try {
-      // Validate prescription data before sending
       if (!prescription.patientId) {
         throw new Error('Patient ID is required');
       }
@@ -113,13 +145,12 @@ export const storage = {
       return response.data || prescription;
     } catch (error) {
       console.error('Error saving prescription:', error);
-      throw error; // Re-throw the error so the calling code can handle it
+      throw error;
     }
   },
 
   getPrescriptionsByPatient: async (patientId) => {
     try {
-      // Ensure patientId is always a string for consistency
       const normalizedPatientId = patientId?.toString();
       const response = await apiCall(`${API_ENDPOINTS.PRESCRIPTIONS}/patient/${normalizedPatientId}`);
       return Array.isArray(response.data) ? response.data : [];
@@ -153,7 +184,6 @@ export const storage = {
     }
   },
 
-  // Add new function for updating single bill
   updateBill: async (billId, updates) => {
     try {
       const bills = await storage.getBills();
@@ -170,7 +200,6 @@ export const storage = {
 
   getBillsByPatient: async (patientId) => {
     try {
-      // Ensure patientId is always a string for consistency
       const normalizedPatientId = patientId?.toString();
       const response = await apiCall(`${API_ENDPOINTS.BILLS}/patient/${normalizedPatientId}`);
       return Array.isArray(response.data) ? response.data : [];
@@ -383,10 +412,9 @@ export const storage = {
     if (!item.pdfUrl) return null;
     
     try {
-      // Check if blob URL is still accessible
       const response = await fetch(item.pdfUrl);
       if (response.ok) {
-        return item.pdfUrl; // URL is still valid
+        return item.pdfUrl;
       }
     } catch (error) {
       // URL is invalid, need to regenerate
@@ -398,7 +426,6 @@ export const storage = {
         const pdfBlob = await generatePDF(item, patient, false);
         const newUrl = URL.createObjectURL(pdfBlob);
         
-        // Update the stored prescription with new URL
         const prescriptions = await storage.getPrescriptions();
         const updatedPrescriptions = prescriptions.map(p => 
           p.id === item.id ? { ...p, pdfUrl: newUrl } : p
@@ -411,7 +438,6 @@ export const storage = {
         const pdfBlob = await generateBillPDF(item, patient);
         const newUrl = URL.createObjectURL(pdfBlob);
         
-        // Update the stored bill with new URL
         const bills = await storage.getBills();
         const updatedBills = bills.map(b => 
           b.id === item.id ? { ...b, pdfUrl: newUrl } : b

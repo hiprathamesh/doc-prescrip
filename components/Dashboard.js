@@ -232,6 +232,9 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     try {
+      // Clear doctor context
+      storage.clearDoctorContext();
+      
       const response = await fetch('/api/logout', {
         method: 'POST',
         headers: {
@@ -241,18 +244,18 @@ export default function Dashboard() {
 
       if (response.ok) {
         // Force a page reload to ensure middleware takes effect
-        window.location.href = '/pin-entry';
+        window.location.href = '/login';
       } else {
         console.error('Logout failed');
-        // Fallback: try client-side cookie clearing
-        document.cookie = 'pin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        window.location.href = '/pin-entry';
+        // Fallback: clear cookies and redirect
+        document.cookie = 'doctor-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        window.location.href = '/login';
       }
     } catch (error) {
       console.error('Logout error:', error);
-      // Fallback: try client-side cookie clearing
-      document.cookie = 'pin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      window.location.href = '/pin-entry';
+      // Fallback: clear cookies and redirect
+      document.cookie = 'doctor-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      window.location.href = '/login';
     }
   };
 
