@@ -188,7 +188,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              Default credentials: admin@chaitanyahospital.com / admin123
+              Default credentials: admin@chaitanyahospital.com
             </p>
           </div>
         </div>
