@@ -37,7 +37,7 @@ export const generateBillPDF = async (bill, patient) => {
   yPosition += 10;
   pdf.setFontSize(11);
   pdf.setFont(undefined, 'normal');
-  pdf.text(`Bill ID: ${bill.id}`, 20, yPosition);
+  pdf.text(`Bill ID: ${bill.billId}`, 20, yPosition);
   pdf.text(`Date: ${formatDate(bill.createdAt)}`, 120, yPosition);
   
   yPosition += 8;

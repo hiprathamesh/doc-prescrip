@@ -38,11 +38,19 @@ export default function BillManagement({ onBack }) {
   };
 
   const toggleBillPayment = async (billId) => {
-    const updatedBills = bills.map(bill =>
-      bill.id === billId ? { ...bill, isPaid: !bill.isPaid } : bill
-    );
-    setBills(updatedBills);
-    await storage.saveBills(updatedBills);
+    try {
+      const updatedBills = bills.map(bill =>
+        (bill.id === billId || bill.billId === billId) ? { 
+          ...bill, 
+          isPaid: !bill.isPaid,
+          paidAt: !bill.isPaid ? new Date() : null
+        } : bill
+      );
+      setBills(updatedBills);
+      await storage.saveBills(updatedBills);
+    } catch (error) {
+      console.error('Error updating bill payment status:', error);
+    }
   };
 
   const downloadBill = async (bill) => {

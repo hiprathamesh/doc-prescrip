@@ -91,9 +91,21 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
 
       // Combine prescriptions with their corresponding bills
       const prescriptionVisits = prescriptionsArray.map(prescription => {
-        const correspondingBill = billsArray.find(bill =>
-          Math.abs(new Date(bill.createdAt) - new Date(prescription.createdAt)) < 24 * 60 * 60 * 1000
-        );
+        // Find the bill that specifically belongs to this prescription
+        const correspondingBill = billsArray.find(bill => {
+          // First try to match by prescriptionId (most accurate)
+          if (bill.prescriptionId && prescription.prescriptionId) {
+            return bill.prescriptionId === prescription.prescriptionId;
+          }
+          
+          // Fallback: match by date and patient (within 1 hour window for better accuracy)
+          const billDate = new Date(bill.createdAt);
+          const prescriptionDate = new Date(prescription.createdAt);
+          const timeDifference = Math.abs(billDate.getTime() - prescriptionDate.getTime());
+          const tenSec = 10000; // 1 hour in milliseconds
+          
+          return bill.patientId === prescription.patientId && timeDifference <= tenSec;
+        });
         
         // Use visitDate if available, otherwise fall back to createdAt
         const visitDateTime = prescription.visitDate ? new Date(prescription.visitDate) : new Date(prescription.createdAt);
@@ -154,9 +166,15 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   const toggleBillPayment = async (billId) => {
     try {
       const allBills = await storage.getBills();
-      const billToUpdate = allBills.find(b => b.id === billId);
+      // Use the actual bill id, not billId field
+      const billToUpdate = allBills.find(b => b.id === billId || b.billId === billId);
 
-      if (!billToUpdate) return;
+      if (!billToUpdate) {
+        toast.error('Error', {
+          description: 'Bill not found'
+        });
+        return;
+      }
 
       const updatedBill = {
         ...billToUpdate,
@@ -170,7 +188,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       updatedBill.pdfUrl = newBillUrl;
 
       const updatedBills = allBills.map(bill =>
-        bill.id === billId ? updatedBill : bill
+        (bill.id === billId || bill.billId === billId) ? updatedBill : bill
       );
 
       await storage.saveBills(updatedBills);
@@ -681,7 +699,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                           <div className="flex items-center space-x-2">
                             <span className="text-sm font-medium text-gray-900">₹{visit.bill.amount}</span>
                             <button
-                              onClick={() => toggleBillPayment(visit.bill.id)}
+                              onClick={() => toggleBillPayment(visit.bill.id || visit.bill.billId)}
                               className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${visit.bill.isPaid
                                   ? 'bg-green-100 text-green-800 hover:bg-green-200'
                                   : 'bg-red-100 text-red-800 hover:bg-red-200'

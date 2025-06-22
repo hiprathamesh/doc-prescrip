@@ -631,7 +631,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       }
 
       const prescription = {
-        id: Date.now().toString(),
+        prescriptionId: Date.now().toString(),
         patientId: selectedPatient.id?.toString(),
         visitDate: new Date(),
         symptoms,
@@ -659,13 +659,15 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       // Create bill if consultation fee is provided
       if (consultationFee && parseFloat(consultationFee) > 0) {
         bill = {
-          id: Date.now().toString() + '_bill',
+          billId: `BILL_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // More unique ID
+          id: `${Date.now()}_bill_${Math.random().toString(36).substr(2, 5)}`, // Add unique id field
           patientId: selectedPatient.id?.toString(),
-          prescriptionId: prescription.id,
+          prescriptionId: prescription.prescriptionId, // Link to prescription
           amount: parseFloat(consultationFee),
           description: `Consultation - ${formatDate(new Date())}`,
           isPaid: false,
-          createdAt: new Date()
+          createdAt: new Date(),
+          visitDate: new Date() // Add visit date for better tracking
         };
 
         // Generate bill PDF

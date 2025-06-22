@@ -133,7 +133,7 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       // Update bill in storage
       const allBills = await storage.getBills();
       const updatedBills = allBills.map(b =>
-        b.id === currentBill.id ? updatedBill : b
+        (b.id === currentBill.id || b.billId === currentBill.billId) ? updatedBill : b
       );
       await storage.saveBills(updatedBills);
 
@@ -145,7 +145,7 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       // Update the bill with new PDF URL in storage
       updatedBill.pdfUrl = newBillUrl;
       const finalUpdatedBills = allBills.map(b =>
-        b.id === currentBill.id ? updatedBill : b
+        (b.id === currentBill.id || b.billId === currentBill.billId) ? updatedBill : b
       );
       await storage.saveBills(finalUpdatedBills);
 
