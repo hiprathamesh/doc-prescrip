@@ -373,18 +373,18 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       <div className="flex items-center space-x-3">
         <button
           onClick={onBack}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
         <div className='flex items-center gap-2'>
-          <h1 className="text-xl sm:text-xl font-semibold text-gray-900">{patient.name}</h1>
+          <h1 className="text-xl sm:text-xl font-semibold text-gray-900 dark:text-gray-100">{patient.name}</h1>
           <p className="text-sm sm:text-sm text-gray-600">ID: {patient.id}</p>
         </div>
       </div>
       <button
         onClick={onNewPrescription}
-        className="w-full sm:w-auto bg-blue-600 text-white px-4 py-3 sm:py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors shadow-sm"
+        className="w-full sm:w-auto bg-blue-600 text-white dark:text-gray-900 px-4 py-3 sm:py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors shadow-sm"
       >
         <FileText className="w-4 h-4" />
         <span>New Visit</span>
@@ -401,24 +401,24 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         `}
         style={{ top: '81px' }}
       >
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-6 py-3">
             <div className={` flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0`}>
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
                 <div className='flex items-center gap-2'>
-                  <h1 className="text-md sm:text-md font-semibold text-gray-900">{patient.name}</h1>
+                  <h1 className="text-md sm:text-md font-semibold text-gray-900 dark:text-gray-100">{patient.name}</h1>
                   <p className="text-xs sm:text-md text-gray-600">ID: {patient.id}</p>
                 </div>
               </div>
               <button
                 onClick={onNewPrescription}
-                className="w-full sm:w-auto bg-blue-600 text-white px-4 py-3 sm:py-2 rounded-md text-sm font-medium flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors shadow-sm"
+                className="w-full sm:w-auto bg-blue-600 text-white dark:text-gray-900 px-4 py-3 sm:py-2 rounded-md text-sm font-medium flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors shadow-sm"
               >
                 <FileText className="w-4 h-4" />
                 <span>New Visit</span>
@@ -434,10 +434,10 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       </div>
 
       {/* Patient EMR Card */}
-      <div className="bg-white rounded-lg p-6">
+      <div className="bg-white dark:bg-gray-900 rounded-lg p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">Electronic Medical Record</h2>
-          <div className="flex items-center space-x-1 text-sm text-gray-600">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Electronic Medical Record</h2>
+          <div className="flex items-center space-x-1 text-sm text-gray-600 dark:text-gray-400">
             <Calendar className="w-4 h-4" />
             <span>Last Visit: {formatDate(patient.lastVisited)}</span>
           </div>
@@ -446,25 +446,25 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         {/* Patient Demographics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
           <div className="space-y-1">
-            <div className="flex items-center space-x-2 text-gray-600">
+            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
               <User className="w-4 h-4" />
               <span className="text-sm font-medium">Demographics</span>
             </div>
             <div className="space-y-1">
-              <p className="text-sm text-gray-900">{patient.gender}, {patient.age} years</p>
+              <p className="text-sm text-gray-900 dark:text-gray-100">{patient.gender}, {patient.age} years</p>
             </div>
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center space-x-2 text-gray-600">
+            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
               <Phone className="w-4 h-4" />
               <span className="text-sm font-medium">Contact</span>
             </div>
-            <p className="text-sm text-gray-900">{patient.phone}</p>
+            <p className="text-sm text-gray-900 dark:text-gray-100">{patient.phone}</p>
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center space-x-2 text-gray-600">
+            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
               <CreditCard className="w-4 h-4" />
               <span className="text-sm font-medium">Billing</span>
             </div>
@@ -476,19 +476,19 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center space-x-2 text-gray-600">
+            <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
               <FileText className="w-4 h-4" />
               <span className="text-sm font-medium">Visits</span>
             </div>
-            <p className="text-sm text-gray-900">{visits.length} total</p>
+            <p className="text-sm text-gray-900 dark:text-gray-100">{visits.length} total</p>
           </div>
         </div>
 
         {/* Medical History */}
         {getMedicalHistory().length > 0 && (
           <>
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Medical History</h3>
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Medical History</h3>
               <div className="flex flex-wrap gap-2">
                 {getMedicalHistory().map((condition, index) => (
                   <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-800 border border-red-200">
@@ -502,8 +502,8 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       </div>
 
       {/* Visit Timeline */}
-      <div className="bg-white rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-6">Visit Timeline</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-lg p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Visit Timeline</h2>
 
         {visits.length === 0 ? (
           <div className="text-center py-12">
@@ -535,7 +535,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       </div>
                     </div>
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-200">
                         {visit.type === 'certificate' 
                           ? formatDate(visit.displayDate)
                           : formatDate(visit.visitDate || visit.displayDate)
@@ -548,7 +548,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                   </div>
 
                   {/* Visit Card */}
-                  <div className="ml-16 bg-gray-50 rounded-lg p-4 relative">
+                  <div className="ml-16 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 border-gray-50 rounded-lg p-4 relative">
                     {/* More options */}
                     <div className="absolute top-3 right-3">
                       <button
@@ -667,7 +667,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                     {/* Visit Header */}
                     <div className="flex items-center justify-between mb-3 pr-8">
                       <div className="flex items-center space-x-3">
-                        <h3 className="font-medium text-gray-900">
+                        <h3 className="font-medium text-gray-900 dark:text-gray-100">
                           {visit.type === 'certificate' ? (
                             <span className="flex items-center space-x-2">
                               <CheckCircle className="w-4 h-4 text-green-600" />
@@ -785,7 +785,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
 
                     {/* Notes and Advice for prescription visits */}
                     {visit.type === 'prescription' && (visit.doctorNotes || visit.advice) && (
-                      <div className="mt-4 pt-3 border-t border-gray-200 space-y-2">
+                      <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
                         {visit.doctorNotes && (
                           <div>
                             <span className="text-xs font-medium text-gray-800">Notes: </span>

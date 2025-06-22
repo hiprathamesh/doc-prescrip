@@ -45,7 +45,7 @@ export default function DarkModeToggle() {
           `circle(${maxRadius}px at ${left + width / 2}px ${top + height / 2}px)`
         ]
       }, {
-        duration: 1000,
+        duration: 1500,
         easing: 'ease-in-out',
         pseudoElement: '::view-transition-new(root)'
       });
