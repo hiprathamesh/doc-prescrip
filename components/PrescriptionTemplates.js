@@ -195,21 +195,21 @@ export default function PrescriptionTemplates({ onBack }) {
         `}
         style={{ top: '81px' }}
       >
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-6 py-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
-                <span className="text-md font-semibold text-gray-900">Prescription Templates</span>
+                <span className="text-md font-semibold text-gray-900 dark:text-gray-100">Prescription Templates</span>
               </div>
               <button
                 onClick={handleCreateNew}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Template</span>
@@ -227,15 +227,15 @@ export default function PrescriptionTemplates({ onBack }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
-                <span className="text-xl font-semibold text-gray-900">Prescription Templates</span>
+                <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">Prescription Templates</span>
               </div>
               <button
                 onClick={handleCreateNew}
-                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium"
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Template</span>
@@ -255,9 +255,9 @@ export default function PrescriptionTemplates({ onBack }) {
                 placeholder="Search templates..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-70 pl-10 pr-16 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                className="w-70 pl-10 pr-16 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded border">
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border">
                 Ctrl K
               </div>
             </div>
@@ -265,7 +265,7 @@ export default function PrescriptionTemplates({ onBack }) {
 
 
           {/* Templates List */}
-          <div className="bg-white rounded-xl border border-gray-200">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-900">
             {filteredTemplates.length > 0 ? (
               <div className="divide-y divide-gray-200">
                 {filteredTemplates.map((template, index) => (
@@ -377,15 +377,15 @@ export default function PrescriptionTemplates({ onBack }) {
               </div>
             ) : (
               <div className="text-center py-12">
-                <FileText className="mx-auto h-8 w-8 text-gray-300 mb-3" />
-                <h3 className="text-sm font-medium text-gray-900 mb-1">No templates found</h3>
+                <FileText className="mx-auto h-8 w-8 text-gray-300 dark:text-gray-700 mb-3" />
+                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-1">No templates found</h3>
                 <p className="text-xs text-gray-500 mb-4">
                   {searchTerm ? 'No templates match your search.' : 'Create your first prescription template to get started.'}
                 </p>
                 {!searchTerm && (
                   <button
                     onClick={handleCreateNew}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors duration-200 mx-auto"
+                    className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors duration-200 mx-auto"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Create Template</span>
@@ -652,30 +652,30 @@ function TemplateEditor({ template, onSave, onCancel }) {
         `}
         style={{ top: '81px' }}
       >
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-6 py-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onCancel}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
-                <span className="text-md font-semibold text-gray-900">
+                <span className="text-md font-semibold text-gray-900 dark:text-gray-100">
                   {template ? 'Edit Template' : 'Create New Template'}
                 </span>
               </div>
               <div className="flex space-x-3">
                 <button
                   onClick={onCancel}
-                  className="px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-sm"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+                  className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
                 >
                   <span>Save Template</span>
                 </button>
@@ -693,24 +693,24 @@ function TemplateEditor({ template, onSave, onCancel }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onCancel}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
-                <span className="text-xl font-semibold text-gray-900">
+                <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                   {template ? 'Edit Template' : 'Create New Template'}
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                 <button
                   onClick={onCancel}
-                  className="w-full sm:w-auto px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                  className="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 text-sm font-medium"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 text-sm font-medium"
                 >
                   <span>Save Template</span>
                 </button>
@@ -721,34 +721,34 @@ function TemplateEditor({ template, onSave, onCancel }) {
 
         <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Template Basic Info */}
-          <div className="bg-white p-6 rounded-xl border border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">Template Information</h3>
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">Template Information</h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-800 mb-2">Template Name *</label>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-300 mb-2">Template Name *</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., Common Cold, Hypertension, Diabetes Follow-up"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-800 mb-2">Description</label>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-300 mb-2">Description</label>
                 <input
                   type="text"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Brief description of when to use this template"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
                 />
               </div>
             </div>
           </div>
 
           {/* Symptoms Section */}
-          <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="space-y-4">
               <PillSelector
                 title="Select Symptoms"
@@ -822,7 +822,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
           </div>
 
           {/* Diagnosis Section */}
-          <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="space-y-4">
               <PillSelector
                 title="Select Diagnosis"
@@ -882,7 +882,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
           </div>
 
           {/* Medications Section */}
-          <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="space-y-4">
               {isLoadingCustomData ? (
                 <div className="text-center py-6">
@@ -1024,7 +1024,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
           </div>
 
           {/* Lab Results Section */}
-          <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="space-y-4">
               <PillSelector
                 title="Select Lab Tests"
@@ -1076,26 +1076,26 @@ function TemplateEditor({ template, onSave, onCancel }) {
 
           {/* Doctor Notes and Advice */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-xl border border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">Doctor's Notes</h3>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">Doctor's Notes</h3>
               <textarea
                 value={formData.doctorNotes}
                 onChange={(e) => setFormData({ ...formData, doctorNotes: e.target.value })}
                 placeholder="Enter doctor's notes (one per line)"
                 rows={5}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
+                className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
               />
               <p className="text-xs text-gray-500 mt-2">Separate each note with a new line</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-gray-200">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">Advice to Patient</h3>
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">Advice to Patient</h3>
               <textarea
                 value={formData.advice}
                 onChange={(e) => setFormData({ ...formData, advice: e.target.value })}
                 placeholder="Enter advice for patient (one per line)"
                 rows={5}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
+                className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
               />
               <p className="text-xs text-gray-500 mt-2">Separate each advice with a new line</p>
             </div>
