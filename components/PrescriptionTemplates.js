@@ -266,26 +266,26 @@ export default function PrescriptionTemplates({ onBack }) {
 
 
           {/* Templates List */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-900">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
             {filteredTemplates.length > 0 ? (
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredTemplates.map((template, index) => (
-                  <div key={template.id} className="p-4 hover:bg-gray-50 transition-colors duration-200">
+                  <div key={template.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-sm font-semibold text-gray-900 truncate">{template.name}</h3>
+                          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 truncate">{template.name}</h3>
                           <div className="flex items-center space-x-1 ml-3">
                             <button
                               onClick={() => handleEdit(template)
                               }
-                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-md transition-colors"
                             >
                               <Edit className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => handleDelete(template.id)}
-                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 rounded-md transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -302,9 +302,9 @@ export default function PrescriptionTemplates({ onBack }) {
                             <div>
                               <div className="flex items-center space-x-1 mb-1">
                                 <FileText className="w-3 h-3 text-orange-500" />
-                                <span className="font-medium text-gray-700">Symptoms ({template.symptoms.length})</span>
+                                <span className="font-medium text-gray-700 dark:text-gray-400">Symptoms ({template.symptoms.length})</span>
                               </div>
-                              <div className="text-gray-600">
+                              <div className="text-gray-600 dark:text-gray-500">
                                 {template.symptoms.slice(0, 2).map(s => s.name).join(', ')}
                                 {template.symptoms.length > 2 && ` +${template.symptoms.length - 2} more`}
                               </div>
@@ -316,9 +316,9 @@ export default function PrescriptionTemplates({ onBack }) {
                             <div>
                               <div className="flex items-center space-x-1 mb-1">
                                 <Stethoscope className="w-3 h-3 text-blue-500" />
-                                <span className="font-medium text-gray-700">Diagnosis ({template.diagnosis.length})</span>
+                                <span className="font-medium text-gray-700 dark:text-gray-400">Diagnosis ({template.diagnosis.length})</span>
                               </div>
-                              <div className="text-gray-600">
+                              <div className="text-gray-600 dark:text-gray-500">
                                 {template.diagnosis.slice(0, 2).map(d => d.name).join(', ')}
                                 {template.diagnosis.length > 2 && ` +${template.diagnosis.length - 2} more`}
                               </div>
@@ -330,9 +330,9 @@ export default function PrescriptionTemplates({ onBack }) {
                             <div>
                               <div className="flex items-center space-x-1 mb-1">
                                 <Pill className="w-3 h-3 text-green-500" />
-                                <span className="font-medium text-gray-700">Medications ({template.medications.length})</span>
+                                <span className="font-medium text-gray-700 dark:text-gray-400">Medications ({template.medications.length})</span>
                               </div>
-                              <div className="text-gray-600">
+                              <div className="text-gray-600 dark:text-gray-500">
                                 {template.medications.slice(0, 2).map(m => m.name).join(', ')}
                                 {template.medications.length > 2 && ` +${template.medications.length - 2} more`}
                               </div>
@@ -344,9 +344,9 @@ export default function PrescriptionTemplates({ onBack }) {
                             <div>
                               <div className="flex items-center space-x-1 mb-1">
                                 <FlaskConical className="w-3 h-3 text-purple-500" />
-                                <span className="font-medium text-gray-700">Lab Tests ({template.labResults.length})</span>
+                                <span className="font-medium text-gray-700 dark:text-gray-400">Lab Tests ({template.labResults.length})</span>
                               </div>
-                              <div className="text-gray-600">
+                              <div className="text-gray-600 dark:text-gray-500">
                                 {template.labResults.slice(0, 2).map(l => l.testName).join(', ')}
                                 {template.labResults.length > 2 && ` +${template.labResults.length - 2} more`}
                               </div>
@@ -354,7 +354,7 @@ export default function PrescriptionTemplates({ onBack }) {
                           )}
                         </div>
 
-                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
                           <div className="flex items-center space-x-1 text-xs text-gray-500">
                             <Calendar className="w-3 h-3" />
                             <span>Created {formatDate(template.createdAt)}</span>
