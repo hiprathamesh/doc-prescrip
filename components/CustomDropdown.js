@@ -156,7 +156,7 @@ const CustomDropdown = forwardRef(function CustomDropdown({
           <div className="flex items-center space-x-1">
             {showDirectionToggle && selectedOption && (
               <div
-                className="direction-toggle flex items-center justify-center w-5 h-5 bg-gray-100 hover:bg-gray-200 rounded border transition-colors cursor-pointer"
+                className="direction-toggle flex items-center justify-center w-5 h-5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded border transition-colors cursor-pointer"
                 onClick={handleSortDirectionClick}
                 title={sortDirection === 'asc' ? 'Sort Ascending' : 'Sort Descending'}
               >

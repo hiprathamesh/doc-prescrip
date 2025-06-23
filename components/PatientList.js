@@ -272,17 +272,17 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
         `}
         style={{ top: '81px' }}
       >
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-6 py-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
-                <span className="text-md font-semibold text-gray-900">Patients</span>
+                <span className="text-md font-semibold text-gray-900 dark:text-gray-100">Patients</span>
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -311,11 +311,11 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
-                <span className="text-xl font-semibold text-gray-900">Patients</span>
+                <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">Patients</span>
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -325,9 +325,9 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                   placeholder="Search patients..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-70 pl-9 pr-16 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-70 pl-9 pr-16 py-2.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded border">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border">
                   Ctrl K
                 </div>
               </div>
@@ -338,7 +338,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
         <div className="max-w-5xl mx-auto px-6">
           <div className="pl-4 py-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-md font-medium text-gray-900">
+              <h2 className="text-md font-medium text-gray-900 dark:text-gray-100">
                 {filteredPatients.length} {filteredPatients.length === 1 ? 'Patient' : 'Patients'}
                 {searchTerm && ` matching "${searchTerm}"`}
               </h2>
@@ -365,7 +365,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
             {/* Subheading with patient count and controls */}
 
 
@@ -465,44 +465,44 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
             {/* Desktop view */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
-                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Patient
                     </th>
-                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       ID
                     </th>
-                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Contact
                     </th>
-                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Last Visit
                     </th>
-                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Next Expected
                     </th>
-                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-5 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
                   {filteredPatients.map((patient, index) => (
-                    <tr key={patient.id} className="hover:bg-gray-50 cursor-pointer transition-colors">
+                    <tr key={patient.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors">
                       <td className="px-5 py-3 whitespace-nowrap" onClick={() => onPatientSelect(patient)}>
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{patient.name}</div>
-                          <div className="text-xs text-gray-600">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{patient.name}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-500">
                             {patient.gender} • {patient.age} years
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-3 whitespace-nowrap text-xs text-gray-800 font-medium" onClick={() => onPatientSelect(patient)}>
+                      <td className="px-5 py-3 whitespace-nowrap text-xs text-gray-800 dark:text-gray-300 font-medium" onClick={() => onPatientSelect(patient)}>
                         {patient.id}
                       </td>
                       <td className="px-5 py-3 whitespace-nowrap" onClick={() => onPatientSelect(patient)}>
-                        <div className="flex items-center text-xs text-gray-800">
+                        <div className="flex items-center text-xs text-gray-800 dark:text-gray-300">
                           <Phone className="w-3 h-3 mr-2 text-gray-500" />
                           {patient.phone}
                         </div>
