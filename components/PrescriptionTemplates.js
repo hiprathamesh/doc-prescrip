@@ -613,7 +613,8 @@ function TemplateEditor({ template, onSave, onCancel }) {
   const addLabResult = () => {
     const newLabResult = {
       id: Date.now().toString(),
-      testName: ''
+      testName: '',
+      remarks: ''
     };
     setFormData({
       ...formData,
@@ -1026,7 +1027,8 @@ function TemplateEditor({ template, onSave, onCancel }) {
                 onSelect={(labTest) => {
                   const newLabResult = {
                     id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                    testName: labTest
+                    testName: labTest,
+                    remarks: ''
                   };
                   setFormData({
                     ...formData,
@@ -1039,7 +1041,8 @@ function TemplateEditor({ template, onSave, onCancel }) {
                   await loadCustomData();
                   const newLabResult = {
                     id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                    testName: labTest
+                    testName: labTest,
+                    remarks: ''
                   };
                   setFormData({
                     ...formData,
@@ -1056,12 +1059,21 @@ function TemplateEditor({ template, onSave, onCancel }) {
                     {formData.labResults.map((lab) => (
                       <div key={lab.id} className="flex justify-between items-center py-4">
                         <div className="font-normal text-gray-700 dark:text-gray-400">{lab.testName}</div>
-                        <button
-                          onClick={() => removeLabResult(lab.id)}
-                          className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex w-100 space-x-3 pl-3 items-center">
+                          <input
+                            type="text"
+                            placeholder="Remarks (optional)"
+                            value={lab.remarks || ''}
+                            onChange={(e) => updateLabResult(lab.id, 'remarks', e.target.value)}
+                            className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                          />
+                          <button
+                            onClick={() => removeLabResult(lab.id)}
+                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
