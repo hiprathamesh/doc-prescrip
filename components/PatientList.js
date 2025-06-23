@@ -507,10 +507,10 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                           {patient.phone}
                         </div>
                       </td>
-                      <td className="px-5 py-3 whitespace-nowrap text-xs text-gray-800" onClick={() => onPatientSelect(patient)}>
+                      <td className="px-5 py-3 whitespace-nowrap text-xs text-gray-800 dark:text-gray-300" onClick={() => onPatientSelect(patient)}>
                         {formatDate(patient.lastVisited)}
                       </td>
-                      <td className="px-5 py-3 whitespace-nowrap text-xs text-gray-800" onClick={() => onPatientSelect(patient)}>
+                      <td className="px-5 py-3 whitespace-nowrap text-xs text-gray-800 dark:text-gray-300" onClick={() => onPatientSelect(patient)}>
                         {formatDate(patient.nextExpected)}
                       </td>
                       <td className="px-5 py-3 whitespace-nowrap text-sm font-medium">
@@ -520,7 +520,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                               e.stopPropagation();
                               onNewPrescription(patient);
                             }}
-                            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded-md flex items-center space-x-1 font-medium transition-colors text-xs"
+                            className="text-blue-600 hover:text-blue-800 dark:hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 px-2 py-1 rounded-md flex items-center space-x-1 font-medium transition-colors text-xs"
                           >
                             <FileText className="w-3 h-3" />
                             <span>New Prescription</span>
@@ -532,18 +532,18 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                           >
                             <button
                               onClick={(e) => handleDropdownToggle(patient.id, e)}
-                              className="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                              className="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
                             >
                               <MoreVertical className="w-4 h-4" />
                             </button>
 
                             {dropdownOpen === patient.id && (
                               <div className={`absolute ${index >= filteredPatients.length - 3 ? 'bottom-full mb-2' : 'top-full mt-2'
-                                } right-0 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200`}>
+                                } right-0 w-48 bg-white dark:bg-gray-900 rounded-md shadow-lg z-50 border border-gray-200 dark:border-gray-700`}>
                                 <div className="py-1">
                                   <button
                                     onClick={(e) => handleDeletePatient(patient, e)}
-                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 transition-colors"
+                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-gray-800 flex items-center space-x-2 transition-colors"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                     <span>Delete Patient</span>

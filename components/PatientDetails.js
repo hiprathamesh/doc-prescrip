@@ -532,7 +532,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         ) : (
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-6 top-6 bottom-0 w-0.5 bg-gray-200"></div>
+            <div className="absolute left-6 top-6 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-600"></div>
 
             <div className="space-y-8">
               {visits.map((visit, index) => (
@@ -577,7 +577,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       </button>
 
                       {dropdownOpen === visit.id && (
-                        <div className="absolute right-0 mt-2 w-60 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                        <div className="absolute right-0 mt-2 w-60 bg-white dark:bg-gray-900 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-800">
                           <div className="py-1">
                             {visit.type === 'certificate' ? (
                               <>
@@ -586,7 +586,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                     downloadCertificate(visit);
                                     setDropdownOpen(null);
                                   }}
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
                                 >
                                   <Download className="w-4 h-4 text-gray-500" />
                                   <span>Download Certificate</span>
@@ -599,7 +599,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                   patientName={visit.patientName}
                                   certificateDate={formatDate(visit.issuedDate)}
                                   certificateFor={visit.certificateFor}
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
                                   variant="dropdown"
                                   onShare={() => setDropdownOpen(null)}
                                   certificate={visit}
@@ -616,7 +616,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                         downloadPrescription(visit);
                                         setDropdownOpen(null);
                                       }}
-                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
                                     >
                                       <Download className="w-4 h-4 text-gray-500" />
                                       <span>Download Prescription</span>
@@ -628,7 +628,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                       type="prescription"
                                       patientName={patient.name}
                                       visitDate={formatDate(visit.visitDate)}
-                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
                                       variant="dropdown"
                                       onShare={() => setDropdownOpen(null)}
                                       prescription={visit}
@@ -644,7 +644,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                         downloadBill(visit.bill);
                                         setDropdownOpen(null);
                                       }}
-                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
                                     >
                                       <Download className="w-4 h-4 text-gray-500" />
                                       <span>Download Bill</span>
@@ -658,7 +658,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                       billDate={formatDate(visit.bill.createdAt)}
                                       amount={visit.bill.amount}
                                       isPaid={visit.bill.isPaid}
-                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
                                       variant="dropdown"
                                       onShare={() => setDropdownOpen(null)}
                                       bill={visit.bill}
@@ -669,10 +669,10 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                 )}
                               </>
                             )}
-                            <div className="border-t border-gray-100 my-1"></div>
+                            <div className="border-t border-gray-100 dark:border-gray-800 my-1"></div>
                             <button
                               onClick={() => deleteVisit(visit.type === 'certificate' ? visit.id : visit.id, visit.bill?.id, visit.type)}
-                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                              className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 flex items-center space-x-2"
                             >
                               <Trash2 className="w-4 h-4" />
                               <span>{visit.type === 'certificate' ? 'Delete Certificate' : 'Delete Visit'}</span>
@@ -697,7 +697,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                         </h3>
                         {visit.bill && (
                           <div className="flex items-center space-x-2">
-                            <span className="text-sm font-medium text-gray-900">₹{visit.bill.amount}</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-200">₹{visit.bill.amount}</span>
                             <button
                               onClick={() => toggleBillPayment(visit.bill.id || visit.bill.billId)}
                               className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${visit.bill.isPaid
@@ -722,13 +722,13 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       /* Medical Certificate Content */
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
-                          <h4 className="font-medium text-gray-800 mb-2">Certificate Purpose</h4>
+                          <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Certificate Purpose</h4>
                           <div className="text-gray-700 text-xs bg-green-50 p-2 rounded-md">
                             {visit.certificateFor}
                           </div>
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-800 mb-2">Fitness Status</h4>
+                          <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Fitness Status</h4>
                           <div className={`text-xs font-medium p-2 rounded-md ${
                             visit.fitnessStatus === 'fit' 
                               ? 'bg-green-100 text-green-800' 
@@ -739,7 +739,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                         </div>
                         {visit.remarks && (
                           <div className="md:col-span-2">
-                            <h4 className="font-medium text-gray-800 mb-2">Remarks</h4>
+                            <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Remarks</h4>
                             <div className="text-xs text-gray-700 bg-gray-100 p-2 rounded-md">
                               {visit.remarks}
                             </div>
@@ -751,10 +751,10 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                         {/* Symptoms */}
                         <div>
-                          <h4 className="font-medium text-gray-800 mb-2">Symptoms</h4>
+                          <h4 className="font-medium text-gray-800 dark:text-gray-300 mb-2">Symptoms</h4>
                           <div className="space-y-1">
                             {visit.symptoms.map((symptom) => (
-                              <div key={symptom.id} className="text-gray-700 text-xs">
+                              <div key={symptom.id} className="text-gray-700 dark:text-gray-400 text-xs">
                                 <span className="font-medium">{symptom.name}</span>
                                 <span className="text-gray-500"> • {symptom.severity} • {symptom.duration}</span>
                               </div>
@@ -764,8 +764,8 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
 
                         {/* Diagnosis */}
                         <div>
-                          <h4 className="font-medium text-gray-800 mb-2">Diagnosis</h4>
-                          <div className="text-xs text-gray-700">
+                          <h4 className="font-medium text-gray-800 dark:text-gray-300 mb-2">Diagnosis</h4>
+                          <div className="text-xs text-gray-700 dark:text-gray-400">
                             {formatListAsText(visit.diagnosis)}
                           </div>
                         </div>
@@ -773,13 +773,13 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                         {/* Medications */}
                         {visit.medications?.length > 0 && (
                           <div>
-                            <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                            <h4 className="font-medium text-gray-800 dark:text-gray-300 mb-2 flex items-center">
                               <Pill className="w-4 h-4 mr-1" />
                               Medications
                             </h4>
                             <div className="space-y-1">
                               {visit.medications.map((med, medIndex) => (
-                                <div key={medIndex} className="text-gray-700 text-xs">
+                                <div key={medIndex} className="text-gray-700 dark:text-gray-400 text-xs">
                                   <span className="font-medium">{med.name}</span>
                                   <span className="text-gray-500"> • {med.dosage} • {formatMedicationTiming(med.timing)}</span>
                                   {med.duration && <span className="text-gray-500"> • {med.duration}</span>}
@@ -792,8 +792,8 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                         {/* Lab Tests */}
                         {visit.labResults?.length > 0 && (
                           <div>
-                            <h4 className="font-medium text-gray-800 mb-2">Lab Tests</h4>
-                            <div className="text-xs text-gray-700">
+                            <h4 className="font-medium text-gray-800 dark:text-gray-300 mb-2">Lab Tests</h4>
+                            <div className="text-xs text-gray-700 dark:text-gray-400">
                               {formatListAsText(visit.labResults, 'testName')}
                             </div>
                           </div>
@@ -806,14 +806,14 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
                         {visit.doctorNotes && (
                           <div>
-                            <span className="text-xs font-medium text-gray-800">Notes: </span>
-                            <span className="text-xs text-gray-700">{visit.doctorNotes}</span>
+                            <span className="text-xs font-medium text-gray-800 dark:text-gray-300">Notes: </span>
+                            <span className="text-xs text-gray-700 dark:text-gray-400">{visit.doctorNotes}</span>
                           </div>
                         )}
                         {visit.advice && (
                           <div>
-                            <span className="text-xs font-medium text-gray-800">Advice: </span>
-                            <span className="text-xs text-gray-700">{visit.advice}</span>
+                            <span className="text-xs font-medium text-gray-800 dark:text-gray-300">Advice: </span>
+                            <span className="text-xs text-gray-700 dark:text-gray-400">{visit.advice}</span>
                           </div>
                         )}
                       </div>
@@ -821,9 +821,9 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
 
                     {/* Follow-up for prescription visits */}
                     {visit.type === 'prescription' && visit.followUpDate && (
-                      <div className="mt-3 pt-3 border-t border-gray-200">
+                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-gray-800">Follow-up:</span>
+                          <span className="text-xs font-medium text-gray-800 dark:text-gray-300">Follow-up:</span>
                           <span className={`text-xs px-2 py-1 rounded font-medium ${visit.followUpStatus === 'completed'
                               ? 'bg-green-100 text-green-800'
                               : visit.followUpStatus === 'overdue'
