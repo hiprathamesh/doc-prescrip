@@ -1249,7 +1249,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   {symptoms.length > 0 && (
                     <div className="space-y-0">
                       <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">Selected Symptoms</h4>
-                      <div className="divide-y divide-gray-200">
+                      <div className="divide-y divide-gray-200 dark:divide-gray-700">
                         {symptoms.map((symptom) => (
                           <div key={symptom.id} className="flex justify-between items-center py-4">
                             <div className="font-normal text-gray-700 dark:text-gray-400">{symptom.name}</div>
@@ -1318,7 +1318,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   {diagnoses.length > 0 && (
                     <div className="space-y-0">
                       <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">Selected Diagnoses</h4>
-                      <div className="divide-y divide-gray-200">
+                      <div className="divide-y divide-gray-200 dark:divide-gray-700">
                         {diagnoses.map((diagnosis) => (
                           <div key={diagnosis.id} className="flex justify-between items-center py-4">
                             <div className="font-normal text-gray-700 dark:text-gray-400">{diagnosis.name}</div>
@@ -1399,7 +1399,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   {medications.length > 0 && (
                     <div className="space-y-0">
                       <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">Selected Medications</h4>
-                      <div className="divide-y divide-gray-200">
+                      <div className="divide-y divide-gray-200 dark:divide-gray-700">
                         {medications.map((medication) => (
                           <div key={medication.id} className="py-4 space-y-3.5">
                             <div className="grid grid-cols-1 sm:grid-cols-6 gap-3 items-center">
@@ -1502,7 +1502,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   {labResults.length > 0 && (
                     <div className="space-y-0">
                       <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">Selected Lab Tests</h4>
-                      <div className="divide-y divide-gray-200">
+                      <div className="divide-y divide-gray-200 dark:divide-gray-700">
                         {labResults.map((lab) => (
                           <div key={lab.id} className="flex justify-between items-center py-4">
                             <div className="font-normal text-gray-700 dark:text-gray-400">{lab.testName}</div>
