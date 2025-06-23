@@ -110,6 +110,109 @@
   .dark ::-webkit-scrollbar-thumb:hover {
     background: rgb(100 116 139); /* slate-500 */
   }
+
+  /* Toast styling for better visibility */
+  .toast-custom {
+    @apply shadow-lg;
+  }
+
+  /* Light mode toast styling */
+  :root [data-sonner-toaster] {
+    --normal-bg: #ffffff;
+    --normal-text: #1f2937; /* gray-800 */
+    --normal-border: #e5e7eb; /* gray-200 */
+    --success-bg: #f0f9ff; /* blue-50 */
+    --success-text: #047857; /* emerald-600 */
+    --error-bg: #fef2f2; /* red-50 */
+    --error-text: #dc2626; /* red-600 */
+    --warning-bg: #fffbeb; /* amber-50 */
+    --warning-text: #d97706; /* amber-600 */
+    --info-bg: #eff6ff; /* blue-50 */
+    --info-text: #2563eb; /* blue-600 */
+  }
+
+  /* Dark mode toast styling */
+  .dark [data-sonner-toaster] {
+    --normal-bg: rgb(30 41 59); /* slate-800 */
+    --normal-text: rgb(248 250 252); /* slate-50 */
+    --normal-border: rgb(51 65 85); /* slate-700 */
+    --success-bg: #064e3b; /* emerald-900 */
+    --success-text: #34d399; /* emerald-400 */
+    --error-bg: #7f1d1d; /* red-900 */
+    --error-text: #f87171; /* red-400 */
+    --warning-bg: #7c2d12; /* amber-900 */
+    --warning-text: #fbbf24; /* amber-400 */
+    --info-bg: #1e3a8a; /* blue-900 */
+    --info-text: #60a5fa; /* blue-400 */
+  }
+
+  /* Ensure toast text is always visible */
+  [data-sonner-toast] {
+    background: var(--normal-bg) !important;
+    color: var(--normal-text) !important;
+    border: 1px solid var(--normal-border) !important;
+  }
+
+  [data-sonner-toast][data-type="success"] {
+    background: var(--success-bg) !important;
+    color: var(--success-text) !important;
+    border-color: var(--success-text) !important;
+  }
+
+  [data-sonner-toast][data-type="error"] {
+    background: var(--error-bg) !important;
+    color: var(--error-text) !important;
+    border-color: var(--error-text) !important;
+  }
+
+  [data-sonner-toast][data-type="warning"] {
+    background: var(--warning-bg) !important;
+    color: var(--warning-text) !important;
+    border-color: var(--warning-text) !important;
+  }
+
+  [data-sonner-toast][data-type="info"] {
+    background: var(--info-bg) !important;
+    color: var(--info-text) !important;
+    border-color: var(--info-text) !important;
+  }
+
+  /* Ensure description text is also visible */
+  [data-sonner-toast] [data-description] {
+    color: var(--normal-text) !important;
+    opacity: 0.8;
+  }
+
+  [data-sonner-toast][data-type="success"] [data-description] {
+    color: var(--success-text) !important;
+  }
+
+  [data-sonner-toast][data-type="error"] [data-description] {
+    color: var(--error-text) !important;
+  }
+
+  [data-sonner-toast][data-type="warning"] [data-description] {
+    color: var(--warning-text) !important;
+  }
+
+  [data-sonner-toast][data-type="info"] [data-description] {
+    color: var(--info-text) !important;
+  }
+
+  /* Action button styling */
+  [data-sonner-toast] button {
+    background: var(--normal-text) !important;
+    color: var(--normal-bg) !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+  }
+
+  [data-sonner-toast] button:hover {
+    opacity: 0.8 !important;
+  }
 }
 
 /* Add to your global CSS file */
