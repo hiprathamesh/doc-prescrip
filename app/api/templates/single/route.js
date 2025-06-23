@@ -6,8 +6,16 @@ import { NextResponse } from 'next/server';
  */
 export async function POST(request) {
   try {
+    const doctorId = request.headers.get('X-Doctor-ID');
+    if (!doctorId) {
+      return NextResponse.json(
+        { success: false, error: 'Doctor ID is required' },
+        { status: 400 }
+      );
+    }
+
     const { template } = await request.json();
-    const savedTemplate = await databaseService.saveTemplate(template);
+    const savedTemplate = await databaseService.saveTemplate(template, doctorId);
     
     if (savedTemplate) {
       return NextResponse.json({ success: true, data: savedTemplate });

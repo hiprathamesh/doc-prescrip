@@ -6,8 +6,16 @@ import { NextResponse } from 'next/server';
  */
 export async function DELETE(request, { params }) {
   try {
+    const doctorId = request.headers.get('X-Doctor-ID');
+    if (!doctorId) {
+      return NextResponse.json(
+        { success: false, error: 'Doctor ID is required' },
+        { status: 400 }
+      );
+    }
+
     const { id } = await params;
-    const success = await databaseService.deleteTemplate(id);
+    const success = await databaseService.deleteTemplate(id, doctorId);
     
     if (success) {
       return NextResponse.json({ success: true });
