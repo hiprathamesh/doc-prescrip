@@ -400,6 +400,22 @@ Dr. Prashant Nikam`;
                 )}
               </div>
             )}
+
+            {/* Follow-up Information */}
+            {prescription.followUpDate && (
+              <div className="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-base">
+                <h4 className="font-medium text-gray-800 dark:text-gray-300 mb-2 flex items-center">
+                  <Calendar className="w-4 h-4 mr-1" />
+                  Follow-up {prescription.followUpStatus === 'completed' ? 'Completed' : 'Scheduled'}
+                </h4>
+                <div className="text-sm text-gray-700 dark:text-gray-400" >
+                  {prescription.followUpStatus === 'completed'
+                    ? `Follow-up was completed on: ${formatDate(prescription.followUpCompletedDate)}`
+                    : `Next appointment: ${formatDate(prescription.followUpDate)}`
+                  }
+                </div>
+              </div>
+            )}
           </div>
 
           {/* PDF Actions */}
@@ -580,36 +596,6 @@ Dr. Prashant Nikam`;
               </div>
             )}
           </div>
-
-          {/* Follow-up Information */}
-          {prescription.followUpDate && (
-            <div className={`p-4 rounded-xl border-2 ${prescription.followUpStatus === 'completed'
-              ? 'bg-green-50 border-green-200'
-              : prescription.followUpStatus === 'overdue'
-                ? 'bg-red-50 border-red-200'
-                : 'bg-yellow-50 border-yellow-200'
-              }`}>
-              <h3 className={`text-base font-semibold mb-2 ${prescription.followUpStatus === 'completed'
-                ? 'text-green-800'
-                : prescription.followUpStatus === 'overdue'
-                  ? 'text-red-800'
-                  : 'text-yellow-800'
-                }`}>
-                Follow-up {prescription.followUpStatus === 'completed' ? 'Completed' : 'Scheduled'}
-              </h3>
-              <p className={`text-sm ${prescription.followUpStatus === 'completed'
-                ? 'text-green-700'
-                : prescription.followUpStatus === 'overdue'
-                  ? 'text-red-700'
-                  : 'text-yellow-700'
-                }`}>
-                {prescription.followUpStatus === 'completed'
-                  ? `Follow-up was completed on: ${formatDate(prescription.followUpCompletedDate)}`
-                  : `Next appointment: ${formatDate(prescription.followUpDate)}`
-                }
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </>
