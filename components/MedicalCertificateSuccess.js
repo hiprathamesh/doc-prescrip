@@ -111,17 +111,17 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
         `}
         style={{ top: '81px' }}
       >
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-6 py-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
-                <span className="text-md font-semibold text-gray-900">Medical Certificate Generated Successfully</span>
+                <span className="text-md font-semibold text-gray-900 dark:text-gray-100">Medical Certificate Generated Successfully</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />
@@ -140,11 +140,11 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
-                <span className="text-xl font-semibold text-gray-900">Medical Certificate Generated Successfully</span>
+                <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">Medical Certificate Generated Successfully</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle className="w-6 h-6 text-green-600" />
@@ -156,50 +156,50 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
 
         <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Patient Info Card */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
               <div className="flex items-center space-x-2">
                 <User className="w-4 h-4 text-gray-500" />
                 <div>
-                  <span className="text-gray-600">Patient</span>
-                  <p className="font-medium text-gray-900">{certificate.patientName}</p>
+                  <span className="text-gray-600 dark:text-gray-400">Patient</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{certificate.patientName}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4 text-gray-500" />
                 <div>
-                  <span className="text-gray-600">Age</span>
-                  <p className="font-medium text-gray-900">{certificate.age} years</p>
+                  <span className="text-gray-600 dark:text-gray-400">Age</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{certificate.age} years</p>
                 </div>
               </div>
               {patient && (
                 <div className="flex items-center space-x-2">
                   <Phone className="w-4 h-4 text-gray-500" />
                   <div>
-                    <span className="text-gray-600">Phone</span>
-                    <p className="font-medium text-gray-900">{patient.phone}</p>
+                    <span className="text-gray-600 dark:text-gray-400">Phone</span>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{patient.phone}</p>
                   </div>
                 </div>
               )}
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4 text-gray-500" />
                 <div>
-                  <span className="text-gray-600">Date</span>
-                  <p className="font-medium text-gray-900">{formatDate(certificate.issuedDate)}</p>
+                  <span className="text-gray-600 dark:text-gray-400">Date</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{formatDate(certificate.issuedDate)}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Certificate Summary */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h2 className="text-lg font-semibold text-gray-900 mb-5">Certificate Summary</h2>
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-5">Certificate Summary</h2>
 
             {/* Certificate Content */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
               {/* Certificate Purpose */}
               <div>
-                <h4 className="font-medium text-gray-800 mb-2">Certificate Purpose</h4>
+                <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Certificate Purpose</h4>
                 <div className="text-gray-700 text-xs bg-green-50 p-3 rounded-md border border-green-200">
                   {certificate.certificateFor}
                 </div>
@@ -207,7 +207,7 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
 
               {/* Fitness Status */}
               <div>
-                <h4 className="font-medium text-gray-800 mb-2">Fitness Status</h4>
+                <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Fitness Status</h4>
                 <div className={`text-xs font-medium p-3 rounded-md border ${
                   certificate.fitnessStatus === 'fit' 
                     ? 'bg-green-100 text-green-800 border-green-200' 
@@ -220,20 +220,20 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
               {/* Physical Details */}
               {(certificate.height || certificate.weight || certificate.build) && (
                 <div>
-                  <h4 className="font-medium text-gray-800 mb-2">Physical Details</h4>
+                  <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Physical Details</h4>
                   <div className="space-y-1">
                     {certificate.height && (
-                      <div className="text-xs text-gray-700">
+                      <div className="text-xs text-gray-700 dark:text-gray-400">
                         <span className="font-medium">Height:</span> {certificate.height}
                       </div>
                     )}
                     {certificate.weight && (
-                      <div className="text-xs text-gray-700">
+                      <div className="text-xs text-gray-700 dark:text-gray-400">
                         <span className="font-medium">Weight:</span> {certificate.weight}
                       </div>
                     )}
                     {certificate.build && (
-                      <div className="text-xs text-gray-700">
+                      <div className="text-xs text-gray-700 dark:text-gray-400">
                         <span className="font-medium">Build:</span> {certificate.build}
                       </div>
                     )}
@@ -244,20 +244,20 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
               {/* Vital Signs */}
               {(certificate.pulse || certificate.bp || certificate.vision) && (
                 <div>
-                  <h4 className="font-medium text-gray-800 mb-2">Vital Signs</h4>
+                  <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Vital Signs</h4>
                   <div className="space-y-1">
                     {certificate.pulse && (
-                      <div className="text-xs text-gray-700">
+                      <div className="text-xs text-gray-700 dark:text-gray-400">
                         <span className="font-medium">Pulse:</span> {certificate.pulse}
                       </div>
                     )}
                     {certificate.bp && (
-                      <div className="text-xs text-gray-700">
+                      <div className="text-xs text-gray-700 dark:text-gray-400">
                         <span className="font-medium">BP:</span> {certificate.bp}
                       </div>
                     )}
                     {certificate.vision && (
-                      <div className="text-xs text-gray-700">
+                      <div className="text-xs text-gray-700 dark:text-gray-400">
                         <span className="font-medium">Vision:</span> {certificate.vision}
                       </div>
                     )}
@@ -268,25 +268,25 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
               {/* System Examination */}
               {(certificate.lungs || certificate.cardiovascularSystem || certificate.liver || certificate.spleen) && (
                 <div className="md:col-span-2">
-                  <h4 className="font-medium text-gray-800 mb-2">System Examination</h4>
+                  <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">System Examination</h4>
                   <div className="grid grid-cols-2 gap-3">
                     {certificate.lungs && (
-                      <div className="text-xs text-gray-700">
+                      <div className="text-xs text-gray-700 dark:text-gray-400">
                         <span className="font-medium">Lungs:</span> {certificate.lungs}
                       </div>
                     )}
                     {certificate.cardiovascularSystem && (
-                      <div className="text-xs text-gray-700">
+                      <div className="text-xs text-gray-700 dark:text-gray-400">
                         <span className="font-medium">CVS:</span> {certificate.cardiovascularSystem}
                       </div>
                     )}
                     {certificate.liver && (
-                      <div className="text-xs text-gray-700">
+                      <div className="text-xs text-gray-700 dark:text-gray-400">
                         <span className="font-medium">Liver:</span> {certificate.liver}
                       </div>
                     )}
                     {certificate.spleen && (
-                      <div className="text-xs text-gray-700">
+                      <div className="text-xs text-gray-700 dark:text-gray-400">
                         <span className="font-medium">Spleen:</span> {certificate.spleen}
                       </div>
                     )}
@@ -297,8 +297,8 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
 
             {/* Remarks */}
             {certificate.remarks && (
-              <div className="mt-5 pt-4 border-t border-gray-200">
-                <h4 className="font-medium text-gray-800 mb-2">Remarks</h4>
+              <div className="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Remarks</h4>
                 <div className="text-xs text-gray-700 bg-gray-50 p-3 rounded-md">
                   {certificate.remarks}
                 </div>
@@ -307,11 +307,11 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
           </div>
 
           {/* PDF Actions */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <FileText className="w-5 h-5 text-green-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Medical Certificate PDF</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Medical Certificate PDF</h3>
               </div>
             </div>
 
@@ -338,7 +338,7 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
               <button
                 onClick={downloadCertificate}
                 disabled={!certificatePdfUrl || isGeneratingPdf}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white dark:text-gray-900 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
               >
                 <Download className="w-4 h-4" />
                 <span>Download</span>
