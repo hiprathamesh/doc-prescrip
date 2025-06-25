@@ -5,19 +5,29 @@ export async function GET(request, { params }) {
   try {
     const { type } = await params;
     
+    // Get doctor ID from headers (set by frontend apiCall function)
+    const doctorId = request.headers.get('X-Doctor-ID');
+    
+    if (!doctorId || doctorId === 'default-doctor') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid doctor context' },
+        { status: 401 }
+      );
+    }
+    
     let data;
     switch (type) {
       case 'symptoms':
-        data = await databaseService.getCustomSymptoms();
+        data = await databaseService.getCustomSymptoms(doctorId);
         break;
       case 'diagnoses':
-        data = await databaseService.getCustomDiagnoses();
+        data = await databaseService.getCustomDiagnoses(doctorId);
         break;
       case 'lab-tests':
-        data = await databaseService.getCustomLabTests();
+        data = await databaseService.getCustomLabTests(doctorId);
         break;
       case 'medications':
-        data = await databaseService.getCustomMedications();
+        data = await databaseService.getCustomMedications(doctorId);
         break;
       default:
         return NextResponse.json(
@@ -41,19 +51,29 @@ export async function POST(request, { params }) {
     const { type } = await params;
     const { items } = await request.json();
     
+    // Get doctor ID from headers (set by frontend apiCall function)
+    const doctorId = request.headers.get('X-Doctor-ID');
+    
+    if (!doctorId || doctorId === 'default-doctor') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid doctor context' },
+        { status: 401 }
+      );
+    }
+    
     let success;
     switch (type) {
       case 'symptoms':
-        success = await databaseService.saveCustomSymptoms(items);
+        success = await databaseService.saveCustomSymptoms(items, doctorId);
         break;
       case 'diagnoses':
-        success = await databaseService.saveCustomDiagnoses(items);
+        success = await databaseService.saveCustomDiagnoses(items, doctorId);
         break;
       case 'lab-tests':
-        success = await databaseService.saveCustomLabTests(items);
+        success = await databaseService.saveCustomLabTests(items, doctorId);
         break;
       case 'medications':
-        success = await databaseService.saveCustomMedications(items);
+        success = await databaseService.saveCustomMedications(items, doctorId);
         break;
       default:
         return NextResponse.json(

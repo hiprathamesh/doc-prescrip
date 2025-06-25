@@ -8,7 +8,7 @@ class DatabaseService {
       prescriptions: 'prescriptions', 
       bills: 'bills',
       templates: 'templates',
-      customData: 'customData',
+      customData: 'custom-data',
       doctors: 'doctors'
     };
   }

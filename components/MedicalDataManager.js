@@ -14,6 +14,7 @@ export default function MedicalDataManager({ onBack }) {
   const [customSymptoms, setCustomSymptoms] = useState([]);
   const [customDiagnoses, setCustomDiagnoses] = useState([]);
   const [customLabTests, setCustomLabTests] = useState([]);
+  const [customMedications, setCustomMedications] = useState([]);
   const [newItem, setNewItem] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   // Add pagination state
@@ -122,6 +123,14 @@ export default function MedicalDataManager({ onBack }) {
         toast.success('Lab Test Added', {
           description: `"${newItem.trim()}" added to custom lab tests`
         });
+      } else if (activeTab === 'medications') {
+        const updated = [...customMedications, newItem.trim()];
+        setCustomMedications(updated);
+        await storage.saveCustomMedications(updated);
+        await activityLogger.logCustomDataAdded('medication', newItem.trim());
+        toast.success('Medication Added', {
+          description: `"${newItem.trim()}" added to custom medications`
+        });
       }
       setNewItem('');
     } catch (error) {
@@ -146,6 +155,10 @@ export default function MedicalDataManager({ onBack }) {
         const updated = customLabTests.filter(l => l !== item);
         setCustomLabTests(updated);
         await storage.saveCustomLabTests(updated);
+      } else if (activeTab === 'medications') {
+        const updated = customMedications.filter(m => m !== item);
+        setCustomMedications(updated);
+        await storage.saveCustomMedications(updated);
       }
     } catch (error) {
       console.error('Error deleting item:', error);
@@ -157,6 +170,7 @@ export default function MedicalDataManager({ onBack }) {
     if (activeTab === 'symptoms') return customSymptoms;
     if (activeTab === 'diagnoses') return customDiagnoses;
     if (activeTab === 'lab-tests') return customLabTests;
+    if (activeTab === 'medications') return customMedications;
     return [];
   };
 
@@ -192,6 +206,7 @@ export default function MedicalDataManager({ onBack }) {
     if (tab === 'symptoms') return 'Custom Symptoms';
     if (tab === 'diagnoses') return 'Custom Diagnoses';
     if (tab === 'lab-tests') return 'Custom Lab Tests';
+    if (tab === 'medications') return 'Custom Medications';
     return '';
   };
 
@@ -199,6 +214,7 @@ export default function MedicalDataManager({ onBack }) {
     if (activeTab === 'symptoms') return 'Add new symptom...';
     if (activeTab === 'diagnoses') return 'Add new diagnosis...';
     if (activeTab === 'lab-tests') return 'Add new lab test...';
+    if (activeTab === 'medications') return 'Add new medication...';
     return '';
   };
 
@@ -206,13 +222,15 @@ export default function MedicalDataManager({ onBack }) {
     if (activeTab === 'symptoms') return customSymptoms.length;
     if (activeTab === 'diagnoses') return customDiagnoses.length;
     if (activeTab === 'lab-tests') return customLabTests.length;
+    if (activeTab === 'medications') return customMedications.length;
     return 0;
   };
 
   const categoryOptions = [
     { value: 'symptoms', label: `Custom Symptoms (${customSymptoms.length})` },
     { value: 'diagnoses', label: `Custom Diagnoses (${customDiagnoses.length})` },
-    { value: 'lab-tests', label: `Custom Lab Tests (${customLabTests.length})` }
+    { value: 'lab-tests', label: `Custom Lab Tests (${customLabTests.length})` },
+    { value: 'medications', label: `Custom Medications (${customMedications.length})` }
   ];
 
   // Handle Ctrl+K shortcut for search
@@ -318,7 +336,7 @@ export default function MedicalDataManager({ onBack }) {
 
           {/* Add new item */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Add New {activeTab === 'symptoms' ? 'Symptom' : activeTab === 'diagnoses' ? 'Diagnosis' : 'Lab Test'}</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Add New {activeTab === 'symptoms' ? 'Symptom' : activeTab === 'diagnoses' ? 'Diagnosis' : activeTab === 'lab-tests' ? 'Lab Test' : 'Medication'}</h3>
             <div className="flex space-x-3">
               <input
                 type="text"
