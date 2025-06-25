@@ -13,33 +13,25 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   
-  // Add state for custom medications
+  // Add state for custom medications - simplified loading
   const [customMedications, setCustomMedications] = useState([]);
-  const [isLoadingCustom, setIsLoadingCustom] = useState(true);
 
-  // Load custom medications on mount
+  // Load custom medications on mount - simplified without loading state
   useEffect(() => {
     loadCustomMedications();
   }, []);
 
   const loadCustomMedications = async () => {
     try {
-      setIsLoadingCustom(true);
       const medications = await storage.getCustomMedications();
       setCustomMedications(medications || []);
     } catch (error) {
       console.error('Error loading custom medications:', error);
       setCustomMedications([]);
-    } finally {
-      setIsLoadingCustom(false);
     }
   };
 
   const getDisplayMedications = () => {
-    if (isLoadingCustom) {
-      return COMMON_MEDICATIONS; // Show only common medications while loading
-    }
-    
     if (selectedCategory === 'all') {
       return [...COMMON_MEDICATIONS, ...customMedications];
     }

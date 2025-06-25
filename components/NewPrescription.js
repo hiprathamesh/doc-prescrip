@@ -68,7 +68,6 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   const [customDiagnoses, setCustomDiagnoses] = useState([]);
   const [customLabTests, setCustomLabTests] = useState([]);
   const [customMedications, setCustomMedications] = useState([]);
-  const [isLoadingCustomData, setIsLoadingCustomData] = useState(true);
 
   // Add new state for confirmation and success
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -107,7 +106,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     }
   }, [isAddingCustom]);
 
-  // Load custom data on mount
+  // Load custom data on mount - simplified without loading state
   useEffect(() => {
     loadCustomData();
   }, []);
@@ -170,7 +169,6 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
   const loadCustomData = async () => {
     try {
-      setIsLoadingCustomData(true);
       const [symptoms, diagnoses, labTests, medications] = await Promise.all([
         storage.getCustomSymptoms(),
         storage.getCustomDiagnoses(),
@@ -188,8 +186,6 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       setCustomDiagnoses([]);
       setCustomLabTests([]);
       setCustomMedications([]);
-    } finally {
-      setIsLoadingCustomData(false);
     }
   };
 
@@ -1358,51 +1354,44 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               {/* Medications section */}
               <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
                 <div className="space-y-5">
-                  {isLoadingCustomData ? (
-                    <div className="text-center py-6">
-                      <RotateCw className="w-8 h-8 animate-spin mx-auto text-blue-500 mb-2" />
-                      <p className="text-gray-500">Loading medications...</p>
-                    </div>
-                  ) : (
-                    <MedicationSelector
-                      onSelect={(medication) => {
-                        const newMedication = {
-                          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                          name: medication,
-                          timing: {
-                            morning: false,
-                            afternoon: false,
-                            evening: false,
-                            night: false
-                          },
-                          dosage: '',
-                          mealTiming: 'after_meal',
-                          duration: '',
-                          remarks: ''
-                        };
-                        setMedications([...medications, newMedication]);
-                      }}
-                      onAddCustom={async (medication) => {
-                        await storage.addCustomMedication(medication);
-                        await loadCustomData();
-                        const newMedication = {
-                          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                          name: medication,
-                          timing: {
-                            morning: false,
-                            afternoon: false,
-                            evening: false,
-                            night: false
-                          },
-                          dosage: '',
-                          mealTiming: 'after_meal',
-                          duration: '',
-                          remarks: ''
-                        };
-                        setMedications([...medications, newMedication]);
-                      }}
-                    />
-                  )}
+                  <MedicationSelector
+                    onSelect={(medication) => {
+                      const newMedication = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        name: medication,
+                        timing: {
+                          morning: false,
+                          afternoon: false,
+                          evening: false,
+                          night: false
+                        },
+                        dosage: '',
+                        mealTiming: 'after_meal',
+                        duration: '',
+                        remarks: ''
+                      };
+                      setMedications([...medications, newMedication]);
+                    }}
+                    onAddCustom={async (medication) => {
+                      await storage.addCustomMedication(medication);
+                      await loadCustomData();
+                      const newMedication = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        name: medication,
+                        timing: {
+                          morning: false,
+                          afternoon: false,
+                          evening: false,
+                          night: false
+                        },
+                        dosage: '',
+                        mealTiming: 'after_meal',
+                        duration: '',
+                        remarks: ''
+                      };
+                      setMedications([...medications, newMedication]);
+                    }}
+                  />
 
                   {medications.length > 0 && (
                     <div className="space-y-0">
