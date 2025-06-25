@@ -17,7 +17,7 @@ export default function PrescriptionTemplates({ onBack }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentView, setCurrentView] = useState('list'); // 'list' | 'create' | 'edit'
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-  
+
   // Add sorting state
   const [sortBy, setSortBy] = useState('date-created');
   const [sortDirection, setSortDirection] = useState('desc');
@@ -105,7 +105,7 @@ export default function PrescriptionTemplates({ onBack }) {
     (template.diagnosis || []).some(d => d.name?.toLowerCase().includes(searchTerm.toLowerCase()))
   ).sort((a, b) => {
     let comparison = 0;
-    
+
     switch (sortBy) {
       case 'name':
         comparison = a.name.localeCompare(b.name);
@@ -114,7 +114,7 @@ export default function PrescriptionTemplates({ onBack }) {
         // Handle lastUsed dates properly with fallback to creation date
         const aLastUsed = a.lastUsed ? new Date(a.lastUsed) : new Date(0);
         const bLastUsed = b.lastUsed ? new Date(b.lastUsed) : new Date(0);
-        
+
         // If both have never been used, sort by creation date
         if (aLastUsed.getTime() === 0 && bLastUsed.getTime() === 0) {
           comparison = new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
@@ -130,7 +130,7 @@ export default function PrescriptionTemplates({ onBack }) {
         comparison = new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
         break;
     }
-    
+
     return sortDirection === 'asc' ? comparison : -comparison;
   });
 
@@ -256,40 +256,13 @@ export default function PrescriptionTemplates({ onBack }) {
                 </button>
                 <span className="text-md font-semibold text-gray-900 dark:text-gray-100">Prescription Templates</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="Search templates..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-64 pl-10 pr-16 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border">
-                    Ctrl K
-                  </div>
-                </div>
-                <div className="w-48">
-                  <CustomDropdown
-                    options={sortOptions}
-                    value={sortBy}
-                    onChange={handleSortChange}
-                    placeholder="Sort by..."
-                    showDirectionToggle={true}
-                    sortDirection={sortDirection}
-                    onDirectionToggle={handleSortDirectionToggle}
-                  />
-                </div>
-                <button
-                  onClick={handleCreateNew}
-                  className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>New Template</span>
-                </button>
-              </div>
+              <button
+                onClick={handleCreateNew}
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+              >
+                <Plus className="w-4 h-4" />
+                <span>New Template</span>
+              </button>
             </div>
           </div>
         </div>
@@ -355,8 +328,8 @@ export default function PrescriptionTemplates({ onBack }) {
             {filteredTemplates.length > 0 ? (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredTemplates.map((template, index) => (
-                  <div 
-                    key={template.id} 
+                  <div
+                    key={template.id}
                     className={`p-4 transition-colors duration-200
                       ${index === 0 ? 'first-template-item hover:bg-gray-50 dark:hover:bg-gray-800 rounded-t-xl' : ''}
                       ${index === filteredTemplates.length - 1 ? 'last-template-item hover:bg-gray-50 dark:hover:bg-gray-800 rounded-b-xl' : ''}
