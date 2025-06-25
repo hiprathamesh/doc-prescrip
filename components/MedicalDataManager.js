@@ -78,20 +78,23 @@ export default function MedicalDataManager({ onBack }) {
 
   const loadData = async () => {
     try {
-      const [symptoms, diagnoses, labTests] = await Promise.all([
+      const [symptoms, diagnoses, labTests, medications] = await Promise.all([
         storage.getCustomSymptoms(),
         storage.getCustomDiagnoses(),
-        storage.getCustomLabTests()
+        storage.getCustomLabTests(),
+        storage.getCustomMedications()
       ]);
 
       setCustomSymptoms(symptoms || []);
       setCustomDiagnoses(diagnoses || []);
       setCustomLabTests(labTests || []);
+      setCustomMedications(medications || []);
     } catch (error) {
       console.error('Error loading custom data:', error);
       setCustomSymptoms([]);
       setCustomDiagnoses([]);
       setCustomLabTests([]);
+      setCustomMedications([]);
     }
   };
 
