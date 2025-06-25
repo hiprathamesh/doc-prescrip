@@ -375,7 +375,10 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                 {filteredPatients.map((patient, index) => (
                   <div key={patient.id} className="p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="flex-1" onClick={() => onPatientSelect(patient)}>
+                      <div
+                        className="flex-1"
+                        onClick={() => onPatientSelect(patient)}
+                      >
                         <div className="font-medium text-gray-900 text-sm">{patient.name}</div>
                         <div className="text-sm text-gray-600">
                           {patient.gender} • {patient.age} years • ID: {patient.id}

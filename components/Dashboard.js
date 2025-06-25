@@ -45,6 +45,7 @@ export default function Dashboard() {
   const [recentActivities, setRecentActivities] = useState([]);
   const [currentGreeting, setCurrentGreeting] = useState({ title: '', subtitle: '' });
   const [lastGreetingUpdate, setLastGreetingUpdate] = useState('');
+  const [navigationSource, setNavigationSource] = useState('dashboard'); // Track where we came from
 
   useEffect(() => {
     loadAllData();
@@ -164,9 +165,20 @@ export default function Dashboard() {
     patient.phone.includes(searchTerm)
   );
 
-  const handlePatientSelect = (patient) => {
+  const handlePatientSelect = (patient, source = 'dashboard') => {
     setSelectedPatient(patient);
+    setNavigationSource(source);
     setCurrentView('details');
+  };
+
+  const handleBackFromDetails = () => {
+    // Navigate back to the appropriate view based on where we came from
+    if (navigationSource === 'list') {
+      setCurrentView('list');
+    } else {
+      setCurrentView('dashboard');
+    }
+    setSelectedPatient(null);
   };
 
   const handleNewPrescription = (patient = null) => {
@@ -841,7 +853,7 @@ export default function Dashboard() {
                               ? 'hover:bg-red-50 dark:hover:bg-red-900/20'
                               : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                               }`}
-                              onClick={() => patient && handlePatientSelect(patient)}>
+                              onClick={() => patient && handlePatientSelect(patient, 'dashboard')}>
                               <div className={`p-1.5 rounded-full ${prescription.isOverdue ? 'bg-red-600 dark:bg-red-500' : 'bg-purple-600 dark:bg-purple-500'
                                 }`}>
                                 <Clock className="w-3 h-3 text-white" />
@@ -901,7 +913,7 @@ export default function Dashboard() {
         {currentView === 'list' && (
           <PatientList
             patients={filteredPatients}
-            onPatientSelect={handlePatientSelect}
+            onPatientSelect={(patient) => handlePatientSelect(patient, 'list')}
             onNewPrescription={handleNewPrescription}
             onPatientDelete={handlePatientDelete}
             onBack={handleBackToDashboard}
@@ -911,7 +923,7 @@ export default function Dashboard() {
         {currentView === 'details' && selectedPatient && (
           <PatientDetails
             patient={selectedPatient}
-            onBack={handleBackToDashboard}
+            onBack={handleBackFromDetails}
             onNewPrescription={() => handleNewPrescription(selectedPatient)}
           />
         )}
