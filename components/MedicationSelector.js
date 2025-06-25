@@ -218,7 +218,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
           </div>
           
           {searchTerm && (
-            <div className="bg-white border border-gray-200 rounded-xl max-h-64 overflow-y-auto shadow-lg">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl max-h-64 overflow-y-auto shadow-lg">
               {getAllSearchResults().length > 0 ? (
                 <div className="p-2">
                   {getAllSearchResults().slice(0, 15).map((medication, index) => {
@@ -226,7 +226,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
                     return (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-3 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="flex items-center justify-between p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                       >
                         <button
                           onClick={() => handleSelect(medication)}
