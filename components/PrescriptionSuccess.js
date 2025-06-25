@@ -14,7 +14,8 @@ import useScrollToTop from '../hooks/useScrollToTop';
 export default function PrescriptionSuccess({ prescription, patient, bill, onBack }) {
   const [prescriptionPdfUrl, setPrescriptionPdfUrl] = useState(null);
   const [billPdfUrl, setBillPdfUrl] = useState(null);
-  const [isGeneratingPdfs, setIsGeneratingPdfs] = useState(true);
+  const [isGeneratingPrescriptionPdf, setIsGeneratingPrescriptionPdf] = useState(false);
+  const [isGeneratingBillPdf, setIsGeneratingBillPdf] = useState(false);
   const [currentBill, setCurrentBill] = useState(bill);
 
   // Add refs and state for floating header
@@ -32,7 +33,6 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
     if (bill && bill.pdfUrl) {
       setBillPdfUrl(bill.pdfUrl);
     }
-    setIsGeneratingPdfs(false);
   }, [prescription, bill]);
 
   // Reset header visibility when component mounts
@@ -82,7 +82,7 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
     // This function is no longer needed since PDFs are pre-generated
     // But keeping it for backward compatibility
     try {
-      setIsGeneratingPdfs(true);
+      setIsGeneratingPrescriptionPdf(true);
 
       if (!prescription.pdfUrl) {
         const prescriptionBlob = await generatePDF(prescription, patient, false);
@@ -91,14 +91,16 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       }
 
       if (bill && !bill.pdfUrl) {
+        setIsGeneratingBillPdf(true);
         const billBlob = await generateBillPDF(bill, patient);
         const billUrl = URL.createObjectURL(billBlob);
         setBillPdfUrl(billUrl);
+        setIsGeneratingBillPdf(false);
       }
     } catch (error) {
       console.error('Error generating PDFs:', error);
     } finally {
-      setIsGeneratingPdfs(false);
+      setIsGeneratingPrescriptionPdf(false);
     }
   };
 
@@ -121,7 +123,8 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
     if (!currentBill) return;
 
     try {
-      setIsGeneratingPdfs(true);
+      // Only set loading state for bill PDF
+      setIsGeneratingBillPdf(true);
 
       // Update bill status
       const updatedBill = {
@@ -157,7 +160,8 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       console.error('Error updating bill payment status:', error);
       alert('Failed to update payment status');
     } finally {
-      setIsGeneratingPdfs(false);
+      // Only reset loading state for bill PDF
+      setIsGeneratingBillPdf(false);
     }
   };
 
@@ -409,9 +413,7 @@ Dr. Prashant Nikam`;
                 </div>
               </div>
 
-              
-
-              {isGeneratingPdfs ? (
+              {isGeneratingPrescriptionPdf ? (
                 <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg">
                   <div className="text-center">
                     <div className="w-6 h-6 animate-spin mx-auto border-4 border-blue-500 border-t-transparent rounded-full mb-2"></div>
@@ -432,7 +434,7 @@ Dr. Prashant Nikam`;
               <div className="flex space-x-3 mt-4 justify-end">
                 <button
                   onClick={downloadPrescription}
-                  disabled={!prescriptionPdfUrl || isGeneratingPdfs}
+                  disabled={!prescriptionPdfUrl || isGeneratingPrescriptionPdf}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white dark:text-gray-900 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                 >
                   <Download className="w-4 h-4" />
@@ -442,7 +444,7 @@ Dr. Prashant Nikam`;
                   pdfUrl={prescriptionPdfUrl}
                   filename={`prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`}
                   phone={patient.phone}
-                  disabled={!prescriptionPdfUrl || isGeneratingPdfs}
+                  disabled={!prescriptionPdfUrl || isGeneratingPrescriptionPdf}
                   type="prescription"
                   patientName={patient.name}
                   visitDate={formatDate(prescription.visitDate)}
@@ -462,10 +464,8 @@ Dr. Prashant Nikam`;
                   </div>
                 </div>
 
-                
-
-                {isGeneratingPdfs ? (
-                  <div className="flex items-center justify-center h-48 bg-gray-50 rounded-lg">
+                {isGeneratingBillPdf ? (
+                  <div className="flex items-center justify-center h-48 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="text-center">
                       <div className="w-6 h-6 animate-spin mx-auto border-4 border-green-500 border-t-transparent rounded-full mb-2"></div>
                       <p className="text-gray-500 text-sm">Updating Bill...</p>
@@ -489,7 +489,7 @@ Dr. Prashant Nikam`;
                     <span className="font-medium text-green-800 text-sm">Amount: ₹{currentBill.amount}</span>
                     <button
                       onClick={toggleBillPayment}
-                      disabled={isGeneratingPdfs}
+                      disabled={isGeneratingBillPdf}
                       className={`px-3 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${currentBill.isPaid
                         ? 'bg-green-100 text-green-800 hover:bg-green-200'
                         : 'bg-red-100 text-red-800 hover:bg-red-200'
@@ -508,7 +508,7 @@ Dr. Prashant Nikam`;
                 <div className="flex space-x-3 mt-4 justify-end">
                   <button
                     onClick={downloadBill}
-                    disabled={!billPdfUrl || isGeneratingPdfs}
+                    disabled={!billPdfUrl || isGeneratingBillPdf}
                     className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white dark:text-gray-900 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-normal"
                   >
                     <Download className="w-4 h-4" />
@@ -518,7 +518,7 @@ Dr. Prashant Nikam`;
                     pdfUrl={billPdfUrl}
                     filename={`bill-${patient.name}-${formatDate(currentBill.createdAt)}.pdf`}
                     phone={patient.phone}
-                    disabled={!billPdfUrl || isGeneratingPdfs}
+                    disabled={!billPdfUrl || isGeneratingBillPdf}
                     type="bill"
                     patientName={patient.name}
                     billDate={formatDate(currentBill.createdAt)}
