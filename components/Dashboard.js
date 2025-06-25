@@ -500,7 +500,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Minimal Header */}
-      <header className="dashboard-header bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-40">
+      <header className="dashboard-header bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div
@@ -522,7 +522,7 @@ export default function Dashboard() {
               <DarkModeToggle />
               <button
                 onClick={handleLogout}
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center space-x-2 text-sm"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 flex items-center space-x-2 text-sm"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
@@ -561,7 +561,7 @@ export default function Dashboard() {
             >
               <div className="grid grid-cols-4 gap-4">
                 {/* Total Patients */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-600 p-4 hover:shadow-lg dark:hover:shadow-slate-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
                   <div className="flex items-center justify-between mb-3">
                     <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded">
                       <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -574,7 +574,7 @@ export default function Dashboard() {
                   </div>
 
                   {/* Expanded content on hover */}
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-slate-600`}>
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
                     <div className="flex justify-between items-center text-[13px]">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
@@ -593,7 +593,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Visits This Week */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-600 p-4 hover:shadow-lg dark:hover:shadow-slate-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
                   <div className="flex items-center justify-between mb-3">
                     <div className="p-2 bg-green-50 dark:bg-green-500/10 rounded">
                       <Calendar className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -605,7 +605,7 @@ export default function Dashboard() {
                     <p className="text-sm text-gray-600 dark:text-gray-300">This week</p>
                   </div>
 
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-slate-600`}>
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
                     <div className="flex justify-between items-center text-[13px]">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
@@ -624,7 +624,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Revenue */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-600 p-4 hover:shadow-lg dark:hover:shadow-slate-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
                   <div className="flex items-center justify-between mb-3">
                     <div className="p-2 bg-orange-50 dark:bg-orange-500/10 rounded">
                       <DollarSign className="w-4 h-4 text-orange-600 dark:text-orange-400" />
@@ -636,7 +636,7 @@ export default function Dashboard() {
                     <p className="text-sm text-gray-600 dark:text-gray-300">Collected</p>
                   </div>
 
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-slate-600`}>
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
                     <div className="flex justify-between items-center text-[13px]">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-orange-600 dark:bg-orange-400 rounded-full"></div>
@@ -655,7 +655,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Follow-ups */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-600 p-4 hover:shadow-lg dark:hover:shadow-slate-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
                   <div className="flex items-center justify-between mb-3">
                     <div className="p-2 bg-purple-50 dark:bg-purple-500/10 rounded">
                       <Clock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
@@ -667,7 +667,7 @@ export default function Dashboard() {
                     <p className="text-sm text-gray-600 dark:text-gray-300">Upcoming</p>
                   </div>
 
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-slate-600`}>
+                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
                     <div className="flex justify-between items-center text-[13px]">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-purple-600 dark:bg-purple-400 rounded-full"></div>
@@ -692,12 +692,12 @@ export default function Dashboard() {
               {/* Left Column - Quick Actions & Recent Activity */}
               <div className="col-span-2 space-y-6">
                 {/* Quick Actions */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-5">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => handleNewPrescription()}
-                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-600 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-blue-600 dark:bg-blue-500 rounded">
@@ -712,7 +712,7 @@ export default function Dashboard() {
 
                     <button
                       onClick={handleViewAllPatients}
-                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-600 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-green-600 dark:bg-green-500 rounded">
@@ -727,7 +727,7 @@ export default function Dashboard() {
 
                     <button
                       onClick={handleViewTemplates}
-                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-600 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-purple-600 dark:bg-purple-500 rounded">
@@ -742,7 +742,7 @@ export default function Dashboard() {
 
                     <button
                       onClick={handleViewMedicalData}
-                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-600 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-orange-600 dark:bg-orange-500 rounded">
@@ -757,7 +757,7 @@ export default function Dashboard() {
 
                     <button
                       onClick={() => handleNewMedicalCertificate()}
-                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-lg border border-gray-200 dark:border-slate-600 transition-all duration-200 text-left col-span-2"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left col-span-2"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-cyan-600 dark:bg-cyan-500 rounded">
@@ -773,7 +773,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Recent Activity */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-5">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
                     <button
@@ -792,7 +792,7 @@ export default function Dashboard() {
 
                         return (
                           <div key={activity.id}>
-                            <div className="flex items-center space-x-3 py-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer rounded-lg px-2 -mx-2">
+                            <div className="flex items-center space-x-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer rounded-lg px-2 -mx-2">
                               <div className={`p-2 rounded ${colorClass}`}>
                                 <IconComponent className="w-4 h-4" />
                               </div>
@@ -809,7 +809,7 @@ export default function Dashboard() {
                               </div>
                             </div>
                             {index < recentActivities.length - 1 && (
-                              <div className="border-b border-gray-100 dark:border-slate-700"></div>
+                              <div className="border-b border-gray-100 dark:border-gray-700"></div>
                             )}
                           </div>
                         );
@@ -828,7 +828,7 @@ export default function Dashboard() {
               {/* Right Column - Follow-ups & Monthly Overview */}
               <div className="space-y-6">
                 {/* Upcoming Follow-ups */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-5">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Upcoming Follow-ups</h3>
 
                   <div className="space-y-0">
@@ -839,7 +839,7 @@ export default function Dashboard() {
                           <div key={prescription.id}>
                             <div className={`flex items-center space-x-3 py-3 transition-colors cursor-pointer rounded-lg px-2 -mx-2 ${prescription.isOverdue
                               ? 'hover:bg-red-50 dark:hover:bg-red-900/20'
-                              : 'hover:bg-gray-50 dark:hover:bg-slate-700'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                               }`}
                               onClick={() => patient && handlePatientSelect(patient)}>
                               <div className={`p-1.5 rounded-full ${prescription.isOverdue ? 'bg-red-600 dark:bg-red-500' : 'bg-purple-600 dark:bg-purple-500'
@@ -854,7 +854,7 @@ export default function Dashboard() {
                               </div>
                             </div>
                             {index < stats.upcomingFollowUps.slice(0, 5).length - 1 && (
-                              <div className="border-b border-gray-100 dark:border-slate-700"></div>
+                              <div className="border-b border-gray-100 dark:border-gray-700"></div>
                             )}
                           </div>
                         );
@@ -869,7 +869,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Monthly Overview */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-slate-700 p-5">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">This Month</h3>
 
                   <div className="space-y-4">
@@ -885,7 +885,7 @@ export default function Dashboard() {
                       <span className="text-sm text-gray-600 dark:text-gray-300">Revenue</span>
                       <span className="text-sm font-semibold text-green-600 dark:text-green-400">₹{stats.revenueThisMonth || 0}</span>
                     </div>
-                    <div className="pt-3 border-t border-gray-200 dark:border-slate-700">
+                    <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Pending Payments</span>
                         <span className="text-sm font-semibold text-orange-600 dark:text-orange-400">₹{stats.pendingRevenue || 0}</span>
