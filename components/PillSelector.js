@@ -112,14 +112,14 @@ export default function PillSelector({
           </div>
           
           {searchTerm && (
-            <div className="bg-white border border-gray-200 rounded-xl max-h-48 overflow-y-auto shadow-lg">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl max-h-48 overflow-y-auto shadow-lg">
               {filteredItems.length > 0 ? (
                 <div className="p-2">
                   {filteredItems.slice(0, 10).map((item, index) => (
                     <button
                       key={index}
                       onClick={() => handleSelect(item)}
-                      className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors text-sm"
+                      className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:border-gray-800 rounded-lg transition-colors text-sm"
                     >
                       {item}
                     </button>
@@ -127,11 +127,11 @@ export default function PillSelector({
                 </div>
               ) : (
                 <div className="p-4 text-center">
-                  <p className="text-gray-500 text-sm mb-3">No matches found</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">No matches found</p>
                   {onAddCustom && (
                     <button
                       onClick={handleAddCustom}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-lg flex items-center space-x-2 text-sm font-medium transition-all duration-200 mx-auto"
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white dark:text-gray-900 px-4 py-2 rounded-lg flex items-center space-x-2 text-sm font-medium transition-all duration-200 mx-auto"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Add "{searchTerm}"</span>

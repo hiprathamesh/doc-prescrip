@@ -303,10 +303,10 @@ Dr. Prashant Nikam`;
               {/* Symptoms */}
               {prescription.symptoms?.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-gray-800 mb-2">Symptoms</h4>
+                  <h4 className="font-medium text-gray-800 dark:text-gray-300 mb-2">Symptoms</h4>
                   <div className="space-y-1">
                     {prescription.symptoms.map((symptom) => (
-                      <div key={symptom.id} className="text-gray-700 text-xs">
+                      <div key={symptom.id} className="text-gray-700 dark:text-gray-400 text-xs">
                         <span className="font-medium">{symptom.name}</span>
                         <span className="text-gray-500"> • {symptom.severity} • {symptom.duration}</span>
                       </div>
@@ -318,10 +318,10 @@ Dr. Prashant Nikam`;
               {/* Diagnosis */}
               {prescription.diagnosis?.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-gray-800 mb-2">Diagnosis</h4>
+                  <h4 className="font-medium text-gray-800 dark:text-gray-300 mb-2">Diagnosis</h4>
                   <div className="space-y-1">
                     {prescription.diagnosis.map((diag, index) => (
-                      <div key={index} className="text-xs text-gray-700">
+                      <div key={index} className="text-xs text-gray-700 dark:text-gray-400">
                         <span className="font-medium">{diag.name}</span>
                         {diag.description && <p className="text-gray-500 mt-0.5">{diag.description}</p>}
                       </div>
@@ -333,13 +333,13 @@ Dr. Prashant Nikam`;
               {/* Medications */}
               {prescription.medications?.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                  <h4 className="font-medium text-gray-800 dark:text-gray-300 mb-2 flex items-center">
                     <Pill className="w-4 h-4 mr-1" />
                     Medications
                   </h4>
                   <div className="space-y-1">
                     {prescription.medications.map((med, medIndex) => (
-                      <div key={medIndex} className="text-gray-700 text-xs">
+                      <div key={medIndex} className="text-gray-700 dark:text-gray-400 text-xs">
                         <span className="font-medium">{med.name}</span>
                         <span className="text-gray-500"> • {med.dosage} • {formatMedicationTiming(med.timing)}</span>
                         {med.duration && <span className="text-gray-500"> • {med.duration}</span>}
@@ -352,13 +352,13 @@ Dr. Prashant Nikam`;
               {/* Lab Tests */}
               {prescription.labResults?.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                  <h4 className="font-medium text-gray-800 dark:text-gray-300 mb-2 flex items-center">
                     <FlaskConical className="w-4 h-4 mr-1" />
                     Lab Tests
                   </h4>
                   <div className="space-y-1">
                     {prescription.labResults.map((lab, index) => (
-                      <div key={index} className="text-xs text-gray-700">
+                      <div key={index} className="text-xs text-gray-700 dark:text-gray-400">
                         <div className="font-medium">{lab.testName}</div>
                         {lab.remarks && (
                           <div className="text-gray-500 mt-0.5">Remarks: {lab.remarks}</div>
@@ -375,8 +375,8 @@ Dr. Prashant Nikam`;
               <div className="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
                 {prescription.doctorNotes && (
                   <div>
-                    <h4 className="font-medium text-gray-800 mb-2">Doctor's Notes</h4>
-                    <div className="text-xs text-gray-700">
+                    <h4 className="font-medium text-gray-800 dark:text-gray-300 mb-2">Doctor's Notes</h4>
+                    <div className="text-xs text-gray-700 dark:text-gray-400">
                       {prescription.doctorNotes.split('\n').map((note, index) => (
                         <div key={index} className="mb-1">• {note}</div>
                       ))}
@@ -386,8 +386,8 @@ Dr. Prashant Nikam`;
 
                 {prescription.advice && (
                   <div>
-                    <h4 className="font-medium text-gray-800 mb-2">Patient Advice</h4>
-                    <div className="text-xs text-gray-700">
+                    <h4 className="font-medium text-gray-800 dark:text-gray-300 mb-2">Patient Advice</h4>
+                    <div className="text-xs text-gray-700 dark:text-gray-400">
                       {prescription.advice.split('\n').map((advice, index) => (
                         <div key={index} className="mb-1">• {advice}</div>
                       ))}
