@@ -12,6 +12,7 @@ import { activityLogger } from '../utils/activityLogger';
 import useScrollToTop from '../hooks/useScrollToTop';
 import CustomDropdown from './CustomDropdown';
 import ConfirmationDialog from './ConfirmationDialog';
+import { toast } from 'sonner';
 
 export default function PrescriptionTemplates({ onBack }) {
   const [templates, setTemplates] = useState([]);
@@ -208,31 +209,53 @@ export default function PrescriptionTemplates({ onBack }) {
 
   const handleSaveTemplate = async (templateData) => {
     try {
-      const template = {
-        ...templateData,
-        id: selectedTemplate ? selectedTemplate.id : undefined,
-        createdAt: selectedTemplate ? selectedTemplate.createdAt : new Date(),
-        updatedAt: new Date()
-      };
+      const templates = await storage.getTemplates();
+      let updatedTemplates;
+      let isEditing = false;
 
-      const savedTemplate = await storage.saveTemplate(template);
-      if (savedTemplate) {
-        // Log activity
-        if (selectedTemplate) {
-          await activityLogger.logTemplateEdited(template);
-        } else {
-          await activityLogger.logTemplateCreated(template);
-        }
-
-        await loadTemplates(); // Reload templates after saving
-        setCurrentView('list');
-        setSelectedTemplate(null);
+      if (selectedTemplate) {
+        // Editing existing template
+        isEditing = true;
+        updatedTemplates = templates.map(t => 
+          t.id === selectedTemplate.id 
+            ? { ...templateData, id: selectedTemplate.id, updatedAt: new Date() }
+            : t
+        );
       } else {
-        alert('Failed to save template');
+        // Creating new template
+        const newTemplate = {
+          ...templateData,
+          id: Date.now().toString(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          lastUsed: null
+        };
+        updatedTemplates = [...templates, newTemplate];
       }
+
+      await storage.saveTemplates(updatedTemplates);
+      
+      // Add toast notifications
+      if (isEditing) {
+        toast.success('Template Updated', {
+          description: `"${templateData.name}" has been updated successfully`
+        });
+      } else {
+        toast.success('Template Created', {
+          description: `"${templateData.name}" has been created successfully`
+        });
+      }
+
+      loadTemplates();
+      setCurrentView('list');
+      setSelectedTemplate(null);
     } catch (error) {
       console.error('Error saving template:', error);
-      alert('Error saving template');
+      
+      // Add error toast
+      toast.error('Save Failed', {
+        description: 'Failed to save template. Please try again.'
+      });
     }
   };
 
