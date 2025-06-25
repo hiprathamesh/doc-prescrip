@@ -90,10 +90,12 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
   };
 
   const getSearchResults = () => {
-    if (!searchTerm || searchTerm.length < 2) return [];
-    
-    const allMedications = [...COMMON_MEDICATIONS, ...customMedications];
-    return allMedications.filter(med => 
+    if (!searchTerm || searchTerm.length < 1) return []; // Changed from < 2 to < 1
+    const allMedications = [
+      ...COMMON_MEDICATIONS,
+      ...customMedications
+    ];
+    return allMedications.filter((med) => 
       med.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
