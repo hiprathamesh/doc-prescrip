@@ -11,6 +11,7 @@ import { PREDEFINED_SYMPTOMS, PREDEFINED_DIAGNOSES, PREDEFINED_LAB_TESTS } from 
 import { activityLogger } from '../utils/activityLogger';
 import useScrollToTop from '../hooks/useScrollToTop';
 import CustomDropdown from './CustomDropdown';
+import ConfirmationDialog from './ConfirmationDialog';
 
 export default function PrescriptionTemplates({ onBack }) {
   const [templates, setTemplates] = useState([]);
@@ -26,6 +27,14 @@ export default function PrescriptionTemplates({ onBack }) {
   const templatesHeaderRef = useRef(null);
   const [isTemplatesHeaderVisible, setIsTemplatesHeaderVisible] = useState(true);
   const searchInputRef = useRef(null);
+
+  // Add confirmation dialog state
+  const [deleteConfirmation, setDeleteConfirmation] = useState({
+    isOpen: false,
+    templateId: null,
+    templateName: '',
+    isDeleting: false
+  });
 
   useEffect(() => {
     loadTemplates();
@@ -146,23 +155,54 @@ export default function PrescriptionTemplates({ onBack }) {
 
   const handleDelete = async (templateId) => {
     const templateToDelete = templates.find(t => t.id === templateId);
-    if (confirm('Are you sure you want to delete this template?')) {
-      try {
-        const success = await storage.deleteTemplate(templateId);
-        if (success) {
-          // Log activity
-          if (templateToDelete) {
-            await activityLogger.logTemplateDeleted(templateToDelete.name);
-          }
+    if (templateToDelete) {
+      setDeleteConfirmation({
+        isOpen: true,
+        templateId: templateId,
+        templateName: templateToDelete.name,
+        isDeleting: false
+      });
+    }
+  };
 
-          await loadTemplates(); // Reload templates after deletion
-        } else {
-          alert('Failed to delete template');
+  const confirmDelete = async () => {
+    setDeleteConfirmation(prev => ({ ...prev, isDeleting: true }));
+    
+    try {
+      const templateToDelete = templates.find(t => t.id === deleteConfirmation.templateId);
+      const success = await storage.deleteTemplate(deleteConfirmation.templateId);
+      if (success) {
+        // Log activity
+        if (templateToDelete) {
+          await activityLogger.logTemplateDeleted(templateToDelete.name);
         }
-      } catch (error) {
-        console.error('Error deleting template:', error);
-        alert('Error deleting template');
+
+        await loadTemplates(); // Reload templates after deletion
+        setDeleteConfirmation({
+          isOpen: false,
+          templateId: null,
+          templateName: '',
+          isDeleting: false
+        });
+      } else {
+        alert('Failed to delete template');
+        setDeleteConfirmation(prev => ({ ...prev, isDeleting: false }));
       }
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      alert('Error deleting template');
+      setDeleteConfirmation(prev => ({ ...prev, isDeleting: false }));
+    }
+  };
+
+  const cancelDelete = () => {
+    if (!deleteConfirmation.isDeleting) {
+      setDeleteConfirmation({
+        isOpen: false,
+        templateId: null,
+        templateName: '',
+        isDeleting: false
+      });
     }
   };
 
@@ -475,6 +515,16 @@ export default function PrescriptionTemplates({ onBack }) {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={deleteConfirmation.isOpen}
+        title="Delete Template"
+        message={`Are you sure you want to delete "${deleteConfirmation.templateName}"? This action cannot be undone.`}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        isLoading={deleteConfirmation.isDeleting}
+      />
     </>
   );
 }
