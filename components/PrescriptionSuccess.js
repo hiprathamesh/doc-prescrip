@@ -465,11 +465,60 @@ Dr. Prashant Nikam`;
                 </div>
 
                 {isGeneratingBillPdf ? (
-                  <div className="flex items-center justify-center h-48 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="text-center">
-                      <div className="w-6 h-6 animate-spin mx-auto border-4 border-green-500 border-t-transparent rounded-full mb-2"></div>
-                      <p className="text-gray-500 text-sm">Updating Bill...</p>
+                  <div className="flex items-center justify-center h-48 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-green-100 dark:border-gray-600 relative overflow-hidden">
+                    {/* Background pulse animation */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-100/50 to-emerald-100/50 dark:from-green-900/20 dark:to-emerald-900/20 animate-pulse"></div>
+                    
+                    <div className="relative z-10 text-center">
+                      {/* Main loading dots animation */}
+                      <div className="flex items-center justify-center space-x-2 mb-4">
+                        <div className="flex space-x-1">
+                          <div 
+                            className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
+                            style={{
+                              animation: 'bounce 1.4s ease-in-out infinite both',
+                              animationDelay: '0s'
+                            }}
+                          ></div>
+                          <div 
+                            className="w-2 h-2 bg-green-600 rounded-full animate-bounce"
+                            style={{
+                              animation: 'bounce 1.4s ease-in-out infinite both',
+                              animationDelay: '0.2s'
+                            }}
+                          ></div>
+                          <div 
+                            className="w-2 h-2 bg-green-700 rounded-full animate-bounce"
+                            style={{
+                              animation: 'bounce 1.4s ease-in-out infinite both',
+                              animationDelay: '0.4s'
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                      
+                      {/* Text with subtle animation */}
+                      <p className="text-green-700 dark:text-green-300 text-sm font-medium">
+                        Updating Bill...
+                      </p>
+                      <p className="text-green-600 dark:text-green-400 text-xs mt-1 opacity-75">
+                        Please wait while we process your changes
+                      </p>
                     </div>
+
+                    {/* Custom CSS for animations */}
+                    <style jsx>{`
+                      @keyframes bounce {
+                        0%, 80%, 100% {
+                          transform: scale(1) translateY(0);
+                          opacity: 0.7;
+                        }
+                        40% {
+                          transform: scale(1.2) translateY(-10px);
+                          opacity: 1;
+                        }
+                      }
+                    `}</style>
                   </div>
                 ) : billPdfUrl ? (
                   <iframe
