@@ -355,7 +355,14 @@ export default function PrescriptionTemplates({ onBack }) {
             {filteredTemplates.length > 0 ? (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredTemplates.map((template, index) => (
-                  <div key={template.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                  <div 
+                    key={template.id} 
+                    className={`p-4 transition-colors duration-200
+                      ${index === 0 ? 'first-template-item hover:bg-gray-50 dark:hover:bg-gray-800 rounded-t-xl' : ''}
+                      ${index === filteredTemplates.length - 1 ? 'last-template-item hover:bg-gray-50 dark:hover:bg-gray-800 rounded-b-xl' : ''}
+                      ${(index !== 0 && index !== filteredTemplates.length - 1) ? 'hover:bg-gray-50 dark:hover:bg-gray-800' : ''}
+                    `}
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-2">
