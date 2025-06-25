@@ -311,6 +311,30 @@ class DatabaseService {
     }
   }
 
+  async updateTemplateUsage(templateId, lastUsed, doctorId) {
+    try {
+      // Update the template's lastUsed field in the database
+      const collection = await getCollection(this.collections.templates);
+      const result = await collection.updateOne(
+        { 
+          _id: new ObjectId(templateId),
+          doctorId: doctorId 
+        },
+        { 
+          $set: { 
+            lastUsed: new Date(lastUsed),
+            updatedAt: new Date()
+          } 
+        }
+      );
+      
+      return result.modifiedCount > 0;
+    } catch (error) {
+      console.error('Database error updating template usage:', error);
+      return false;
+    }
+  }
+
   // ==================== CUSTOM DATA OPERATIONS ====================
   
   async getCustomData(type, doctorId = 'default-doctor') {

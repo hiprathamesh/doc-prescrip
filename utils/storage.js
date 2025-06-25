@@ -246,6 +246,32 @@ export const storage = {
     }
   },
 
+  // Add method to update template usage
+  updateTemplateUsage: async (templateId) => {
+    try {
+      const response = await apiCall(`${API_ENDPOINTS.TEMPLATES}/${templateId}/usage`, {
+        method: 'PATCH',
+        body: JSON.stringify({ lastUsed: new Date().toISOString() })
+      });
+      return response.success !== false;
+    } catch (error) {
+      console.error('Error updating template usage:', error);
+      // Fallback: update locally if API fails
+      try {
+        const templates = await storage.getTemplates();
+        const updatedTemplates = templates.map(template => 
+          template.id === templateId 
+            ? { ...template, lastUsed: new Date().toISOString() }
+            : template
+        );
+        return await storage.saveTemplates(updatedTemplates);
+      } catch (fallbackError) {
+        console.error('Fallback template usage update failed:', fallbackError);
+        return false;
+      }
+    }
+  },
+
   deleteTemplate: async (templateId) => {
     try {
       await apiCall(`${API_ENDPOINTS.TEMPLATES}/${templateId}`, {

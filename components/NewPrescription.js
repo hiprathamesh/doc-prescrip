@@ -281,7 +281,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     return nameMatch || descMatch || diagMatch;
   });
 
-  const applyTemplate = (template) => {
+  const applyTemplate = async (template) => {
     if (!template) return;
 
     // Store previous state for undo functionality
@@ -342,6 +342,14 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         text: a.trim()
       }));
       setAdviceList(advice);
+    }
+
+    // Update template usage tracking
+    try {
+      await storage.updateTemplateUsage(template.id);
+    } catch (error) {
+      console.error('Failed to update template usage:', error);
+      // Don't block the template application if usage tracking fails
     }
 
     setShowTemplates(false);
