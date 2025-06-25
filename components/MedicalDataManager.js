@@ -244,17 +244,17 @@ export default function MedicalDataManager({ onBack }) {
         `}
         style={{ top: '81px' }}
       >
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-6 py-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
-                <span className="text-md font-semibold text-gray-900">Medical Data Manager</span>
+                <span className="text-md font-semibold text-gray-900 dark:text-gray-100">Medical Data Manager</span>
               </div>
               <div className="w-64">
                 <CustomDropdown
@@ -277,11 +277,11 @@ export default function MedicalDataManager({ onBack }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:border-gray-800 rounded-md transition-colors duration-200"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
-                <span className="text-xl font-semibold text-gray-900">Medical Data Manager</span>
+                <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">Medical Data Manager</span>
               </div>
               <div className="w-full sm:w-64">
                 <CustomDropdown
@@ -307,9 +307,9 @@ export default function MedicalDataManager({ onBack }) {
                 placeholder={`Search ${activeTab.replace('-', ' ')}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-70 pl-10 pr-16 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                className="w-70 pl-10 pr-16 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded border">
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border">
                 Ctrl K
               </div>
             </div>
@@ -317,20 +317,20 @@ export default function MedicalDataManager({ onBack }) {
 
 
           {/* Add new item */}
-          <div className="bg-white p-6 rounded-xl border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New {activeTab === 'symptoms' ? 'Symptom' : activeTab === 'diagnoses' ? 'Diagnosis' : 'Lab Test'}</h3>
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Add New {activeTab === 'symptoms' ? 'Symptom' : activeTab === 'diagnoses' ? 'Diagnosis' : 'Lab Test'}</h3>
             <div className="flex space-x-3">
               <input
                 type="text"
                 value={newItem}
                 onChange={(e) => setNewItem(e.target.value)}
                 placeholder={getPlaceholder()}
-                className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                className="flex-1 p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
                 onKeyDown={(e) => e.key === 'Enter' && handleAddItem()}
               />
               <button
                 onClick={handleAddItem}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors duration-200 font-medium"
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors duration-200 font-medium"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add</span>
@@ -342,9 +342,9 @@ export default function MedicalDataManager({ onBack }) {
 
 
           {/* Custom items */}
-          <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {getTabLabel(activeTab)}
               </h3>
               <span className="text-sm text-gray-500">
@@ -382,9 +382,9 @@ export default function MedicalDataManager({ onBack }) {
           </div>
 
           {/* Predefined items (for reference) */}
-          <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Predefined {activeTab === 'symptoms' ? 'Symptoms' : activeTab === 'diagnoses' ? 'Diagnoses' : 'Lab Tests'}
               </h3>
               <div className="flex items-center space-x-4">
@@ -405,7 +405,7 @@ export default function MedicalDataManager({ onBack }) {
                   {paginatedPredefined.map((item, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors cursor-default"
+                      className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400 rounded-full text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-default"
                     >
                       {item}
                     </span>
@@ -413,7 +413,7 @@ export default function MedicalDataManager({ onBack }) {
                 </div>
 
                 {totalPages > 1 && (
-                  <div className="mt-6 pt-4 border-t border-gray-200">
+                  <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <Pagination
                       currentPage={currentPage}
                       totalPages={totalPages}
@@ -493,8 +493,8 @@ function Pagination({ currentPage, totalPages, onPageChange, showingStart, showi
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
           className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === 1
-            ? 'text-gray-400 cursor-not-allowed'
-            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
         >
           Previous
@@ -511,7 +511,7 @@ function Pagination({ currentPage, totalPages, onPageChange, showingStart, showi
                 ? 'bg-blue-600 text-white'
                 : page === '...'
                   ? 'text-gray-400 cursor-default'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
             >
               {page}
@@ -524,8 +524,8 @@ function Pagination({ currentPage, totalPages, onPageChange, showingStart, showi
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
           className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === totalPages
-            ? 'text-gray-400 cursor-not-allowed'
-            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
         >
           Next
