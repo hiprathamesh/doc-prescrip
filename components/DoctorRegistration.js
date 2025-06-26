@@ -1,8 +1,9 @@
-'use client';
-
+// This file is no longer needed - functionality has been merged into the login page
+// You can safely delete this file
 import { useState } from 'react';
-import { ArrowLeft, User, Mail, Lock, Building2, GraduationCap, Phone, MapPin, FileText } from 'lucide-react';
+import { ArrowLeft, User, Mail, Lock, Building2, GraduationCap, Phone, MapPin, FileText, Key, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import storage from '../utils/storage';
 
 export default function DoctorRegistration({ onBack, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -14,22 +15,54 @@ export default function DoctorRegistration({ onBack, onSuccess }) {
     hospitalAddress: '',
     degree: '',
     registrationNumber: '',
-    phone: ''
+    phone: '',
+    accessKey: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [accessType, setAccessType] = useState('trial');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Update access type based on key presence
+    if (name === 'accessKey') {
+      setAccessType(value.trim() ? 'lifetime_free' : 'trial');
+    }
+  };
+
+  const validateForm = () => {
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Error', { description: 'Passwords do not match' });
+      return false;
+    }
+
+    if (formData.password.length < 8) {
+      toast.error('Error', { description: 'Password must be at least 8 characters long' });
+      return false;
+    }
+
+    // Phone validation
+    const phoneRegex = /^[\+]?[1-9][\d]{3,14}$/;
+    if (!phoneRegex.test(formData.phone.replace(/[\s\-\(\)]/g, ''))) {
+      toast.error('Error', { description: 'Please enter a valid phone number' });
+      return false;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Error', { description: 'Please enter a valid email address' });
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Error', {
-        description: 'Passwords do not match'
-      });
+    if (!validateForm()) {
       return;
     }
 
@@ -49,15 +82,26 @@ export default function DoctorRegistration({ onBack, onSuccess }) {
           hospitalAddress: formData.hospitalAddress,
           degree: formData.degree,
           registrationNumber: formData.registrationNumber,
-          phone: formData.phone
+          phone: formData.phone,
+          accessKey: formData.accessKey
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
+        const accessMessage = data.doctor.accessType === 'lifetime_free' 
+          ? 'with lifetime free access' 
+          : 'with 6-month free trial';
+        
+        // Store doctor context for immediate login
+        storage.setCurrentDoctor(data.doctor.doctorId, {
+          name: data.doctor.name,
+          accessType: data.doctor.accessType
+        });
+        
         toast.success('Registration Successful', {
-          description: 'Doctor account has been created successfully'
+          description: `Doctor account has been created successfully ${accessMessage}`
         });
         onSuccess?.(data.doctor);
       } else {
@@ -92,6 +136,42 @@ export default function DoctorRegistration({ onBack, onSuccess }) {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Access Key */}
+            <div>
+              <label htmlFor="accessKey" className="block text-sm font-medium text-gray-700">
+                Access Key (Optional)
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Key className="h-4 w-4 text-gray-400" />
+                </div>
+                <input
+                  id="accessKey"
+                  name="accessKey"
+                  type="text"
+                  value={formData.accessKey}
+                  onChange={handleChange}
+                  className="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="XXXX-XXXX-XXXX-XXXX"
+                />
+              </div>
+              <div className={`mt-2 p-3 rounded-md ${accessType === 'lifetime_free' ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200'}`}>
+                <div className="flex items-center">
+                  <Info className={`h-4 w-4 mr-2 ${accessType === 'lifetime_free' ? 'text-green-600' : 'text-blue-600'}`} />
+                  <span className={`text-sm font-medium ${accessType === 'lifetime_free' ? 'text-green-800' : 'text-blue-800'}`}>
+                    {accessType === 'lifetime_free' 
+                      ? 'Lifetime Free Access' 
+                      : '6-Month Free Trial'}
+                  </span>
+                </div>
+                <p className={`text-xs mt-1 ${accessType === 'lifetime_free' ? 'text-green-700' : 'text-blue-700'}`}>
+                  {accessType === 'lifetime_free' 
+                    ? 'Your access key provides unlimited access to all features.' 
+                    : 'After 6 months, a subscription will be required to continue accessing your data.'}
+                </p>
+              </div>
+            </div>
+
             {/* Name */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -132,6 +212,28 @@ export default function DoctorRegistration({ onBack, onSuccess }) {
                   onChange={handleChange}
                   className="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="john.doe@hospital.com"
+                />
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                Phone Number *
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-4 w-4 text-gray-400" />
+                </div>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="+91-9876543210"
                 />
               </div>
             </div>
@@ -263,27 +365,6 @@ export default function DoctorRegistration({ onBack, onSuccess }) {
                   onChange={handleChange}
                   className="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="MH-12345"
-                />
-              </div>
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone Number
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="+91-9876543210"
                 />
               </div>
             </div>

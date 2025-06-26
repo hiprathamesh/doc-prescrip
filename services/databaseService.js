@@ -9,7 +9,9 @@ class DatabaseService {
       bills: 'bills',
       templates: 'templates',
       customData: 'custom-data',
-      doctors: 'doctors'
+      doctors: 'doctors',
+      registrationKeys: 'registration-keys',
+      otps: 'otps'
     };
   }
 
@@ -510,6 +512,157 @@ class DatabaseService {
       return result.modifiedCount > 0;
     } catch (error) {
       console.error('Error updating doctor profile:', error);
+      return false;
+    }
+  }
+
+  async checkPhoneExists(phone) {
+    try {
+      const collection = await getCollection(this.collections.doctors);
+      const doctor = await collection.findOne({ phone });
+      return !!doctor;
+    } catch (error) {
+      console.error('Error checking phone exists:', error);
+      return false;
+    }
+  }
+
+  // ==================== REGISTRATION KEY OPERATIONS ====================
+  
+  async saveRegistrationKey(key) {
+    try {
+      const collection = await getCollection(this.collections.registrationKeys);
+      const keyData = {
+        key,
+        isUsed: false,
+        usedBy: null,
+        usedAt: null,
+        createdAt: new Date()
+      };
+      
+      const result = await collection.insertOne(keyData);
+      return result.acknowledged;
+    } catch (error) {
+      console.error('Error saving registration key:', error);
+      return false;
+    }
+  }
+
+  async validateRegistrationKey(key) {
+    try {
+      const collection = await getCollection(this.collections.registrationKeys);
+      const keyData = await collection.findOne({ key, isUsed: false });
+      return !!keyData;
+    } catch (error) {
+      console.error('Error validating registration key:', error);
+      return false;
+    }
+  }
+
+  async useRegistrationKey(key, doctorId) {
+    try {
+      const collection = await getCollection(this.collections.registrationKeys);
+      const result = await collection.updateOne(
+        { key, isUsed: false },
+        { 
+          $set: { 
+            isUsed: true,
+            usedBy: doctorId,
+            usedAt: new Date()
+          }
+        }
+      );
+      return result.modifiedCount > 0;
+    } catch (error) {
+      console.error('Error using registration key:', error);
+      return false;
+    }
+  }
+
+  // ==================== OTP OPERATIONS ====================
+  
+  async storeOtp(identifier, type, otp) {
+    try {
+      const collection = await getCollection(this.collections.otps);
+      
+      // Remove any existing OTP for this identifier and type
+      await collection.deleteMany({ identifier, type });
+      
+      const otpData = {
+        identifier,
+        type,
+        otp,
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes from now
+      };
+      
+      const result = await collection.insertOne(otpData);
+      return result.acknowledged;
+    } catch (error) {
+      console.error('Error storing OTP:', error);
+      return false;
+    }
+  }
+
+  async verifyOtp(identifier, type, otp) {
+    try {
+      const collection = await getCollection(this.collections.otps);
+      
+      const otpData = await collection.findOne({
+        identifier,
+        type,
+        otp,
+        expiresAt: { $gt: new Date() } // Not expired
+      });
+      
+      if (otpData) {
+        // Remove the OTP after successful verification
+        await collection.deleteOne({ _id: otpData._id });
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      return false;
+    }
+  }
+
+  async cleanupOtps(email, phone) {
+    try {
+      const collection = await getCollection(this.collections.otps);
+      
+      // Build query conditions
+      const conditions = [{ identifier: email }];
+      if (phone) {
+        conditions.push({ identifier: phone });
+      }
+      
+      // Remove all OTPs for the given email and optionally phone
+      await collection.deleteMany({
+        $or: conditions
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error cleaning up OTPs:', error);
+      return false;
+    }
+  }
+
+  async cleanupExpiredOtps() {
+    try {
+      const collection = await getCollection(this.collections.otps);
+      
+      // Remove all expired OTPs
+      const result = await collection.deleteMany({
+        expiresAt: { $lt: new Date() }
+      });
+      
+      console.log(`Cleaned up ${result.deletedCount} expired OTPs`);
+      return true;
+    } catch (error) {
+      console.error('Error cleaning up expired OTPs:', error);
       return false;
     }
   }

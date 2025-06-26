@@ -3,78 +3,61 @@ import bcrypt from 'bcryptjs';
 
 export async function POST(request) {
   try {
-    const { 
-      firstName,
-      lastName,
-      email, 
-      password, 
-      hospitalName, 
-      hospitalAddress, 
-      degree, 
-      registrationNumber, 
-      phone,
-      accessKey 
-    } = await request.json();
+    const { email, emailOtp, registrationData } = await request.json();
 
     // Validate required fields
-    if (!firstName || !lastName || !email || !password || !hospitalName || !degree || !registrationNumber || !phone) {
+    if (!email || !emailOtp || !registrationData) {
       return NextResponse.json(
-        { success: false, error: 'All required fields must be provided including first name, last name, and phone number' },
+        { success: false, error: 'All verification details are required' },
         { status: 400 }
       );
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Validate OTP format
+    if (!/^\d{6}$/.test(emailOtp)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid email format' },
-        { status: 400 }
-      );
-    }
-
-    // Validate phone format (basic validation)
-    const phoneRegex = /^[\+]?[1-9][\d]{3,14}$/;
-    if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid phone number format' },
-        { status: 400 }
-      );
-    }
-
-    // Validate password strength
-    if (password.length < 8) {
-      return NextResponse.json(
-        { success: false, error: 'Password must be at least 8 characters long' },
+        { success: false, error: 'Verification code must be 6 digits' },
         { status: 400 }
       );
     }
 
     const { doctorService } = await import('../../../../services/doctorService');
 
-    // Check if email already exists
-    const emailExists = await doctorService.checkEmailExists(email);
-    if (emailExists) {
+    // Verify email OTP
+    const emailValid = await doctorService.verifyOtp(email, 'email', emailOtp);
+
+    if (!emailValid) {
       return NextResponse.json(
-        { success: false, error: 'An account with this email already exists' },
-        { status: 409 }
+        { success: false, error: 'Invalid email verification code' },
+        { status: 400 }
       );
     }
 
-    // Check if phone already exists
-    const phoneExists = await doctorService.checkPhoneExists(phone);
-    if (phoneExists) {
+    // Validate registration data
+    const {
+      firstName,
+      lastName,
+      password,
+      hospitalName,
+      hospitalAddress,
+      degree,
+      registrationNumber,
+      phone,
+      accessKey
+    } = registrationData;
+
+    if (!firstName || !lastName || !password || !hospitalName || !degree || !registrationNumber) {
       return NextResponse.json(
-        { success: false, error: 'An account with this phone number already exists' },
-        { status: 409 }
+        { success: false, error: 'All required registration fields must be provided' },
+        { status: 400 }
       );
     }
 
+    // Check access key if provided
     let accessType = 'trial';
     let expiryDate = new Date();
-    expiryDate.setMonth(expiryDate.getMonth() + 6); // 6 months from now
+    expiryDate.setMonth(expiryDate.getMonth() + 6);
 
-    // Validate access key if provided
     if (accessKey && accessKey.trim()) {
       const keyValid = await doctorService.validateRegistrationKey(accessKey.trim());
       if (!keyValid) {
@@ -87,7 +70,7 @@ export async function POST(request) {
       expiryDate = null;
     }
 
-    // Generate unique doctor ID using firstName and lastName
+    // Generate unique doctor ID
     const doctorId = doctorService.generateDoctorId(firstName, lastName, hospitalName);
 
     // Hash password
@@ -99,7 +82,7 @@ export async function POST(request) {
       doctorId,
       firstName,
       lastName,
-      name: `${firstName} ${lastName}`, // Combined full name
+      name: `${firstName} ${lastName}`,
       email,
       passwordHash,
       hospitalName,
@@ -110,17 +93,21 @@ export async function POST(request) {
       accessType,
       expiryDate,
       createdAt: new Date(),
-      isActive: true
+      isActive: true,
+      emailVerified: true
     };
 
     // Save doctor
     const success = await doctorService.createDoctor(newDoctor);
 
     if (success) {
-      // If access key was used, mark it as used
+      // Mark access key as used if provided
       if (accessKey && accessKey.trim()) {
         await doctorService.useRegistrationKey(accessKey.trim(), doctorId);
       }
+
+      // Clean up OTPs
+      await doctorService.cleanupOtps(email, null);
 
       return NextResponse.json({
         success: true,
@@ -147,7 +134,7 @@ export async function POST(request) {
       );
     }
   } catch (error) {
-    console.error('Doctor registration error:', error);
+    console.error('OTP verification error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

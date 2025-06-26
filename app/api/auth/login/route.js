@@ -32,13 +32,16 @@ export async function POST(request) {
       success: true,
       doctor: {
         doctorId: doctor.doctorId,
-        name: doctor.name,
+        firstName: doctor.firstName || doctor.name?.split(' ')[0] || 'Dr.',
+        lastName: doctor.lastName || doctor.name?.split(' ').slice(1).join(' ') || 'Nikam',
+        name: doctor.name || `${doctor.firstName || 'Dr.'} ${doctor.lastName || 'Nikam'}`,
         email: doctor.email,
         hospitalName: doctor.hospitalName,
         hospitalAddress: doctor.hospitalAddress,
         degree: doctor.degree,
         registrationNumber: doctor.registrationNumber,
-        phone: doctor.phone
+        phone: doctor.phone,
+        accessType: doctor.accessType || 'doctor' // Include accessType
       }
     });
 

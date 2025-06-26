@@ -7,6 +7,7 @@ import NewPrescription from './NewPrescription';
 import PrescriptionTemplates from './PrescriptionTemplates';
 import MedicalDataManager from './MedicalDataManager';
 import MedicalCertificate from './MedicalCertificate';
+import KeyGeneratorModal from './KeyGeneratorModal';
 import {
   Plus,
   Search,
@@ -25,7 +26,8 @@ import {
   BarChart3,
   LogOut,
   Trash2,
-  Download
+  Download,
+  Key
 } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, formatTimeAgo } from '../utils/dateUtils';
@@ -46,11 +48,14 @@ export default function Dashboard() {
   const [currentGreeting, setCurrentGreeting] = useState({ title: '', subtitle: '' });
   const [lastGreetingUpdate, setLastGreetingUpdate] = useState('');
   const [navigationSource, setNavigationSource] = useState('dashboard'); // Track where we came from
+  const [showKeyGeneratorModal, setShowKeyGeneratorModal] = useState(false);
+  const [currentDoctor, setCurrentDoctor] = useState(null);
 
   useEffect(() => {
     loadAllData();
     loadRecentActivities();
     updateGreeting();
+    loadDoctorContext();
 
     // Update greeting every minute to check for time period changes
     const greetingInterval = setInterval(() => {
@@ -509,6 +514,15 @@ export default function Dashboard() {
     return colorMap[colorName] || colorMap.gray;
   };
 
+  const loadDoctorContext = () => {
+    const doctor = storage.getDoctorContext();
+    setCurrentDoctor(doctor);
+  };
+
+  const isAdmin = () => {
+    return currentDoctor?.accessType === 'admin';
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Minimal Header */}
@@ -767,9 +781,26 @@ export default function Dashboard() {
                       </div>
                     </button>
 
+                    {isAdmin() && (
+                      <button
+                        onClick={() => setShowKeyGeneratorModal(true)}
+                        className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-indigo-600 dark:bg-indigo-500 rounded">
+                            <Key className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">Generate Key</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-300">Access keys for new doctors</p>
+                          </div>
+                        </div>
+                      </button>
+                    )}
+
                     <button
                       onClick={() => handleNewMedicalCertificate()}
-                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left col-span-2"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-cyan-600 dark:bg-cyan-500 rounded">
@@ -955,6 +986,14 @@ export default function Dashboard() {
           <MedicalDataManager onBack={handleBackToDashboard} />
         )}
       </main>
+
+      {/* Key Generator Modal */}
+      {isAdmin() && (
+        <KeyGeneratorModal
+          isOpen={showKeyGeneratorModal}
+          onClose={() => setShowKeyGeneratorModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -33,7 +33,7 @@ function getCurrentDoctorId() {
 async function apiCall(url, options = {}) {
   try {
     const doctorId = getCurrentDoctorId();
-    
+
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -44,12 +44,12 @@ async function apiCall(url, options = {}) {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       console.error(`API call failed: ${response.status}`, data);
       throw new Error(`API call failed: ${response.status} - ${data.error || 'Unknown error'}`);
     }
-    
+
     return data;
   } catch (error) {
     console.error('API call error:', error);
@@ -59,23 +59,58 @@ async function apiCall(url, options = {}) {
 }
 
 export const storage = {
-  
+
   // Doctor context management
-  setCurrentDoctor: (doctorId) => {
+  setCurrentDoctor: (doctorId, doctorName, doctorAccessType) => {
     if (typeof window !== 'undefined') {
       if (!doctorId) {
         throw new Error('Doctor ID is required');
       }
+      
+      // Handle both string parameters and object parameter
+      let name, accessType;
+      if (typeof doctorName === 'object') {
+        // If second parameter is an object, extract from it
+        name = doctorName.name || doctorName.firstName + ' ' + doctorName.lastName || 'Dr. Nikam';
+        accessType = doctorName.accessType || 'doctor';
+      } else {
+        // If passed as separate parameters
+        name = doctorName || 'Dr. Nikam';
+        accessType = doctorAccessType || 'doctor';
+      }
+      
       localStorage.setItem('currentDoctorId', doctorId);
+      localStorage.setItem('currentDoctorName', name);
+      localStorage.setItem('currentDoctorAccessType', accessType);
     }
   },
 
   getCurrentDoctorId,
 
+  // Add missing getDoctorContext method
+  getDoctorContext: () => {
+    if (typeof window !== 'undefined') {
+      const doctorId = localStorage.getItem('currentDoctorId');
+      const doctorName = localStorage.getItem('currentDoctorName');
+      const accessType = localStorage.getItem('currentDoctorAccessType');
+
+      if (doctorId) {
+        return {
+          id: doctorId,
+          name: doctorName || 'Dr. Nikam',
+          accessType: accessType || 'doctor'
+        };
+      }
+    }
+    return null;
+  },
+
   // Clear doctor context on logout
   clearDoctorContext: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('currentDoctorId');
+      localStorage.removeItem('currentDoctorName');
+      localStorage.removeItem('currentDoctorAccessType');
     }
   },
 
@@ -137,11 +172,11 @@ export const storage = {
         method: 'POST',
         body: JSON.stringify({ prescription })
       });
-      
+
       if (!response.success) {
         throw new Error(response.error || 'Failed to save prescription');
       }
-      
+
       return response.data || prescription;
     } catch (error) {
       console.error('Error saving prescription:', error);
@@ -187,7 +222,7 @@ export const storage = {
   updateBill: async (billId, updates) => {
     try {
       const bills = await storage.getBills();
-      const updatedBills = bills.map(bill => 
+      const updatedBills = bills.map(bill =>
         bill.id === billId ? { ...bill, ...updates } : bill
       );
       const success = await storage.saveBills(updatedBills);
@@ -259,8 +294,8 @@ export const storage = {
       // Fallback: update locally if API fails
       try {
         const templates = await storage.getTemplates();
-        const updatedTemplates = templates.map(template => 
-          template.id === templateId 
+        const updatedTemplates = templates.map(template =>
+          template.id === templateId
             ? { ...template, lastUsed: new Date().toISOString() }
             : template
         );
@@ -436,7 +471,7 @@ export const storage = {
   // Add new function for regenerating PDFs when blob URLs are invalid
   regeneratePDFIfNeeded: async (item, patient, type) => {
     if (!item.pdfUrl) return null;
-    
+
     try {
       const response = await fetch(item.pdfUrl);
       if (response.ok) {
@@ -445,31 +480,31 @@ export const storage = {
     } catch (error) {
       // URL is invalid, need to regenerate
     }
-    
+
     try {
       if (type === 'prescription') {
         const { generatePDF } = await import('./pdfGenerator');
         const pdfBlob = await generatePDF(item, patient, false);
         const newUrl = URL.createObjectURL(pdfBlob);
-        
+
         const prescriptions = await storage.getPrescriptions();
-        const updatedPrescriptions = prescriptions.map(p => 
+        const updatedPrescriptions = prescriptions.map(p =>
           p.id === item.id ? { ...p, pdfUrl: newUrl } : p
         );
         await storage.savePrescriptions(updatedPrescriptions);
-        
+
         return newUrl;
       } else if (type === 'bill') {
         const { generateBillPDF } = await import('./billGenerator');
         const pdfBlob = await generateBillPDF(item, patient);
         const newUrl = URL.createObjectURL(pdfBlob);
-        
+
         const bills = await storage.getBills();
-        const updatedBills = bills.map(b => 
+        const updatedBills = bills.map(b =>
           b.id === item.id ? { ...b, pdfUrl: newUrl } : b
         );
         await storage.saveBills(updatedBills);
-        
+
         return newUrl;
       }
     } catch (error) {
