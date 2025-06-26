@@ -460,7 +460,6 @@ export default function LoginPage() {
                   >
                     <div className={`flex items-center transition-all duration-200 ${loginData.isLoading ? 'opacity-0' : 'opacity-100'}`}>
                       Sign In
-                      <ArrowRight className="w-4 h-4 ml-2 transform transition-transform duration-200 group-hover:translate-x-0.5" />
                     </div>
                     {loginData.isLoading && (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -478,7 +477,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => handleModeSwitch('register')}
                   disabled={isTransitioning}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 hover:underline focus:outline-none focus:underline disabled:opacity-50"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 hover:underline focus:outline-none focus:underline disabled:opacity-50 cursor-pointer"
                 >
                   Register
                 </button>
@@ -770,7 +769,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => handleModeSwitch('login')}
                   disabled={isTransitioning}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 hover:underline focus:outline-none focus:underline disabled:opacity-50"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 hover:underline focus:outline-none focus:underline disabled:opacity-50 cursor-pointer"
                 >
                   Sign In
                 </button>
@@ -815,7 +814,7 @@ export default function LoginPage() {
                           value={otpData.emailOtp[index]}
                           onChange={(e) => handleOtpDigitChange(index, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                          className="w-12 h-12 text-center text-lg font-semibold bg-transparent border-2 border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 caret-transparent"
+                          className="w-12 h-12 text-center text-lg font-semibold bg-transparent border-2 border-gray-200 dark:border-gray-700 rounded-full text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 caret-transparent"
                         />
                       ))}
                     </div>
@@ -834,7 +833,7 @@ export default function LoginPage() {
                           value={otpData.emailOtp[index]}
                           onChange={(e) => handleOtpDigitChange(index, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                          className="w-12 h-12 text-center text-lg font-semibold bg-transparent border-2 border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 caret-transparent"
+                          className="w-12 h-12 text-center text-lg font-semibold bg-transparent border-2 border-gray-200 dark:border-gray-700 rounded-full text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 caret-transparent"
                         />
                       ))}
                     </div>
