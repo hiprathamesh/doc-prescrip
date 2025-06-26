@@ -456,7 +456,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={loginData.isLoading}
-                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center relative overflow-hidden"
+                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center relative overflow-hidden"
                   >
                     <div className={`flex items-center transition-all duration-200 ${loginData.isLoading ? 'opacity-0' : 'opacity-100'}`}>
                       Sign In
@@ -749,11 +749,10 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={regData.isLoading}
-                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center relative overflow-hidden"
+                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center relative overflow-hidden"
                   >
                     <div className={`flex items-center transition-all duration-200 ${regData.isLoading ? 'opacity-0' : 'opacity-100'}`}>
                       Register Doctor
-                      <ArrowRight className="w-4 h-4 ml-2 transform transition-transform duration-200 group-hover:translate-x-0.5" />
                     </div>
                     {regData.isLoading && (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -804,19 +803,41 @@ export default function LoginPage() {
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wide text-center">
                     Email Verification Code
                   </label>
-                  <div className="flex justify-center space-x-3">
-                    {[0, 1, 2, 3, 4, 5].map((index) => (
-                      <input
-                        key={index}
-                        id={`otp-${index}`}
-                        type="text"
-                        maxLength={1}
-                        value={otpData.emailOtp[index]}
-                        onChange={(e) => handleOtpDigitChange(index, e.target.value)}
-                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                        className="w-12 h-12 text-center text-lg font-semibold bg-transparent border-2 border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600"
-                      />
-                    ))}
+                  <div className="flex justify-center items-center space-x-3">
+                    {/* First 3 digits */}
+                    <div className="flex space-x-3">
+                      {[0, 1, 2].map((index) => (
+                        <input
+                          key={index}
+                          id={`otp-${index}`}
+                          type="text"
+                          maxLength={1}
+                          value={otpData.emailOtp[index]}
+                          onChange={(e) => handleOtpDigitChange(index, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                          className="w-12 h-12 text-center text-lg font-semibold bg-transparent border-2 border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 caret-transparent"
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* Dash separator */}
+                    <div className="text-gray-400 dark:text-gray-500 text-xl font-bold">-</div>
+                    
+                    {/* Last 3 digits */}
+                    <div className="flex space-x-3">
+                      {[3, 4, 5].map((index) => (
+                        <input
+                          key={index}
+                          id={`otp-${index}`}
+                          type="text"
+                          maxLength={1}
+                          value={otpData.emailOtp[index]}
+                          onChange={(e) => handleOtpDigitChange(index, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                          className="w-12 h-12 text-center text-lg font-semibold bg-transparent border-2 border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 caret-transparent"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -825,11 +846,10 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={otpData.isLoading}
-                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center relative overflow-hidden"
+                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center relative overflow-hidden"
                   >
                     <div className={`flex items-center transition-all duration-200 ${otpData.isLoading ? 'opacity-0' : 'opacity-100'}`}>
                       Verify & Register
-                      <ArrowRight className="w-4 h-4 ml-2 transform transition-transform duration-200 group-hover:translate-x-0.5" />
                     </div>
                     {otpData.isLoading && (
                       <div className="absolute inset-0 flex items-center justify-center">
