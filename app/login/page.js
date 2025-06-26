@@ -77,6 +77,19 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [otpData.countdown]);
 
+  // Auto-focus first OTP input when OTP step is reached
+  useEffect(() => {
+    if (currentStep === 'otp') {
+      const timer = setTimeout(() => {
+        const firstInput = document.getElementById('otp-0');
+        if (firstInput) {
+          firstInput.focus();
+        }
+      }, 600); // Wait for animation to complete
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep]);
+
   const handleModeSwitch = async (toStep) => {
     setIsTransitioning(true);
     
@@ -320,6 +333,35 @@ export default function LoginPage() {
     if (e.key === 'Backspace' && !otpData.emailOtp[index] && index > 0) {
       const prevInput = document.getElementById(`otp-${index - 1}`);
       if (prevInput) prevInput.focus();
+    }
+  };
+
+  const handleOtpFocus = (index) => {
+    // Keep focus within OTP inputs
+    const input = document.getElementById(`otp-${index}`);
+    if (input) {
+      input.focus();
+    }
+  };
+
+  const handleOtpBlur = (index, e) => {
+    // Prevent focus from leaving OTP inputs unless it's going to another OTP input, button, or form elements
+    const relatedTarget = e.relatedTarget;
+    const isOtpInput = relatedTarget && relatedTarget.id && relatedTarget.id.startsWith('otp-');
+    const isOtpButton = relatedTarget && (
+      relatedTarget.type === 'submit' || 
+      relatedTarget.textContent?.includes('Resend') ||
+      relatedTarget.textContent?.includes('Verify')
+    );
+    
+    if (!isOtpInput && !isOtpButton) {
+      // Return focus to current input
+      setTimeout(() => {
+        const currentInput = document.getElementById(`otp-${index}`);
+        if (currentInput && currentStep === 'otp') {
+          currentInput.focus();
+        }
+      }, 0);
     }
   };
 
@@ -814,6 +856,8 @@ export default function LoginPage() {
                           value={otpData.emailOtp[index]}
                           onChange={(e) => handleOtpDigitChange(index, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                          onFocus={() => handleOtpFocus(index)}
+                          onBlur={(e) => handleOtpBlur(index, e)}
                           className="w-12 h-12 text-center text-lg font-semibold bg-transparent border-2 border-gray-200 dark:border-gray-700 rounded-full text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 caret-transparent"
                         />
                       ))}
@@ -833,6 +877,8 @@ export default function LoginPage() {
                           value={otpData.emailOtp[index]}
                           onChange={(e) => handleOtpDigitChange(index, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                          onFocus={() => handleOtpFocus(index)}
+                          onBlur={(e) => handleOtpBlur(index, e)}
                           className="w-12 h-12 text-center text-lg font-semibold bg-transparent border-2 border-gray-200 dark:border-gray-700 rounded-full text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 caret-transparent"
                         />
                       ))}
