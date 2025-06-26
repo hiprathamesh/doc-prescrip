@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { 
+import {
   Eye, EyeOff, Mail, Lock, Stethoscope, UserPlus, ArrowRight, ArrowLeft,
   User, Building2, GraduationCap, Phone, MapPin, FileText, Key, Info, Shield
 } from 'lucide-react';
@@ -16,7 +16,7 @@ export default function LoginPage() {
   const [isVisible, setIsVisible] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
-  
+
   // Login state
   const [loginData, setLoginData] = useState({
     email: 'admin@chaitanyahospital.com',
@@ -92,17 +92,17 @@ export default function LoginPage() {
 
   const handleModeSwitch = async (toStep) => {
     setIsTransitioning(true);
-    
+
     // Wait for animation to complete
     await new Promise(resolve => setTimeout(resolve, 400));
-    
+
     setCurrentStep(toStep);
     setIsTransitioning(false);
   };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!loginData.email || !loginData.password) {
       toast.error('Error', {
         description: 'Please enter both email and password'
@@ -116,9 +116,9 @@ export default function LoginPage() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: loginData.email, 
-          password: loginData.password 
+        body: JSON.stringify({
+          email: loginData.email,
+          password: loginData.password
         })
       });
 
@@ -129,11 +129,11 @@ export default function LoginPage() {
           name: data.doctor.name,
           accessType: data.doctor.accessType
         });
-        
+
         toast.success('Login Successful', {
           description: `Welcome back, ${data.doctor.name}!`
         });
-        
+
         router.push('/');
       } else {
         toast.error('Login Failed', {
@@ -152,7 +152,7 @@ export default function LoginPage() {
 
   const handleRegistrationSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateRegistrationForm()) return;
 
     setRegData(prev => ({ ...prev, isLoading: true }));
@@ -181,13 +181,13 @@ export default function LoginPage() {
         toast.success('OTP Sent', {
           description: 'Verification codes have been sent to your email'
         });
-        
+
         setOtpData(prev => ({
           ...prev,
           countdown: 60,
           canResend: false
         }));
-        
+
         await handleModeSwitch('otp');
       } else {
         toast.error('Failed to Send OTP', {
@@ -206,7 +206,7 @@ export default function LoginPage() {
 
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
-    
+
     const otpString = otpData.emailOtp.join('');
     if (otpString.length !== 6) {
       toast.error('Error', { description: 'Please enter the complete 6-digit verification code' });
@@ -240,15 +240,15 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        const accessMessage = data.doctor.accessType === 'lifetime_free' 
-          ? 'with lifetime free access' 
+        const accessMessage = data.doctor.accessType === 'lifetime_free'
+          ? 'with lifetime free access'
           : 'with 6-month free trial';
-        
+
         storage.setCurrentDoctor(data.doctor.doctorId, {
           name: data.doctor.name,
           accessType: data.doctor.accessType
         });
-        
+
         toast.success('Registration Successful', {
           description: `Doctor account has been created successfully ${accessMessage}`
         });
@@ -292,7 +292,7 @@ export default function LoginPage() {
         toast.success('OTP Resent', {
           description: 'New verification code has been sent'
         });
-        
+
         setOtpData(prev => ({
           ...prev,
           countdown: 60,
@@ -316,12 +316,12 @@ export default function LoginPage() {
 
   const handleOtpDigitChange = (index, value) => {
     if (!/^\d*$/.test(value)) return; // Only allow digits
-    
+
     const newOtp = [...otpData.emailOtp];
     newOtp[index] = value;
-    
+
     setOtpData(prev => ({ ...prev, emailOtp: newOtp }));
-    
+
     // Auto-focus next input
     if (value && index < 5) {
       const nextInput = document.getElementById(`otp-${index + 1}`);
@@ -349,11 +349,11 @@ export default function LoginPage() {
     const relatedTarget = e.relatedTarget;
     const isOtpInput = relatedTarget && relatedTarget.id && relatedTarget.id.startsWith('otp-');
     const isOtpButton = relatedTarget && (
-      relatedTarget.type === 'submit' || 
+      relatedTarget.type === 'submit' ||
       relatedTarget.textContent?.includes('Resend') ||
       relatedTarget.textContent?.includes('Verify')
     );
-    
+
     if (!isOtpInput && !isOtpButton) {
       // Return focus to current input
       setTimeout(() => {
@@ -393,7 +393,7 @@ export default function LoginPage() {
 
   const handleRegDataChange = (field, value) => {
     setRegData(prev => ({ ...prev, [field]: value }));
-    
+
     if (field === 'accessKey') {
       setAccessType(value.trim() ? 'lifetime_free' : 'trial');
     }
@@ -408,44 +408,40 @@ export default function LoginPage() {
 
       {/* Main Container */}
       <div className="w-full max-w-4xl py-8">
-        
+
         {/* Header - Always visible */}
-        <div className={`text-center mb-8 transform transition-all duration-500 ease-out ${
-          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-        }`}>
-          <div className={`inline-flex items-center justify-center w-12 h-12 mb-4 transform transition-all duration-700 ease-out ${
-            isVisible ? 'scale-100 rotate-0' : 'scale-50 rotate-45'
+        <div className={`text-center mb-8 transform transition-all duration-500 ease-out ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
           }`}>
-            <Stethoscope className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+          <div className="inline-flex items-center justify-center gap-3 mb-4">
+            <Stethoscope className={`w-8 h-8 text-blue-600 dark:text-blue-400 transform transition-all duration-700 ease-out ${
+              isVisible ? 'scale-100 rotate-0' : 'scale-50 rotate-45'
+              }`} />
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+              Doc Prescrip
+            </h1>
           </div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
-            Doc Prescrip
-          </h1>
-          <p className={`text-sm text-gray-500 dark:text-gray-400 transition-all duration-500 ${
-            isTransitioning ? 'opacity-0' : 'opacity-100'
-          }`}>
-            {currentStep === 'login' ? 'Welcome back' : 
-             currentStep === 'register' ? 'Create your doctor account' : 
-             'Verify your email'}
+          <p className={`text-sm text-gray-500 dark:text-gray-400 transition-all duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'
+            }`}>
+            {currentStep === 'login' ? 'Welcome back' :
+              currentStep === 'register' ? 'Create your doctor account' :
+                'Verify your email'}
           </p>
         </div>
 
         {/* Content Container */}
         <div className="relative min-h-[400px]">
-          
+
           {/* Login Form */}
-          <div className={`transform transition-all duration-500 ease-in-out ${
-            currentStep === 'login' 
-              ? 'translate-x-0 opacity-100 pointer-events-auto' 
+          <div className={`transform transition-all duration-500 ease-in-out ${currentStep === 'login'
+              ? 'translate-x-0 opacity-100 pointer-events-auto'
               : '-translate-x-40 opacity-0 pointer-events-none absolute inset-0'
-          } ${!isVisible ? 'translate-y-4 opacity-0' : ''}`}>
+            } ${!isVisible ? 'translate-y-4 opacity-0' : ''}`}>
             <div className="max-w-sm mx-auto">
               <form onSubmit={handleLoginSubmit} className="space-y-6">
                 {/* Email Field */}
                 <div className="relative">
-                  <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                    focusedField === 'login-email' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
-                  }`}>
+                  <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'login-email' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                    }`}>
                     <Mail className="h-4 w-4" />
                   </div>
                   <input
@@ -465,9 +461,8 @@ export default function LoginPage() {
 
                 {/* Password Field */}
                 <div className="relative">
-                  <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                    focusedField === 'login-password' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
-                  }`}>
+                  <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'login-password' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                    }`}>
                     <Lock className="h-4 w-4" />
                   </div>
                   <input
@@ -528,13 +523,12 @@ export default function LoginPage() {
           </div>
 
           {/* Registration Form */}
-          <div className={`transform transition-all duration-500 ease-in-out ${
-            currentStep === 'register' 
-              ? 'translate-x-0 opacity-100 pointer-events-auto' 
+          <div className={`transform transition-all duration-500 ease-in-out ${currentStep === 'register'
+              ? 'translate-x-0 opacity-100 pointer-events-auto'
               : currentStep === 'login'
                 ? 'translate-x-40 opacity-0 pointer-events-none absolute inset-0'
                 : '-translate-x-40 opacity-0 pointer-events-none absolute inset-0'
-          }`}>
+            }`}>
             <div className="max-w-2xl mx-auto">
               <form onSubmit={handleRegistrationSubmit} className="space-y-6">
 
@@ -556,233 +550,223 @@ export default function LoginPage() {
 
                 {/* Two Column Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
-           
-                    
-                    {/* First Name */}
-                    <div className="relative">
-                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                        focusedField === 'reg-firstName' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
-                      }`}>
-                        <User className="h-4 w-4" />
-                      </div>
-                      <input
-                        id="reg-firstName"
-                        type="text"
-                        required
-                        value={regData.firstName}
-                        onChange={(e) => handleRegDataChange('firstName', e.target.value)}
-                        onFocus={() => setFocusedField('reg-firstName')}
-                        onBlur={() => setFocusedField(null)}
-                        className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
-                        placeholder="First Name *"
-                      />
-                      <label htmlFor="reg-firstName" className="form-label">First Name *</label>
-                    </div>
 
-                    {/* Last Name */}
-                    <div className="relative">
-                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                        focusedField === 'reg-lastName' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
-                      }`}>
-                        <User className="h-4 w-4" />
-                      </div>
-                      <input
-                        id="reg-lastName"
-                        type="text"
-                        required
-                        value={regData.lastName}
-                        onChange={(e) => handleRegDataChange('lastName', e.target.value)}
-                        onFocus={() => setFocusedField('reg-lastName')}
-                        onBlur={() => setFocusedField(null)}
-                        className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
-                        placeholder="Last Name *"
-                      />
-                      <label htmlFor="reg-lastName" className="form-label">Last Name *</label>
-                    </div>
 
-                    {/* Email */}
-                    <div className="relative">
-                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                        focusedField === 'reg-email' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
-                      }`}>
-                        <Mail className="h-4 w-4" />
-                      </div>
-                      <input
-                        id="reg-email"
-                        type="email"
-                        required
-                        value={regData.email}
-                        onChange={(e) => handleRegDataChange('email', e.target.value)}
-                        onFocus={() => setFocusedField('reg-email')}
-                        onBlur={() => setFocusedField(null)}
-                        className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
-                        placeholder="Email Address *"
-                      />
-                      <label htmlFor="reg-email" className="form-label">Email Address *</label>
-                    </div>
 
-                    {/* Phone */}
-                    <div className="relative">
-                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                        focusedField === 'reg-phone' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                  {/* First Name */}
+                  <div className="relative">
+                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'reg-firstName' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
                       }`}>
-                        <Phone className="h-4 w-4" />
-                      </div>
-                      <input
-                        id="reg-phone"
-                        type="tel"
-                        required
-                        value={regData.phone}
-                        onChange={(e) => handleRegDataChange('phone', e.target.value)}
-                        onFocus={() => setFocusedField('reg-phone')}
-                        onBlur={() => setFocusedField(null)}
-                        className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
-                        placeholder="Phone Number *"
-                      />
-                      <label htmlFor="reg-phone" className="form-label">Phone Number *</label>
+                      <User className="h-4 w-4" />
                     </div>
+                    <input
+                      id="reg-firstName"
+                      type="text"
+                      required
+                      value={regData.firstName}
+                      onChange={(e) => handleRegDataChange('firstName', e.target.value)}
+                      onFocus={() => setFocusedField('reg-firstName')}
+                      onBlur={() => setFocusedField(null)}
+                      className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
+                      placeholder="First Name *"
+                    />
+                    <label htmlFor="reg-firstName" className="form-label">First Name *</label>
+                  </div>
 
-                    {/* Password */}
-                    <div className="relative">
-                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                        focusedField === 'reg-password' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                  {/* Last Name */}
+                  <div className="relative">
+                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'reg-lastName' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
                       }`}>
-                        <Lock className="h-4 w-4" />
-                      </div>
-                      <input
-                        id="reg-password"
-                        type={regData.showPassword ? 'text' : 'password'}
-                        required
-                        value={regData.password}
-                        onChange={(e) => handleRegDataChange('password', e.target.value)}
-                        onFocus={() => setFocusedField('reg-password')}
-                        onBlur={() => setFocusedField(null)}
-                        className="peer text-sm pl-10 pr-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
-                        placeholder="Password *"
-                      />
-                      <label htmlFor="reg-password" className="form-label">Password *</label>
-                      <button
-                        type="button"
-                        onClick={() => handleRegDataChange('showPassword', !regData.showPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 hover:scale-110 active:scale-95"
-                      >
-                        {regData.showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
+                      <User className="h-4 w-4" />
                     </div>
+                    <input
+                      id="reg-lastName"
+                      type="text"
+                      required
+                      value={regData.lastName}
+                      onChange={(e) => handleRegDataChange('lastName', e.target.value)}
+                      onFocus={() => setFocusedField('reg-lastName')}
+                      onBlur={() => setFocusedField(null)}
+                      className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
+                      placeholder="Last Name *"
+                    />
+                    <label htmlFor="reg-lastName" className="form-label">Last Name *</label>
+                  </div>
 
-                    {/* Confirm Password */}
-                    <div className="relative">
-                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                        focusedField === 'reg-confirmPassword' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                  {/* Email */}
+                  <div className="relative">
+                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'reg-email' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
                       }`}>
-                        <Lock className="h-4 w-4" />
-                      </div>
-                      <input
-                        id="reg-confirmPassword"
-                        type={regData.showConfirmPassword ? 'text' : 'password'}
-                        required
-                        value={regData.confirmPassword}
-                        onChange={(e) => handleRegDataChange('confirmPassword', e.target.value)}
-                        onFocus={() => setFocusedField('reg-confirmPassword')}
-                        onBlur={() => setFocusedField(null)}
-                        className="peer text-sm pl-10 pr-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
-                        placeholder="Confirm Password *"
-                      />
-                      <label htmlFor="reg-confirmPassword" className="form-label">Confirm Password *</label>
-                      <button
-                        type="button"
-                        onClick={() => handleRegDataChange('showConfirmPassword', !regData.showConfirmPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 hover:scale-110 active:scale-95"
-                      >
-                        {regData.showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
+                      <Mail className="h-4 w-4" />
                     </div>
-                  
-                    
-                    {/* Hospital Name */}
-                    <div className="relative">
-                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                        focusedField === 'reg-hospitalName' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
-                      }`}>
-                        <Building2 className="h-4 w-4" />
-                      </div>
-                      <input
-                        id="reg-hospitalName"
-                        type="text"
-                        required
-                        value={regData.hospitalName}
-                        onChange={(e) => handleRegDataChange('hospitalName', e.target.value)}
-                        onFocus={() => setFocusedField('reg-hospitalName')}
-                        onBlur={() => setFocusedField(null)}
-                        className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
-                        placeholder="Hospital/Clinic Name *"
-                      />
-                      <label htmlFor="reg-hospitalName" className="form-label">Hospital/Clinic Name *</label>
-                    </div>
+                    <input
+                      id="reg-email"
+                      type="email"
+                      required
+                      value={regData.email}
+                      onChange={(e) => handleRegDataChange('email', e.target.value)}
+                      onFocus={() => setFocusedField('reg-email')}
+                      onBlur={() => setFocusedField(null)}
+                      className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
+                      placeholder="Email Address *"
+                    />
+                    <label htmlFor="reg-email" className="form-label">Email Address *</label>
+                  </div>
 
-                    {/* Hospital Address */}
-                    <div className="relative">
-                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                        focusedField === 'reg-hospitalAddress' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                  {/* Phone */}
+                  <div className="relative">
+                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'reg-phone' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
                       }`}>
-                        <MapPin className="h-4 w-4" />
-                      </div>
-                      <input
-                        id="reg-hospitalAddress"
-                        type="text"
-                        value={regData.hospitalAddress}
-                        onChange={(e) => handleRegDataChange('hospitalAddress', e.target.value)}
-                        onFocus={() => setFocusedField('reg-hospitalAddress')}
-                        onBlur={() => setFocusedField(null)}
-                        className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
-                        placeholder="Hospital Address"
-                      />
-                      <label htmlFor="reg-hospitalAddress" className="form-label">Hospital Address</label>
+                      <Phone className="h-4 w-4" />
                     </div>
+                    <input
+                      id="reg-phone"
+                      type="tel"
+                      required
+                      value={regData.phone}
+                      onChange={(e) => handleRegDataChange('phone', e.target.value)}
+                      onFocus={() => setFocusedField('reg-phone')}
+                      onBlur={() => setFocusedField(null)}
+                      className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
+                      placeholder="Phone Number *"
+                    />
+                    <label htmlFor="reg-phone" className="form-label">Phone Number *</label>
+                  </div>
 
-                    {/* Degree */}
-                    <div className="relative">
-                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                        focusedField === 'reg-degree' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                  {/* Password */}
+                  <div className="relative">
+                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'reg-password' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
                       }`}>
-                        <GraduationCap className="h-4 w-4" />
-                      </div>
-                      <input
-                        id="reg-degree"
-                        type="text"
-                        required
-                        value={regData.degree}
-                        onChange={(e) => handleRegDataChange('degree', e.target.value)}
-                        onFocus={() => setFocusedField('reg-degree')}
-                        onBlur={() => setFocusedField(null)}
-                        className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
-                        placeholder="Medical Degree *"
-                      />
-                      <label htmlFor="reg-degree" className="form-label">Medical Degree *</label>
+                      <Lock className="h-4 w-4" />
                     </div>
+                    <input
+                      id="reg-password"
+                      type={regData.showPassword ? 'text' : 'password'}
+                      required
+                      value={regData.password}
+                      onChange={(e) => handleRegDataChange('password', e.target.value)}
+                      onFocus={() => setFocusedField('reg-password')}
+                      onBlur={() => setFocusedField(null)}
+                      className="peer text-sm pl-10 pr-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
+                      placeholder="Password *"
+                    />
+                    <label htmlFor="reg-password" className="form-label">Password *</label>
+                    <button
+                      type="button"
+                      onClick={() => handleRegDataChange('showPassword', !regData.showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 hover:scale-110 active:scale-95"
+                    >
+                      {regData.showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
 
-                    {/* Registration Number */}
-                    <div className="relative">
-                      <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
-                        focusedField === 'reg-registrationNumber' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                  {/* Confirm Password */}
+                  <div className="relative">
+                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'reg-confirmPassword' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
                       }`}>
-                        <FileText className="h-4 w-4" />
-                      </div>
-                      <input
-                        id="reg-registrationNumber"
-                        type="text"
-                        required
-                        value={regData.registrationNumber}
-                        onChange={(e) => handleRegDataChange('registrationNumber', e.target.value)}
-                        onFocus={() => setFocusedField('reg-registrationNumber')}
-                        onBlur={() => setFocusedField(null)}
-                        className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
-                        placeholder="Medical Registration Number *"
-                      />
-                      <label htmlFor="reg-registrationNumber" className="form-label">Medical Registration Number *</label>
+                      <Lock className="h-4 w-4" />
                     </div>
-                 
+                    <input
+                      id="reg-confirmPassword"
+                      type={regData.showConfirmPassword ? 'text' : 'password'}
+                      required
+                      value={regData.confirmPassword}
+                      onChange={(e) => handleRegDataChange('confirmPassword', e.target.value)}
+                      onFocus={() => setFocusedField('reg-confirmPassword')}
+                      onBlur={() => setFocusedField(null)}
+                      className="peer text-sm pl-10 pr-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
+                      placeholder="Confirm Password *"
+                    />
+                    <label htmlFor="reg-confirmPassword" className="form-label">Confirm Password *</label>
+                    <button
+                      type="button"
+                      onClick={() => handleRegDataChange('showConfirmPassword', !regData.showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 hover:scale-110 active:scale-95"
+                    >
+                      {regData.showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+
+
+                  {/* Hospital Name */}
+                  <div className="relative">
+                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'reg-hospitalName' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                      }`}>
+                      <Building2 className="h-4 w-4" />
+                    </div>
+                    <input
+                      id="reg-hospitalName"
+                      type="text"
+                      required
+                      value={regData.hospitalName}
+                      onChange={(e) => handleRegDataChange('hospitalName', e.target.value)}
+                      onFocus={() => setFocusedField('reg-hospitalName')}
+                      onBlur={() => setFocusedField(null)}
+                      className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
+                      placeholder="Hospital/Clinic Name *"
+                    />
+                    <label htmlFor="reg-hospitalName" className="form-label">Hospital/Clinic Name *</label>
+                  </div>
+
+                  {/* Hospital Address */}
+                  <div className="relative">
+                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'reg-hospitalAddress' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                      }`}>
+                      <MapPin className="h-4 w-4" />
+                    </div>
+                    <input
+                      id="reg-hospitalAddress"
+                      type="text"
+                      value={regData.hospitalAddress}
+                      onChange={(e) => handleRegDataChange('hospitalAddress', e.target.value)}
+                      onFocus={() => setFocusedField('reg-hospitalAddress')}
+                      onBlur={() => setFocusedField(null)}
+                      className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
+                      placeholder="Hospital Address"
+                    />
+                    <label htmlFor="reg-hospitalAddress" className="form-label">Hospital Address</label>
+                  </div>
+
+                  {/* Degree */}
+                  <div className="relative">
+                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'reg-degree' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                      }`}>
+                      <GraduationCap className="h-4 w-4" />
+                    </div>
+                    <input
+                      id="reg-degree"
+                      type="text"
+                      required
+                      value={regData.degree}
+                      onChange={(e) => handleRegDataChange('degree', e.target.value)}
+                      onFocus={() => setFocusedField('reg-degree')}
+                      onBlur={() => setFocusedField(null)}
+                      className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
+                      placeholder="Medical Degree *"
+                    />
+                    <label htmlFor="reg-degree" className="form-label">Medical Degree *</label>
+                  </div>
+
+                  {/* Registration Number */}
+                  <div className="relative">
+                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${focusedField === 'reg-registrationNumber' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                      }`}>
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <input
+                      id="reg-registrationNumber"
+                      type="text"
+                      required
+                      value={regData.registrationNumber}
+                      onChange={(e) => handleRegDataChange('registrationNumber', e.target.value)}
+                      onFocus={() => setFocusedField('reg-registrationNumber')}
+                      onBlur={() => setFocusedField(null)}
+                      className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
+                      placeholder="Medical Registration Number *"
+                    />
+                    <label htmlFor="reg-registrationNumber" className="form-label">Medical Registration Number *</label>
+                  </div>
+
                 </div>
 
                 {/* Submit Button */}
@@ -820,11 +804,10 @@ export default function LoginPage() {
           </div>
 
           {/* OTP Verification Form */}
-          <div className={`transform transition-all duration-500 ease-in-out ${
-            currentStep === 'otp' 
-              ? 'translate-x-0 opacity-100 pointer-events-auto' 
+          <div className={`transform transition-all duration-500 ease-in-out ${currentStep === 'otp'
+              ? 'translate-x-0 opacity-100 pointer-events-auto'
               : 'translate-x-40 opacity-0 pointer-events-none absolute inset-0'
-          }`}>
+            }`}>
             <div className="max-w-md mx-auto">
               <div className="text-center mb-8">
                 <div className="inline-flex items-center justify-center w-12 h-12 mb-4 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -862,10 +845,10 @@ export default function LoginPage() {
                         />
                       ))}
                     </div>
-                    
+
                     {/* Dash separator */}
                     <div className="text-gray-400 dark:text-gray-500 text-xl font-bold">-</div>
-                    
+
                     {/* Last 3 digits */}
                     <div className="flex space-x-3">
                       {[3, 4, 5].map((index) => (
