@@ -168,7 +168,7 @@ export default function PrescriptionTemplates({ onBack }) {
 
   const confirmDelete = async () => {
     setDeleteConfirmation(prev => ({ ...prev, isDeleting: true }));
-    
+
     try {
       const templateToDelete = templates.find(t => t.id === deleteConfirmation.templateId);
       const success = await storage.deleteTemplate(deleteConfirmation.templateId);
@@ -216,8 +216,8 @@ export default function PrescriptionTemplates({ onBack }) {
       if (selectedTemplate) {
         // Editing existing template
         isEditing = true;
-        updatedTemplates = templates.map(t => 
-          t.id === selectedTemplate.id 
+        updatedTemplates = templates.map(t =>
+          t.id === selectedTemplate.id
             ? { ...templateData, id: selectedTemplate.id, updatedAt: new Date() }
             : t
         );
@@ -234,7 +234,7 @@ export default function PrescriptionTemplates({ onBack }) {
       }
 
       await storage.saveTemplates(updatedTemplates);
-      
+
       // Add toast notifications
       if (isEditing) {
         toast.success('Template Updated', {
@@ -251,7 +251,7 @@ export default function PrescriptionTemplates({ onBack }) {
       setSelectedTemplate(null);
     } catch (error) {
       console.error('Error saving template:', error);
-      
+
       // Add error toast
       toast.error('Save Failed', {
         description: 'Failed to save template. Please try again.'
@@ -574,7 +574,6 @@ function TemplateEditor({ template, onSave, onCancel }) {
   const [customDiagnoses, setCustomDiagnoses] = useState([]);
   const [customLabTests, setCustomLabTests] = useState([]);
   const [customMedications, setCustomMedications] = useState([]);
-  const [isLoadingCustomData, setIsLoadingCustomData] = useState(true);
 
   useEffect(() => {
     loadCustomData();
@@ -631,7 +630,6 @@ function TemplateEditor({ template, onSave, onCancel }) {
 
   const loadCustomData = async () => {
     try {
-      setIsLoadingCustomData(true);
       const [symptoms, diagnoses, labTests, medications] = await Promise.all([
         storage.getCustomSymptoms(),
         storage.getCustomDiagnoses(),
@@ -649,8 +647,6 @@ function TemplateEditor({ template, onSave, onCancel }) {
       setCustomDiagnoses([]);
       setCustomLabTests([]);
       setCustomMedications([]);
-    } finally {
-      setIsLoadingCustomData(false);
     }
   };
 
@@ -1041,57 +1037,51 @@ function TemplateEditor({ template, onSave, onCancel }) {
           {/* Medications Section */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="space-y-4">
-              {isLoadingCustomData ? (
-                <div className="text-center py-6">
-                  <div className="w-6 h-6 animate-spin mx-auto border-4 border-blue-500 border-t-transparent rounded-full mb-2"></div>
-                  <p className="text-gray-500 text-sm">Loading medications...</p>
-                </div>
-              ) : (
-                <MedicationSelector
-                  onSelect={(medication) => {
-                    const newMedication = {
-                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                      name: medication,
-                      timing: {
-                        morning: false,
-                        afternoon: false,
-                        evening: false,
-                        night: false
-                      },
-                      dosage: '',
-                      mealTiming: 'after_meal',
-                      duration: '',
-                      remarks: ''
-                    };
-                    setFormData({
-                      ...formData,
-                      medications: [...formData.medications, newMedication]
-                    });
-                  }}
-                  onAddCustom={async (medication) => {
-                    await storage.addCustomMedication(medication);
-                    await loadCustomData();
-                    const newMedication = {
-                      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                      name: medication,
-                      timing: {
-                        morning: false,
-                        afternoon: false,
-                        evening: false,
-                        night: false
-                      },
-                      dosage: '',
-                      mealTiming: 'after_meal',
-                      duration: '',
-                      remarks: ''
-                    };
-                    setFormData({
-                      ...formData,
-                      medications: [...formData.medications, newMedication]
-                    });
-                  }}
-                />
-              )}
+
+              <MedicationSelector
+                onSelect={(medication) => {
+                  const newMedication = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                    name: medication,
+                    timing: {
+                      morning: false,
+                      afternoon: false,
+                      evening: false,
+                      night: false
+                    },
+                    dosage: '',
+                    mealTiming: 'after_meal',
+                    duration: '',
+                    remarks: ''
+                  };
+                  setFormData({
+                    ...formData,
+                    medications: [...formData.medications, newMedication]
+                  });
+                }}
+                onAddCustom={async (medication) => {
+                  await storage.addCustomMedication(medication);
+                  await loadCustomData();
+                  const newMedication = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                    name: medication,
+                    timing: {
+                      morning: false,
+                      afternoon: false,
+                      evening: false,
+                      night: false
+                    },
+                    dosage: '',
+                    mealTiming: 'after_meal',
+                    duration: '',
+                    remarks: ''
+                  };
+                  setFormData({
+                    ...formData,
+                    medications: [...formData.medications, newMedication]
+                  });
+                }}
+              />
 
               {/* Selected medications with details */}
               {formData.medications.length > 0 && (
