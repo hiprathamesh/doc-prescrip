@@ -92,6 +92,13 @@
     @apply hover:bg-gray-100 dark:hover:bg-gray-700;
   }
 
+  .form-label {
+    @apply absolute text-gray-400 dark:text-gray-500 text-sm pointer-events-none transition-all duration-200;
+    @apply left-10 top-3;
+    @apply peer-focus:-top-2 peer-focus:text-xs peer-focus:left-5 peer-focus:px-1 peer-focus:bg-white dark:peer-focus:bg-gray-900 peer-focus:text-blue-500 dark:peer-focus:text-blue-400;
+    @apply peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:left-5 peer-[:not(:placeholder-shown)]:px-1 peer-[:not(:placeholder-shown)]:bg-white dark:peer-[:not(:placeholder-shown)]:bg-gray-900;
+  }
+
   /* Dark mode scrollbar styling */
   .dark ::-webkit-scrollbar {
     width: 8px;
