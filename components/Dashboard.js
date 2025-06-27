@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PatientList from './PatientList';
 import PatientDetails from './PatientDetails';
 import NewPrescription from './NewPrescription';
 import PrescriptionTemplates from './PrescriptionTemplates';
 import MedicalDataManager from './MedicalDataManager';
 import MedicalCertificate from './MedicalCertificate';
-import KeyGeneratorModal from './KeyGeneratorModal';
+import KeyGeneratorTooltip from './KeyGeneratorModal';
 import {
   Plus,
   Search,
@@ -49,6 +49,7 @@ export default function Dashboard() {
   const [lastGreetingUpdate, setLastGreetingUpdate] = useState('');
   const [navigationSource, setNavigationSource] = useState('dashboard'); // Track where we came from
   const [showKeyGeneratorModal, setShowKeyGeneratorModal] = useState(false);
+  const keyGeneratorTriggerRef = useRef(null);
   const [currentDoctor, setCurrentDoctor] = useState(null);
 
   useEffect(() => {
@@ -546,6 +547,26 @@ export default function Dashboard() {
 
             <div className="flex items-center space-x-3">
               <DarkModeToggle />
+
+              {isAdmin() && (
+                <div className="relative">
+                  <button
+                    ref={keyGeneratorTriggerRef}
+                    onClick={() => setShowKeyGeneratorModal(!showKeyGeneratorModal)}
+                    className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer border border-gray-200 dark:border-gray-700"
+                    title="Generate Registration Key"
+                  >
+                    <Key className="w-5 h-5" />
+                  </button>
+
+                  <KeyGeneratorTooltip
+                    isOpen={showKeyGeneratorModal}
+                    onClose={() => setShowKeyGeneratorModal(false)}
+                    triggerRef={keyGeneratorTriggerRef}
+                  />
+                </div>
+              )}
+
               <button
                 onClick={handleLogout}
                 className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 flex items-center space-x-2 text-sm cursor-pointer"
@@ -781,23 +802,6 @@ export default function Dashboard() {
                       </div>
                     </button>
 
-                    {isAdmin() && (
-                      <button
-                        onClick={() => setShowKeyGeneratorModal(true)}
-                        className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left cursor-pointer"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-indigo-600 dark:bg-indigo-500 rounded">
-                            <Key className="w-4 h-4 text-white" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">Generate Key</p>
-                            <p className="text-xs text-gray-600 dark:text-gray-300">Access keys for new doctors</p>
-                          </div>
-                        </div>
-                      </button>
-                    )}
-
                     <button
                       onClick={() => handleNewMedicalCertificate()}
                       className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left cursor-pointer"
@@ -986,14 +990,6 @@ export default function Dashboard() {
           <MedicalDataManager onBack={handleBackToDashboard} />
         )}
       </main>
-
-      {/* Key Generator Modal */}
-      {isAdmin() && (
-        <KeyGeneratorModal
-          isOpen={showKeyGeneratorModal}
-          onClose={() => setShowKeyGeneratorModal(false)}
-        />
-      )}
     </div>
   );
 }
