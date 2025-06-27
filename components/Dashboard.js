@@ -618,7 +618,7 @@ export default function Dashboard() {
 
               <button
                 onClick={() => handleNewPrescription()}
-                className="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white dark:text-gray-900 px-4 py-2 rounded text-sm font-medium flex items-center space-x-2 transition-all duration-200 cursor-pointer"
+                className="bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-semibold flex items-center space-x-2 transition-all duration-200 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Prescription</span>

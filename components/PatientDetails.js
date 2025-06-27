@@ -460,7 +460,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   const pendingBills = totalBills - paidBills;
 
   const HeaderContent = ({ isFloating = false }) => (
-    <div className={`${isFloating ? 'px-6 py-4' : ''} flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0`}>
+    <div className={`${isFloating ? 'px-6 py-4' : ''} max-w-5xl mx-auto px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0`}>
       <div className="flex items-center space-x-3">
         <button
           onClick={onBack}
@@ -523,7 +523,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       <div ref={headerRef}>
         <HeaderContent />
       </div>
-
+          
       {/* Patient EMR Card */}
       <div className="bg-white dark:bg-gray-900 rounded-lg p-6">
         <div className="flex items-center justify-between mb-6">
@@ -955,6 +955,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         onCancel={handleCancelDelete}
         isLoading={confirmDialog.isLoading}
       />
+
     </div>
   );
 }
