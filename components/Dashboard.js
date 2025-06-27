@@ -51,6 +51,9 @@ export default function Dashboard() {
   const [showKeyGeneratorModal, setShowKeyGeneratorModal] = useState(false);
   const keyGeneratorTriggerRef = useRef(null);
   const [currentDoctor, setCurrentDoctor] = useState(null);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
+  const [isGreetingLoading, setIsGreetingLoading] = useState(true);
 
   useEffect(() => {
     loadAllData();
@@ -71,6 +74,9 @@ export default function Dashboard() {
 
   const loadAllData = async () => {
     try {
+      setIsDataLoading(true);
+      setIsStatsLoading(true);
+      
       // Load all data concurrently
       const [savedPatients, savedPrescriptions, savedBills] = await Promise.all([
         storage.getPatients(),
@@ -83,9 +89,13 @@ export default function Dashboard() {
       setBills(savedBills);
 
       calculateStats(savedPatients, savedPrescriptions, savedBills);
+      
+      setIsDataLoading(false);
+      setIsStatsLoading(false);
     } catch (error) {
       console.error('Error loading data:', error);
-      // Handle error - maybe show a notification to user
+      setIsDataLoading(false);
+      setIsStatsLoading(false);
     }
   };
 
@@ -469,6 +479,7 @@ export default function Dashboard() {
   };
 
   const updateGreeting = () => {
+    setIsGreetingLoading(true);
     const now = new Date();
     const currentPeriod = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${now.getHours()}`;
 
@@ -478,6 +489,7 @@ export default function Dashboard() {
       setCurrentGreeting(newGreeting);
       setLastGreetingUpdate(currentPeriod);
     }
+    setIsGreetingLoading(false);
   };
 
   const getActivityIcon = (activityType) => {
@@ -523,6 +535,27 @@ export default function Dashboard() {
   const isAdmin = () => {
     return currentDoctor?.accessType === 'admin';
   };
+
+  // Skeleton Components
+  const GreetingSkeleton = () => (
+    <div className="space-y-3 animate-pulse">
+      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg w-100"></div>
+      <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-50"></div>
+    </div>
+  );
+
+  const StatCardSkeleton = () => (
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 animate-pulse">
+      <div className="flex items-center justify-between mb-3">
+        <div className="p-2 bg-gray-200 dark:bg-gray-700 rounded w-8 h-8"></div>
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+      </div>
+      <div className="space-y-2">
+        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-12"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -592,145 +625,164 @@ export default function Dashboard() {
         {currentView === 'dashboard' && (
           <div className="space-y-8">
             {/* Dynamic Welcome Section */}
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-                {currentGreeting.title}
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">
-                {currentGreeting.subtitle}
-              </p>
+            <div className="min-h-[76px]"> {/* Fixed height to prevent layout shift */}
+              {isGreetingLoading ? (
+                <GreetingSkeleton />
+              ) : (
+                <div>
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                    {currentGreeting.title}
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    {currentGreeting.subtitle}
+                  </p>
+                </div>
+              )}
             </div>
+
             {/* Stats Grid with Hover Expansion */}
             <div
               className={`bg-gray-100 dark:bg-gray-800 rounded-2xl p-4 transition-all duration-500 ease-out `}
-              onMouseEnter={() => setIsStatsHovered(true)}
+              onMouseEnter={() => !isStatsLoading && setIsStatsHovered(true)}
               onMouseLeave={() => setIsStatsHovered(false)}
             >
               <div className="grid grid-cols-4 gap-4">
-                {/* Total Patients */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded">
-                      <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">PATIENTS</span>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.totalPatients || 0}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Total registered</p>
-                  </div>
+                {isStatsLoading ? (
+                  // Show skeleton cards
+                  <>
+                    <StatCardSkeleton />
+                    <StatCardSkeleton />
+                    <StatCardSkeleton />
+                    <StatCardSkeleton />
+                  </>
+                ) : (
+                  <>
+                    {/* Total Patients */}
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded">
+                          <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">PATIENTS</span>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.totalPatients || 0}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Total registered</p>
+                      </div>
 
-                  {/* Expanded content on hover */}
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
-                    <div className="flex justify-between items-center text-[13px]">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
-                        <span className="text-gray-600 dark:text-gray-300">New this month</span>
+                      {/* Expanded content on hover */}
+                      <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
+                        <div className="flex justify-between items-center text-[13px]">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
+                            <span className="text-gray-600 dark:text-gray-300">New this month</span>
+                          </div>
+                          <span className="font-medium text-gray-600 dark:text-gray-300">+{stats.newPatientsThisMonth || 0}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[13px] mt-1">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+                            <span className="text-gray-600 dark:text-gray-300">New this week</span>
+                          </div>
+                          <span className="font-medium text-gray-600 dark:text-gray-300">+{stats.newPatientsThisWeek || 0}</span>
+                        </div>
                       </div>
-                      <span className="font-medium text-gray-600 dark:text-gray-300">+{stats.newPatientsThisMonth || 0}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[13px] mt-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
-                        <span className="text-gray-600 dark:text-gray-300">New this week</span>
-                      </div>
-                      <span className="font-medium text-gray-600 dark:text-gray-300">+{stats.newPatientsThisWeek || 0}</span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Visits This Week */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-green-50 dark:bg-green-500/10 rounded">
-                      <Calendar className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">VISITS</span>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.visitsThisWeek || 0}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">This week</p>
-                  </div>
+                    {/* Visits This Week */}
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="p-2 bg-green-50 dark:bg-green-500/10 rounded">
+                          <Calendar className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">VISITS</span>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.visitsThisWeek || 0}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">This week</p>
+                      </div>
 
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
-                    <div className="flex justify-between items-center text-[13px]">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
-                        <span className="text-gray-600 dark:text-gray-300">This month</span>
+                      <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
+                        <div className="flex justify-between items-center text-[13px]">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
+                            <span className="text-gray-600 dark:text-gray-300">This month</span>
+                          </div>
+                          <span className="font-medium text-gray-600 dark:text-gray-300">{stats.visitsThisMonth || 0}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[13px] mt-1">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+                            <span className="text-gray-600 dark:text-gray-300">Average per day</span>
+                          </div>
+                          <span className="font-medium text-gray-600 dark:text-gray-300">{Math.round((stats.visitsThisWeek || 0) / 7)}</span>
+                        </div>
                       </div>
-                      <span className="font-medium text-gray-600 dark:text-gray-300">{stats.visitsThisMonth || 0}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[13px] mt-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
-                        <span className="text-gray-600 dark:text-gray-300">Average per day</span>
-                      </div>
-                      <span className="font-medium text-gray-600 dark:text-gray-300">{Math.round((stats.visitsThisWeek || 0) / 7)}</span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Revenue */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-orange-50 dark:bg-orange-500/10 rounded">
-                      <DollarSign className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">REVENUE</span>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-2xl font-semibold text-gray-900 dark:text-white">₹{stats.paidRevenue || 0}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Collected</p>
-                  </div>
+                    {/* Revenue */}
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="p-2 bg-orange-50 dark:bg-orange-500/10 rounded">
+                          <DollarSign className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">REVENUE</span>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-2xl font-semibold text-gray-900 dark:text-white">₹{stats.paidRevenue || 0}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Collected</p>
+                      </div>
 
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
-                    <div className="flex justify-between items-center text-[13px]">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-orange-600 dark:bg-orange-400 rounded-full"></div>
-                        <span className="text-gray-600 dark:text-gray-300">Pending</span>
+                      <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
+                        <div className="flex justify-between items-center text-[13px]">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-orange-600 dark:bg-orange-400 rounded-full"></div>
+                            <span className="text-gray-600 dark:text-gray-300">Pending</span>
+                          </div>
+                          <span className="font-medium text-gray-600 dark:text-gray-300">₹{stats.pendingRevenue || 0}</span>
+                        </div>
+                        <div className="flex justify-between items-end text-[13px] mt-1">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
+                            <span className="text-gray-600 dark:text-gray-300">This month</span>
+                          </div>
+                          <span className="font-medium text-gray-600 dark:text-gray-300">₹{stats.revenueThisMonth || 0}</span>
+                        </div>
                       </div>
-                      <span className="font-medium text-gray-600 dark:text-gray-300">₹{stats.pendingRevenue || 0}</span>
                     </div>
-                    <div className="flex justify-between items-end text-[13px] mt-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
-                        <span className="text-gray-600 dark:text-gray-300">This month</span>
-                      </div>
-                      <span className="font-medium text-gray-600 dark:text-gray-300">₹{stats.revenueThisMonth || 0}</span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Follow-ups */}
-                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-purple-50 dark:bg-purple-500/10 rounded">
-                      <Clock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">FOLLOW-UPS</span>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.upcomingFollowUps?.length || 0}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">Upcoming</p>
-                  </div>
+                    {/* Follow-ups */}
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-600 p-4 hover:shadow-lg dark:hover:shadow-gray-900/20 transition-all duration-500 ease-out cursor-pointer overflow-hidden">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="p-2 bg-purple-50 dark:bg-purple-500/10 rounded">
+                          <Clock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">FOLLOW-UPS</span>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.upcomingFollowUps?.length || 0}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Upcoming</p>
+                      </div>
 
-                  <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
-                    <div className="flex justify-between items-center text-[13px]">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-purple-600 dark:bg-purple-400 rounded-full"></div>
-                        <span className="text-gray-600 dark:text-gray-300">Next 7 days</span>
+                      <div className={`${isStatsHovered ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden transition-all duration-500 ease-in-out mt-2 pt-2 border-t border-gray-100 dark:border-gray-600`}>
+                        <div className="flex justify-between items-center text-[13px]">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-purple-600 dark:bg-purple-400 rounded-full"></div>
+                            <span className="text-gray-600 dark:text-gray-300">Next 7 days</span>
+                          </div>
+                          <span className="font-medium text-gray-600 dark:text-gray-300">{stats.upcomingFollowUps?.length || 0}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[13px] mt-1">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-red-600 dark:bg-red-400 rounded-full"></div>
+                            <span className="text-gray-600 dark:text-gray-300">Overdue</span>
+                          </div>
+                          <span className="font-medium text-gray-600 dark:text-gray-300">{stats.upcomingFollowUps?.filter(f => f.isOverdue).length || 0}</span>
+                        </div>
                       </div>
-                      <span className="font-medium text-gray-600 dark:text-gray-300">{stats.upcomingFollowUps?.length || 0}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[13px] mt-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-red-600 dark:bg-red-400 rounded-full"></div>
-                        <span className="text-gray-600 dark:text-gray-300">Overdue</span>
-                      </div>
-                      <span className="font-medium text-gray-600 dark:text-gray-300">{stats.upcomingFollowUps?.filter(f => f.isOverdue).length || 0}</span>
-                    </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
             </div>
 
