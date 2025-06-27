@@ -68,29 +68,38 @@ export const storage = {
       }
       
       // Handle both string parameters and object parameter
-      let name, accessType, phone, degree, registrationNumber;
+      let name, lastName, accessType, phone, degree, registrationNumber, hospitalName, hospitalAddress;
       if (typeof doctorData === 'object') {
         // If second parameter is an object, extract from it
         name = doctorData.name || doctorData.firstName + ' ' + doctorData.lastName || 'Dr. Nikam';
+        lastName = doctorData.lastName || doctorData.name?.split(' ').pop() || 'Nikam';
         accessType = doctorData.accessType || 'doctor';
         phone = doctorData.phone || '';
         degree = doctorData.degree || '';
         registrationNumber = doctorData.registrationNumber || '';
+        hospitalName = doctorData.hospitalName || 'Chaitanya Hospital';
+        hospitalAddress = doctorData.hospitalAddress || 'Deola, Maharashtra';
       } else {
         // If passed as separate parameters (legacy support)
         name = doctorData || 'Dr. Nikam';
+        lastName = name.split(' ').pop() || 'Nikam';
         accessType = arguments[2] || 'doctor';
         phone = '';
         degree = '';
         registrationNumber = '';
+        hospitalName = 'Chaitanya Hospital';
+        hospitalAddress = 'Deola, Maharashtra';
       }
       
       localStorage.setItem('currentDoctorId', doctorId);
       localStorage.setItem('currentDoctorName', name);
+      localStorage.setItem('currentDoctorLastName', lastName);
       localStorage.setItem('currentDoctorAccessType', accessType);
       localStorage.setItem('currentDoctorPhone', phone);
       localStorage.setItem('currentDoctorDegree', degree);
       localStorage.setItem('currentDoctorRegistrationNumber', registrationNumber);
+      localStorage.setItem('currentDoctorHospitalName', hospitalName);
+      localStorage.setItem('currentDoctorHospitalAddress', hospitalAddress);
     }
   },
 
@@ -101,19 +110,25 @@ export const storage = {
     if (typeof window !== 'undefined') {
       const doctorId = localStorage.getItem('currentDoctorId');
       const doctorName = localStorage.getItem('currentDoctorName');
+      const lastName = localStorage.getItem('currentDoctorLastName');
       const accessType = localStorage.getItem('currentDoctorAccessType');
       const phone = localStorage.getItem('currentDoctorPhone');
       const degree = localStorage.getItem('currentDoctorDegree');
       const registrationNumber = localStorage.getItem('currentDoctorRegistrationNumber');
+      const hospitalName = localStorage.getItem('currentDoctorHospitalName');
+      const hospitalAddress = localStorage.getItem('currentDoctorHospitalAddress');
 
       if (doctorId) {
         return {
           id: doctorId,
           name: doctorName || 'Dr. Nikam',
+          lastName: lastName || 'Nikam',
           accessType: accessType || 'doctor',
           phone: phone || '',
           degree: degree || '',
-          registrationNumber: registrationNumber || ''
+          registrationNumber: registrationNumber || '',
+          hospitalName: hospitalName || 'Chaitanya Hospital',
+          hospitalAddress: hospitalAddress || 'Deola, Maharashtra'
         };
       }
     }
@@ -125,10 +140,13 @@ export const storage = {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('currentDoctorId');
       localStorage.removeItem('currentDoctorName');
+      localStorage.removeItem('currentDoctorLastName');
       localStorage.removeItem('currentDoctorAccessType');
       localStorage.removeItem('currentDoctorPhone');
       localStorage.removeItem('currentDoctorDegree');
       localStorage.removeItem('currentDoctorRegistrationNumber');
+      localStorage.removeItem('currentDoctorHospitalName');
+      localStorage.removeItem('currentDoctorHospitalAddress');
     }
   },
 

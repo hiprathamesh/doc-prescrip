@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import { formatDate, formatDateTime } from './dateUtils';
+import { storage } from './storage';
 
 export const generateBillPDF = async (bill, patient) => {
   const pdf = new jsPDF();
@@ -7,6 +8,13 @@ export const generateBillPDF = async (bill, patient) => {
   const pageHeight = pdf.internal.pageSize.height;
   const margin = 15;
   let yPosition = 20;
+
+  // Get current doctor context
+  const doctorContext = storage.getDoctorContext();
+  const doctorName = doctorContext?.name || 'Dr. Prashant Nikam';
+  const doctorDegree = doctorContext?.degree || 'BAMS (College Name)';
+  const hospitalName = doctorContext?.hospitalName || 'Chaitanya Hospital';
+  const hospitalAddress = doctorContext?.hospitalAddress || 'Deola';
 
   // Header Section
   // Hospital Logo (placeholder - left side)
@@ -23,15 +31,15 @@ export const generateBillPDF = async (bill, patient) => {
   
   pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Dr. Prashant Nikam', doctorDetailsX, yPosition + 5);
+  pdf.text(doctorName, doctorDetailsX, yPosition + 5);
   
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('BAMS (College Name)', doctorDetailsX, yPosition + 12);
+  pdf.text(doctorDegree, doctorDetailsX, yPosition + 12);
   
   pdf.setFontSize(10);
   pdf.setTextColor(80, 80, 80);
-  pdf.text('Chaitanya Hospital, Deola', doctorDetailsX, yPosition + 18);
+  pdf.text(`${hospitalName}, ${hospitalAddress}`, doctorDetailsX, yPosition + 18);
 
   yPosition += 30;
 

@@ -6,6 +6,7 @@ class DoctorService {
     this.defaultDoctor = {
       doctorId: 'dr_prashant_nikam_chaitanya',
       name: 'Dr. Prashant Nikam',
+      lastName: 'Nikam',
       email: 'admin@chaitanyahospital.com',
       hospitalName: 'Chaitanya Hospital',
       hospitalAddress: 'Deola, Maharashtra',

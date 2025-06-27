@@ -69,9 +69,9 @@ export default function DarkModeToggle() {
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
       {isDark ? (
-        <Sun className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+        <Sun className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
       ) : (
-        <Moon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+        <Moon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
       )}
     </button>
   );

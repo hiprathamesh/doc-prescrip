@@ -153,7 +153,7 @@ export default function KeyGeneratorTooltip({ isOpen, onClose, triggerRef }) {
           ? `opacity-100 scale-100 translate-y-0 ${
               state === 'input' ? 'w-72' : state === 'loading' ? 'w-14' : 'w-80'
             } ${state === 'loading' ? 'h-14' : 'h-auto'}` 
-          : 'opacity-0 scale-0 translate-y-2 w-72 h-auto pointer-events-none'
+          : 'opacity-0 scale-0 translate-y-4 w-0 h-auto pointer-events-none'
       }`}
       style={{
         transformOrigin: 'top center'
@@ -169,7 +169,7 @@ export default function KeyGeneratorTooltip({ isOpen, onClose, triggerRef }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-300"
+            className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-300"
             placeholder="Admin Password"
           />
         </div>

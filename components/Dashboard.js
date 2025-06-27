@@ -58,7 +58,6 @@ export default function Dashboard() {
   useEffect(() => {
     loadAllData();
     loadRecentActivities();
-    updateGreeting();
     loadDoctorContext();
 
     // Update greeting every minute to check for time period changes
@@ -68,6 +67,12 @@ export default function Dashboard() {
 
     return () => clearInterval(greetingInterval);
   }, []);
+
+  useEffect(() => {
+    if (currentDoctor) {
+      updateGreeting();
+    }
+  }, [currentDoctor]);
 
   // Add scroll to top when returning to dashboard
   useScrollToTop([currentView === 'dashboard']);
@@ -295,6 +300,9 @@ export default function Dashboard() {
     const month = now.getMonth(); // 0 = January, 11 = December
     const date = now.getDate();
 
+    // Get current doctor's last name
+    const doctorLastName = currentDoctor?.lastName || 'Doctor';
+
     // Create a stable seed based on current date and hour for consistent message selection
     const seed = `${now.getFullYear()}-${month}-${date}-${hour}`;
     const getSeedBasedIndex = (arrayLength) => {
@@ -336,56 +344,56 @@ export default function Dashboard() {
     // Festival greetings (these take priority and don't shuffle)
     if (specialDays.diwali2024) {
       return {
-        title: "Happy Diwali, Dr. Nikam!",
+        title: `Happy Diwali, Dr. ${doctorLastName}!`,
         subtitle: "May this festival of lights brighten your practice and bring prosperity to all your patients"
       };
     }
 
     if (specialDays.holi2024) {
       return {
-        title: "Happy Holi, Dr. Nikam!",
+        title: `Happy Holi, Dr. ${doctorLastName}!`,
         subtitle: "Let the colors of joy and healing fill your practice today"
       };
     }
 
     if (specialDays.doctorsDay) {
       return {
-        title: "Happy National Doctors' Day, Dr. Nikam!",
+        title: `Happy National Doctors' Day, Dr. ${doctorLastName}!`,
         subtitle: "Thank you for your dedication to healing and caring for the community"
       };
     }
 
     if (specialDays.worldHealthDay) {
       return {
-        title: "Happy World Health Day, Dr. Nikam!",
+        title: `Happy World Health Day, Dr. ${doctorLastName}!`,
         subtitle: "Your commitment to health makes the world a better place"
       };
     }
 
     if (specialDays.independenceDay) {
       return {
-        title: "Happy Independence Day, Dr. Nikam!",
+        title: `Happy Independence Day, Dr. ${doctorLastName}!`,
         subtitle: "Freedom through health - your service strengthens our nation"
       };
     }
 
     if (specialDays.republicDay) {
       return {
-        title: "Happy Republic Day, Dr. Nikam!",
+        title: `Happy Republic Day, Dr. ${doctorLastName}!`,
         subtitle: "Serving the republic with compassion and care"
       };
     }
 
     if (specialDays.newYear) {
       return {
-        title: "Happy New Year, Dr. Nikam!",
+        title: `Happy New Year, Dr. ${doctorLastName}!`,
         subtitle: "Here's to another year of healing hearts and changing lives"
       };
     }
 
     if (specialDays.christmas) {
       return {
-        title: "Merry Christmas, Dr. Nikam!",
+        title: `Merry Christmas, Dr. ${doctorLastName}!`,
         subtitle: "Spreading joy and wellness this festive season"
       };
     }
@@ -394,11 +402,11 @@ export default function Dashboard() {
     if (day === 5) { // Friday
       const fridayMessages = [
         {
-          title: "Happy Friday, Dr. Nikam!",
+          title: `Happy Friday, Dr. ${doctorLastName}!`,
           subtitle: "End the week strong with your healing touch"
         },
         {
-          title: "TGIF, Dr. Nikam!",
+          title: `TGIF, Dr. ${doctorLastName}!`,
           subtitle: "Friday energy for healing and caring"
         }
       ];
@@ -408,7 +416,7 @@ export default function Dashboard() {
     if (day === 1) { // Monday
       const mondayMessages = [
         {
-          title: "Fresh start, Dr. Nikam!",
+          title: `Fresh start, Dr. ${doctorLastName}!`,
           subtitle: "New week, new opportunities to heal and help"
         }
       ];
@@ -417,7 +425,7 @@ export default function Dashboard() {
 
     if (day === 0 || day === 6) { // Weekend
       return {
-        title: "Weekend warrior, Dr. Nikam!",
+        title: `Weekend warrior, Dr. ${doctorLastName}!`,
         subtitle: "Even on weekends, your dedication to care never stops"
       };
     }
@@ -426,15 +434,15 @@ export default function Dashboard() {
     if (hour >= 5 && hour < 12) {
       const morningMessages = [
         {
-          title: "Good morning, Dr. Nikam!",
+          title: `Good morning, Dr. ${doctorLastName}!`,
           subtitle: "Ready to make a difference in people's lives today"
         },
         {
-          title: "Rise and heal, Dr. Nikam!",
+          title: `Rise and heal, Dr. ${doctorLastName}!`,
           subtitle: "Another day to spread wellness and hope"
         },
         {
-          title: "Morning energy, Dr. Nikam!",
+          title: `Morning energy, Dr. ${doctorLastName}!`,
           subtitle: "Starting the day with purpose and healing"
         }
       ];
@@ -442,11 +450,11 @@ export default function Dashboard() {
     } else if (hour >= 12 && hour < 17) {
       const afternoonMessages = [
         {
-          title: "Good afternoon, Dr. Nikam!",
+          title: `Good afternoon, Dr. ${doctorLastName}!`,
           subtitle: "Midday momentum for continued excellent care"
         },
         {
-          title: "Afternoon power, Dr. Nikam!",
+          title: `Afternoon power, Dr. ${doctorLastName}!`,
           subtitle: "Keeping the healing energy strong"
         }
       ];
@@ -454,11 +462,11 @@ export default function Dashboard() {
     } else if (hour >= 17 && hour < 21) {
       const eveningMessages = [
         {
-          title: "Good evening, Dr. Nikam!",
+          title: `Good evening, Dr. ${doctorLastName}!`,
           subtitle: "Winding down another day of compassionate care"
         },
         {
-          title: "Evening excellence, Dr. Nikam!",
+          title: `Evening excellence, Dr. ${doctorLastName}!`,
           subtitle: "Your dedication brightens even the evening hours"
         }
       ];
@@ -466,11 +474,11 @@ export default function Dashboard() {
     } else {
       const lateMessages = [
         {
-          title: "Dedicated healer, Dr. Nikam!",
+          title: `Dedicated healer, Dr. ${doctorLastName}!`,
           subtitle: "Your commitment to patient care knows no bounds"
         },
         {
-          title: "Night owl doctor, Dr. Nikam!",
+          title: `Night owl doctor, Dr. ${doctorLastName}!`,
           subtitle: "Thank you for your round-the-clock dedication"
         }
       ];
@@ -565,14 +573,14 @@ export default function Dashboard() {
           <div className="flex justify-between items-center">
             <div
               className="flex items-center space-x-3 cursor-pointer"
-              onClick={() => setCurrentView('dashboard')}
+              onClick={handleBackToDashboard}
             >
               <div className="p-2 bg-blue-600 dark:bg-blue-500 rounded">
                 <Stethoscope className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Chaitanya Hospital, Deola
+                  {currentDoctor?.hospitalName || 'Chaitanya Hospital'}, {currentDoctor?.hospitalAddress?.split(',')[0] || 'Deola'}
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Practice Management</p>
               </div>
@@ -589,7 +597,7 @@ export default function Dashboard() {
                     className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer border border-gray-200 dark:border-gray-700"
                     title="Generate Registration Key"
                   >
-                    <Key className="w-5 h-5" />
+                    <Key className="w-4 h-4" />
                   </button>
 
                   <KeyGeneratorTooltip
@@ -601,11 +609,11 @@ export default function Dashboard() {
               )}
 
               <button
+                title='Logout'
                 onClick={handleLogout}
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 flex items-center space-x-2 text-sm cursor-pointer"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-700 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 flex items-center space-x-2 text-sm cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
-                <span>Logout</span>
               </button>
 
               <button
