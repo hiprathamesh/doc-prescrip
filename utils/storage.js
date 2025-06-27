@@ -61,27 +61,36 @@ async function apiCall(url, options = {}) {
 export const storage = {
 
   // Doctor context management
-  setCurrentDoctor: (doctorId, doctorName, doctorAccessType) => {
+  setCurrentDoctor: (doctorId, doctorData) => {
     if (typeof window !== 'undefined') {
       if (!doctorId) {
         throw new Error('Doctor ID is required');
       }
       
       // Handle both string parameters and object parameter
-      let name, accessType;
-      if (typeof doctorName === 'object') {
+      let name, accessType, phone, degree, registrationNumber;
+      if (typeof doctorData === 'object') {
         // If second parameter is an object, extract from it
-        name = doctorName.name || doctorName.firstName + ' ' + doctorName.lastName || 'Dr. Nikam';
-        accessType = doctorName.accessType || 'doctor';
+        name = doctorData.name || doctorData.firstName + ' ' + doctorData.lastName || 'Dr. Nikam';
+        accessType = doctorData.accessType || 'doctor';
+        phone = doctorData.phone || '';
+        degree = doctorData.degree || '';
+        registrationNumber = doctorData.registrationNumber || '';
       } else {
-        // If passed as separate parameters
-        name = doctorName || 'Dr. Nikam';
-        accessType = doctorAccessType || 'doctor';
+        // If passed as separate parameters (legacy support)
+        name = doctorData || 'Dr. Nikam';
+        accessType = arguments[2] || 'doctor';
+        phone = '';
+        degree = '';
+        registrationNumber = '';
       }
       
       localStorage.setItem('currentDoctorId', doctorId);
       localStorage.setItem('currentDoctorName', name);
       localStorage.setItem('currentDoctorAccessType', accessType);
+      localStorage.setItem('currentDoctorPhone', phone);
+      localStorage.setItem('currentDoctorDegree', degree);
+      localStorage.setItem('currentDoctorRegistrationNumber', registrationNumber);
     }
   },
 
@@ -93,12 +102,18 @@ export const storage = {
       const doctorId = localStorage.getItem('currentDoctorId');
       const doctorName = localStorage.getItem('currentDoctorName');
       const accessType = localStorage.getItem('currentDoctorAccessType');
+      const phone = localStorage.getItem('currentDoctorPhone');
+      const degree = localStorage.getItem('currentDoctorDegree');
+      const registrationNumber = localStorage.getItem('currentDoctorRegistrationNumber');
 
       if (doctorId) {
         return {
           id: doctorId,
           name: doctorName || 'Dr. Nikam',
-          accessType: accessType || 'doctor'
+          accessType: accessType || 'doctor',
+          phone: phone || '',
+          degree: degree || '',
+          registrationNumber: registrationNumber || ''
         };
       }
     }
@@ -111,6 +126,9 @@ export const storage = {
       localStorage.removeItem('currentDoctorId');
       localStorage.removeItem('currentDoctorName');
       localStorage.removeItem('currentDoctorAccessType');
+      localStorage.removeItem('currentDoctorPhone');
+      localStorage.removeItem('currentDoctorDegree');
+      localStorage.removeItem('currentDoctorRegistrationNumber');
     }
   },
 

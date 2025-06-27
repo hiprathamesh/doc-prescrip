@@ -127,7 +127,10 @@ export default function LoginPage() {
       if (data.success) {
         storage.setCurrentDoctor(data.doctor.doctorId, {
           name: data.doctor.name,
-          accessType: data.doctor.accessType
+          accessType: data.doctor.accessType,
+          phone: data.doctor.phone || '',
+          degree: data.doctor.degree || '',
+          registrationNumber: data.doctor.registrationNumber || ''
         });
 
         toast.success('Login Successful', {
@@ -246,7 +249,10 @@ export default function LoginPage() {
 
         storage.setCurrentDoctor(data.doctor.doctorId, {
           name: data.doctor.name,
-          accessType: data.doctor.accessType
+          accessType: data.doctor.accessType,
+          phone: data.doctor.phone || '',
+          degree: data.doctor.degree || '',
+          registrationNumber: data.doctor.registrationNumber || ''
         });
 
         toast.success('Registration Successful', {

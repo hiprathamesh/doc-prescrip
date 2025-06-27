@@ -5,22 +5,50 @@ export const generateMedicalCertificatePDF = async (certificate, patient, autoDo
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const margin = 20;
+  const margin = 15;
   const contentWidth = pageWidth - 2 * margin;
 
   // Add decorative border
   pdf.setDrawColor(0, 0, 0);
-  pdf.setLineWidth(2);
+  pdf.setLineWidth(1.5);
   pdf.rect(10, 10, pageWidth - 20, pageHeight - 20);
   
-  pdf.setLineWidth(0.5);
-  pdf.rect(15, 15, pageWidth - 30, pageHeight - 30);
+  pdf.setLineWidth(0.3);
+  pdf.rect(12, 12, pageWidth - 24, pageHeight - 24);
 
-  let yPosition = 35;
+  let yPosition = 25;
 
-  // Header
-  pdf.setFontSize(20);
+  // Header Section
+  // Hospital Logo (placeholder - left side)
+  pdf.setFillColor(240, 240, 240);
+  pdf.rect(margin, yPosition, 50, 20, 'F');
+  pdf.setFontSize(8);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(120, 120, 120);
+  pdf.text('HOSPITAL LOGO', margin + 25, yPosition + 12, { align: 'center' });
+
+  // Doctor Details (right side)
+  const doctorDetailsX = pageWidth - margin - 80;
+  pdf.setTextColor(0, 0, 0);
+  
+  pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
+  pdf.text('Dr. Prashant Kisanrao Nikam', doctorDetailsX, yPosition + 5);
+  
+  pdf.setFontSize(11);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('BAMS (College Name)', doctorDetailsX, yPosition + 12);
+  
+  pdf.setFontSize(9);
+  pdf.setTextColor(80, 80, 80);
+  pdf.text('Reg. No: I-34621-A', doctorDetailsX, yPosition + 18);
+
+  yPosition += 35;
+
+  // Title
+  pdf.setFontSize(18);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(0, 0, 0);
   pdf.text('MEDICAL / FITNESS CERTIFICATE', pageWidth / 2, yPosition, { align: 'center' });
   
   yPosition += 15;
@@ -175,36 +203,28 @@ export const generateMedicalCertificatePDF = async (certificate, patient, autoDo
   pdf.text(certLines, margin, yPosition);
   yPosition += certLines.length * 5 + 20;
 
+  // Footer Section
+  const footerY = pageHeight - 35;
+  
   // Doctor signature
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Dr. Prashant Kisanrao Nikam', pageWidth - margin - 60, yPosition);
+  pdf.setFontSize(11);
+  pdf.text('Dr. Prashant Kisanrao Nikam', pageWidth - margin - 60, footerY);
   yPosition += 5;
   pdf.setFont('helvetica', 'normal');
-  pdf.text('Chaitnya Hospital & X Ray Clinic', pageWidth - margin - 60, yPosition);
-  yPosition += 4;
-  pdf.text('Adgaon, Dist. Nashik.', pageWidth - margin - 60, yPosition);
-  yPosition += 4;
-  pdf.text('Reg. No. I-34621-A', pageWidth - margin - 60, yPosition);
+  pdf.setFontSize(9);
+  pdf.text('Chaitnya Hospital & X Ray Clinic', pageWidth - margin - 60, footerY + 5);
+  pdf.text('Adgaon, Dist. Nashik.', pageWidth - margin - 60, footerY + 10);
+  pdf.text('Reg. No. I-34621-A', pageWidth - margin - 60, footerY + 15);
 
-  pdf.text('Dr. Sign & Stamp', margin, yPosition - 15);
-  pdf.text('Reg. No. :', margin, yPosition - 10);
-
-  // Generate blob
-  const pdfBlob = pdf.output('blob');
-
-  // Remove automatic logging here since it's handled when certificate is created
-  // Activity logging should only happen when certificate is actually saved, not when PDF is generated
+  // Footer disclaimers
+  pdf.setFontSize(6);
+  pdf.setTextColor(100, 100, 100);
+  pdf.text('This certificate is computer generated and legally valid.', pageWidth / 2, pageHeight - 15, { align: 'center' });
 
   if (autoDownload) {
-    const url = URL.createObjectURL(pdfBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `medical-certificate-${certificate.patientName}-${formatDate(certificate.issuedDate)}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    pdf.save(`medical-certificate-${certificate.patientName}-${formatDate(certificate.issuedDate)}.pdf`);
   }
 
-  return pdfBlob;
+  return pdf.output('blob');
 };
