@@ -139,7 +139,7 @@ const CustomDropdown = forwardRef(function CustomDropdown({
   return (
     <div className="relative w-full" ref={wrapperRef}>
       <div
-        className={`w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg hover:border-[#BFDBFE] text-left cursor-default focus-within:outline-none focus-within:ring-3 focus-within:ring-[#BFDBFE] focus-within:border-[#3B82F6] text-sm flex items-center justify-between h-12 transition-colors ${disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''
+        className={`w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg hover:border-[#BFDBFE] text-left cursor-default focus-within:outline-none focus-within:ring-0 focus-within:ring-blue-500 focus-within:border-blue-500 dark:focus-within:border-blue-500 text-sm flex items-center justify-between h-12 transition-colors ${disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''
           }`}
       >
         <button
@@ -148,7 +148,7 @@ const CustomDropdown = forwardRef(function CustomDropdown({
           onClick={handleMainButtonClick}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          className="flex-1 p-3 text-left focus:outline-none flex items-center justify-between"
+          className="flex-1 p-3 text-left focus:outline-none flex items-center justify-between cursor-pointer"
         >
           <span className={`block truncate ${selectedOption ? 'text-gray-900 dark:text-gray-400' : 'text-gray-400'}`}>
             {selectedOption ? selectedOption.label : placeholder}

@@ -14,7 +14,7 @@ export default function ConfirmationDialog({ isOpen, title, message, onConfirm, 
             {!isLoading && (
               <button
                 onClick={onCancel}
-                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4 text-gray-500" />
               </button>
@@ -27,14 +27,14 @@ export default function ConfirmationDialog({ isOpen, title, message, onConfirm, 
             <button
               onClick={onCancel}
               disabled={isLoading}
-              className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 text-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 text-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={onConfirm}
               disabled={isLoading}
-              className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white dark:text-gray-900 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white dark:text-gray-900 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 cursor-pointer"
             >
               {isLoading ? (
                 <>

@@ -391,7 +391,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       <div className="flex items-center space-x-3">
         <button
           onClick={onBack}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
@@ -402,7 +402,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       </div>
       <button
         onClick={onNewPrescription}
-        className="w-full sm:w-auto bg-blue-600 text-white dark:text-gray-900 px-4 py-3 sm:py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors shadow-sm"
+        className="w-full sm:w-auto bg-blue-600 text-white dark:text-gray-900 px-4 py-3 sm:py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
       >
         <FileText className="w-4 h-4" />
         <span>New Visit</span>
@@ -425,7 +425,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
@@ -436,7 +436,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
               </div>
               <button
                 onClick={onNewPrescription}
-                className="w-full sm:w-auto bg-blue-600 text-white dark:text-gray-900 px-4 py-3 sm:py-2 rounded-md text-sm font-medium flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors shadow-sm"
+                className="w-full sm:w-auto bg-blue-600 text-white dark:text-gray-900 px-4 py-3 sm:py-2 rounded-md text-sm font-medium flex items-center justify-center space-x-2 hover:bg-blue-700 transition-colors cursor-pointer"
               >
                 <FileText className="w-4 h-4" />
                 <span>New Visit</span>
@@ -571,7 +571,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                     <div className="absolute top-3 right-3">
                       <button
                         onClick={() => setDropdownOpen(dropdownOpen === visit.id ? null : visit.id)}
-                        className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="p-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
                       >
                         <MoreVertical className="w-4 h-4" />
                       </button>
@@ -586,7 +586,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                     downloadCertificate(visit);
                                     setDropdownOpen(null);
                                   }}
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2 cursor-pointer"
                                 >
                                   <Download className="w-4 h-4 text-gray-500" />
                                   <span>Download Certificate</span>
@@ -599,7 +599,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                   patientName={visit.patientName}
                                   certificateDate={formatDate(visit.issuedDate)}
                                   certificateFor={visit.certificateFor}
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
+                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2 cursor-pointer"
                                   variant="dropdown"
                                   onShare={() => setDropdownOpen(null)}
                                   certificate={visit}
@@ -616,7 +616,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                         downloadPrescription(visit);
                                         setDropdownOpen(null);
                                       }}
-                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2 cursor-pointer"
                                     >
                                       <Download className="w-4 h-4 text-gray-500" />
                                       <span>Download Prescription</span>
@@ -628,7 +628,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                       type="prescription"
                                       patientName={patient.name}
                                       visitDate={formatDate(visit.visitDate)}
-                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2 cursor-pointer"
                                       variant="dropdown"
                                       onShare={() => setDropdownOpen(null)}
                                       prescription={visit}
@@ -644,7 +644,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                         downloadBill(visit.bill);
                                         setDropdownOpen(null);
                                       }}
-                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2 cursor-pointer"
                                     >
                                       <Download className="w-4 h-4 text-gray-500" />
                                       <span>Download Bill</span>
@@ -658,7 +658,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                       billDate={formatDate(visit.bill.createdAt)}
                                       amount={visit.bill.amount}
                                       isPaid={visit.bill.isPaid}
-                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2"
+                                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2 cursor-pointer"
                                       variant="dropdown"
                                       onShare={() => setDropdownOpen(null)}
                                       bill={visit.bill}
@@ -672,7 +672,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                             <div className="border-t border-gray-100 dark:border-gray-800 my-1"></div>
                             <button
                               onClick={() => deleteVisit(visit.type === 'certificate' ? visit.id : visit.id, visit.bill?.id, visit.type)}
-                              className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 flex items-center space-x-2"
+                              className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-gray-800 flex items-center space-x-2 cursor-pointer"
                             >
                               <Trash2 className="w-4 h-4" />
                               <span>{visit.type === 'certificate' ? 'Delete Certificate' : 'Delete Visit'}</span>
@@ -700,7 +700,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                             <span className="text-sm font-medium text-gray-900 dark:text-gray-200">₹{visit.bill.amount}</span>
                             <button
                               onClick={() => toggleBillPayment(visit.bill.id || visit.bill.billId)}
-                              className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${visit.bill.isPaid
+                              className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${visit.bill.isPaid
                                   ? 'bg-green-100 text-green-800 hover:bg-green-200'
                                   : 'bg-red-100 text-red-800 hover:bg-red-200'
                                 }`}

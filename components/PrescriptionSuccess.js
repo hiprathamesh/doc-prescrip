@@ -451,7 +451,7 @@ Dr. Prashant Nikam`;
                 <button
                   onClick={downloadPrescription}
                   disabled={!prescriptionPdfUrl || isGeneratingPrescriptionPdf}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white dark:text-gray-900 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white dark:text-gray-900 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download</span>
@@ -555,7 +555,7 @@ Dr. Prashant Nikam`;
                     <button
                       onClick={toggleBillPayment}
                       disabled={isGeneratingBillPdf}
-                      className={`px-3 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${currentBill.isPaid
+                      className={`px-3 py-1 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${currentBill.isPaid
                         ? 'bg-green-100 text-green-800 hover:bg-green-200'
                         : 'bg-red-100 text-red-800 hover:bg-red-200'
                         }`}
@@ -574,7 +574,7 @@ Dr. Prashant Nikam`;
                   <button
                     onClick={downloadBill}
                     disabled={!billPdfUrl || isGeneratingBillPdf}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white dark:text-gray-900 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-normal"
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white dark:text-gray-900 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium cursor-pointer"
                   >
                     <Download className="w-4 h-4" />
                     <span>Download</span>

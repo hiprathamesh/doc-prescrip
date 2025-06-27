@@ -99,7 +99,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
         <div className="flex items-center justify-end space-x-2">
           <button
             onClick={() => setShowSearch(!showSearch)}
-            className="p-2 text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
             title="Search Medications"
           >
             <Search className="w-4 h-4" />
@@ -107,7 +107,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
           {canScrollLeft && (
             <button
               onClick={() => scroll('left')}
-              className="hidden sm:block p-2 text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="hidden sm:block p-2 text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -115,7 +115,7 @@ export default function MedicationSelector({ onSelect, onAddCustom }) {
           {canScrollRight && (
             <button
               onClick={() => scroll('right')}
-              className="hidden sm:block p-2 text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="hidden sm:block p-2 text-gray-600 dark:text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

@@ -73,7 +73,7 @@ export default function PillSelector({
         <div className="flex items-center justify-end space-x-2">
           <button
             onClick={() => setShowSearch(!showSearch)}
-            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-600 rounded-lg transition-colors"
+            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-600 rounded-lg transition-colors cursor-pointer"
             title="Search"
           >
             <Search className="w-4 h-4" />
@@ -81,7 +81,7 @@ export default function PillSelector({
           {canScrollLeft && (
             <button
               onClick={() => scroll('left')}
-              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-600 rounded-lg transition-colors"
+              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-600 rounded-lg transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -89,7 +89,7 @@ export default function PillSelector({
           {canScrollRight && (
             <button
               onClick={() => scroll('right')}
-              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800  dark:hover:text-gray-600 rounded-lg transition-colors"
+              className="hidden sm:block p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800  dark:hover:text-gray-600 rounded-lg transition-colors cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

@@ -314,7 +314,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
@@ -322,7 +322,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
               </div>
               <button
                 onClick={handleSaveCertificate}
-                className="bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+                className="bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Certificate</span>
@@ -340,7 +340,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
@@ -349,7 +349,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
               <div className="flex space-x-3">
                 <button
                   onClick={handleSaveCertificate}
-                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium"
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save Certificate</span>
@@ -387,7 +387,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                   </div>
                   <button
                     onClick={toggleNewPatient}
-                    className={`w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-medium transition-all duration-200 ${isNewPatient ? 'bg-gray-600 hover:bg-gray-700' : ''
+                    className={`w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-medium transition-all duration-200 cursor-pointer ${isNewPatient ? 'bg-gray-600 hover:bg-gray-700' : ''
                       }`}
                   >
                     <Plus className={`w-5 h-5 transition-transform duration-300 ease-out ${isNewPatient ? 'rotate-45' : 'rotate-0'
@@ -414,7 +414,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                           value={newPatientData.name}
                           onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
                           onKeyPress={(e) => handleKeyPress(e, ageRef)}
-                          className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-12"
+                          className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-12"
                           placeholder="Enter patient name"
                           autoFocus={isNewPatient && !isAnimating}
                         />
@@ -427,7 +427,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                           value={newPatientData.age}
                           onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
                           onKeyPress={(e) => handleKeyPress(e, genderRef)}
-                          className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-12"
+                          className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-12"
                           placeholder="Enter age"
                         />
                       </div>
@@ -454,7 +454,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                           value={newPatientData.phone}
                           onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
                           onKeyPress={handleLastFieldKeyPress}
-                          className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-12"
+                          className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-12"
                           placeholder="Enter phone number"
                         />
                       </div>
@@ -462,7 +462,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                         <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
                           <button
                             onClick={handleCreateNewPatient}
-                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg font-medium transition-colors duration-200"
+                            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg font-medium transition-colors duration-200 cursor-pointer"
                           >
                             Create Patient
                           </button>
@@ -526,7 +526,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.certificateFor}
                       onChange={(e) => setCertificateData({ ...certificateData, certificateFor: e.target.value })}
                       placeholder="e.g., Employment, Sports, School admission, etc."
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -535,7 +535,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       type="date"
                       value={certificateData.issuedDate}
                       onChange={(e) => setCertificateData({ ...certificateData, issuedDate: e.target.value })}
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                 </div>
@@ -551,7 +551,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       type="text"
                       value={certificateData.patientName}
                       onChange={(e) => setCertificateData({ ...certificateData, patientName: e.target.value })}
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -560,7 +560,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       type="number"
                       value={certificateData.age}
                       onChange={(e) => setCertificateData({ ...certificateData, age: e.target.value })}
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -584,7 +584,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.height}
                       onChange={(e) => setCertificateData({ ...certificateData, height: e.target.value })}
                       placeholder="e.g., 170 cm"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -594,7 +594,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.weight}
                       onChange={(e) => setCertificateData({ ...certificateData, weight: e.target.value })}
                       placeholder="e.g., 70 kg"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -626,7 +626,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.identificationMarks}
                       onChange={(e) => setCertificateData({ ...certificateData, identificationMarks: e.target.value })}
                       placeholder="e.g., Scar on left hand"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -636,7 +636,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.colourOfEyes}
                       onChange={(e) => setCertificateData({ ...certificateData, colourOfEyes: e.target.value })}
                       placeholder="e.g., Brown"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -646,7 +646,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.colourOfSkin}
                       onChange={(e) => setCertificateData({ ...certificateData, colourOfSkin: e.target.value })}
                       placeholder="e.g., Fair"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -656,7 +656,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.pulse}
                       onChange={(e) => setCertificateData({ ...certificateData, pulse: e.target.value })}
                       placeholder="e.g., 72/min"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -666,7 +666,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.bp}
                       onChange={(e) => setCertificateData({ ...certificateData, bp: e.target.value })}
                       placeholder="e.g., 120/80 mmHg"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -676,7 +676,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.vision}
                       onChange={(e) => setCertificateData({ ...certificateData, vision: e.target.value })}
                       placeholder="e.g., 6/6"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                 </div>
@@ -693,7 +693,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.chestMeasurementInsp}
                       onChange={(e) => setCertificateData({ ...certificateData, chestMeasurementInsp: e.target.value })}
                       placeholder="e.g., 36 inches"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -703,7 +703,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.chestMeasurementExp}
                       onChange={(e) => setCertificateData({ ...certificateData, chestMeasurementExp: e.target.value })}
                       placeholder="e.g., 34 inches"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -713,7 +713,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.lungs}
                       onChange={(e) => setCertificateData({ ...certificateData, lungs: e.target.value })}
                       placeholder="e.g., Normal"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -723,7 +723,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.cardiovascularSystem}
                       onChange={(e) => setCertificateData({ ...certificateData, cardiovascularSystem: e.target.value })}
                       placeholder="e.g., Normal"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -733,7 +733,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.liver}
                       onChange={(e) => setCertificateData({ ...certificateData, liver: e.target.value })}
                       placeholder="e.g., Not palpable"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -743,7 +743,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.spleen}
                       onChange={(e) => setCertificateData({ ...certificateData, spleen: e.target.value })}
                       placeholder="e.g., Not palpable"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -753,7 +753,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.urinarySystem}
                       onChange={(e) => setCertificateData({ ...certificateData, urinarySystem: e.target.value })}
                       placeholder="e.g., Normal"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                   <div>
@@ -763,7 +763,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       value={certificateData.urine}
                       onChange={(e) => setCertificateData({ ...certificateData, urine: e.target.value })}
                       placeholder="e.g., Normal"
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors h-11"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                     />
                   </div>
                 </div>
@@ -805,7 +805,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       onChange={(e) => setCertificateData({ ...certificateData, remarks: e.target.value })}
                       placeholder="Any additional remarks or observations..."
                       rows={3}
-                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
+                      className="w-full text-sm p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors resize-none"
                     />
                   </div>
                 </div>

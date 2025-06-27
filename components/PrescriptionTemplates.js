@@ -313,7 +313,7 @@ export default function PrescriptionTemplates({ onBack }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
@@ -321,7 +321,7 @@ export default function PrescriptionTemplates({ onBack }) {
               </div>
               <button
                 onClick={handleCreateNew}
-                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Template</span>
@@ -339,7 +339,7 @@ export default function PrescriptionTemplates({ onBack }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
@@ -347,7 +347,7 @@ export default function PrescriptionTemplates({ onBack }) {
               </div>
               <button
                 onClick={handleCreateNew}
-                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium"
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Template</span>
@@ -367,9 +367,12 @@ export default function PrescriptionTemplates({ onBack }) {
                 placeholder="Search templates..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-70 pl-10 pr-16 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                className="w-70 pl-10 pr-16 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-sm"
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border">
+              <div
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border cursor-pointer"
+                onClick={() => searchInputRef.current?.focus()}
+              >
                 Ctrl K
               </div>
             </div>
@@ -406,13 +409,13 @@ export default function PrescriptionTemplates({ onBack }) {
                           <div className="flex items-center space-x-1 ml-3">
                             <button
                               onClick={() => handleEdit(template)}
-                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-md transition-colors"
+                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-md transition-colors cursor-pointer"
                             >
                               <Edit className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => handleDelete(template.id)}
-                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 rounded-md transition-colors"
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 rounded-md transition-colors cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -527,7 +530,7 @@ export default function PrescriptionTemplates({ onBack }) {
                 {!searchTerm && (
                   <button
                     onClick={handleCreateNew}
-                    className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors duration-200 mx-auto"
+                    className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors duration-200 mx-auto cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Create Template</span>
@@ -807,7 +810,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onCancel}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
@@ -818,13 +821,13 @@ function TemplateEditor({ template, onSave, onCancel }) {
               <div className="flex space-x-3">
                 <button
                   onClick={onCancel}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
-                  className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200"
+                  className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200 cursor-pointer"
                 >
                   <span>Save Template</span>
                 </button>
@@ -842,7 +845,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onCancel}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
@@ -853,13 +856,13 @@ function TemplateEditor({ template, onSave, onCancel }) {
               <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                 <button
                   onClick={onCancel}
-                  className="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm"
+                  className="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 text-sm font-medium"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 text-sm font-medium cursor-pointer"
                 >
                   <span>Save Template</span>
                 </button>
@@ -880,7 +883,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., Common Cold, Hypertension, Diabetes Follow-up"
-                  className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-sm"
                 />
               </div>
               <div>
@@ -890,7 +893,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Brief description of when to use this template"
-                  className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-sm"
                 />
               </div>
             </div>
@@ -957,7 +960,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                           />
                           <button
                             onClick={() => removeSymptom(symptom.id)}
-                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1017,11 +1020,11 @@ function TemplateEditor({ template, onSave, onCancel }) {
                             placeholder="Description (optional)"
                             value={diagnosis.description}
                             onChange={(e) => updateDiagnosis(diagnosis.id, 'description', e.target.value)}
-                            className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                            className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                           />
                           <button
                             onClick={() => removeDiagnosis(diagnosis.id)}
-                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1114,7 +1117,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
 
                           <button
                             onClick={() => removeMedication(medication.id)}
-                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors sm:justify-self-end"
+                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors sm:justify-self-end cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1126,7 +1129,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                             placeholder="Dosage (e.g., 500mg)"
                             value={medication.dosage}
                             onChange={(e) => updateMedication(medication.id, 'dosage', e.target.value)}
-                            className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                            className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                           />
                           <CustomDropdown
                             options={MEDICATION_TIMING.map(option => ({ value: option.value, label: option.label }))}
@@ -1148,7 +1151,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                             placeholder="Remarks"
                             value={medication.remarks}
                             onChange={(e) => updateMedication(medication.id, 'remarks', e.target.value)}
-                            className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                            className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                           />
                         </div>
                       </div>
@@ -1206,11 +1209,11 @@ function TemplateEditor({ template, onSave, onCancel }) {
                             placeholder="Remarks (optional)"
                             value={lab.remarks || ''}
                             onChange={(e) => updateLabResult(lab.id, 'remarks', e.target.value)}
-                            className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors h-11"
+                            className="text-sm w-full p-2.5 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-11"
                           />
                           <button
                             onClick={() => removeLabResult(lab.id)}
-                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors"
+                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -1232,7 +1235,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                 onChange={(e) => setFormData({ ...formData, doctorNotes: e.target.value })}
                 placeholder="Enter doctor's notes (one per line)"
                 rows={5}
-                className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
+                className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors resize-none text-sm"
               />
               <p className="text-xs text-gray-500 mt-2">Separate each note with a new line</p>
             </div>
@@ -1244,7 +1247,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                 onChange={(e) => setFormData({ ...formData, advice: e.target.value })}
                 placeholder="Enter advice for patient (one per line)"
                 rows={5}
-                className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none text-sm"
+                className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors resize-none text-sm"
               />
               <p className="text-xs text-gray-500 mt-2">Separate each advice with a new line</p>
             </div>

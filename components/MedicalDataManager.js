@@ -271,7 +271,7 @@ export default function MedicalDataManager({ onBack }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
@@ -298,7 +298,7 @@ export default function MedicalDataManager({ onBack }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
@@ -328,9 +328,12 @@ export default function MedicalDataManager({ onBack }) {
                 placeholder={`Search ${activeTab.replace('-', ' ')}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-70 pl-10 pr-16 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                className="w-70 pl-10 pr-16 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-sm"
               />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border">
+              <div
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border cursor-pointer"
+                onClick={() => searchInputRef.current?.focus()}
+              >
                 Ctrl K
               </div>
             </div>
@@ -346,12 +349,12 @@ export default function MedicalDataManager({ onBack }) {
                 value={newItem}
                 onChange={(e) => setNewItem(e.target.value)}
                 placeholder={getPlaceholder()}
-                className="flex-1 p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                className="flex-1 p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-sm"
                 onKeyDown={(e) => e.key === 'Enter' && handleAddItem()}
               />
               <button
                 onClick={handleAddItem}
-                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors duration-200 font-medium"
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors duration-200 font-medium cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add</span>
@@ -382,7 +385,7 @@ export default function MedicalDataManager({ onBack }) {
                     <span>{item}</span>
                     <button
                       onClick={() => handleDeleteItem(item)}
-                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs"
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs cursor-pointer"
                       title="Remove item"
                     >
                       ×
@@ -515,7 +518,7 @@ function Pagination({ currentPage, totalPages, onPageChange, showingStart, showi
           disabled={currentPage === 1}
           className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === 1
             ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer'
             }`}
         >
           Previous
@@ -532,7 +535,7 @@ function Pagination({ currentPage, totalPages, onPageChange, showingStart, showi
                 ? 'bg-blue-600 text-white'
                 : page === '...'
                   ? 'text-gray-400 cursor-default'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer'
                 }`}
             >
               {page}
@@ -546,7 +549,7 @@ function Pagination({ currentPage, totalPages, onPageChange, showingStart, showi
           disabled={currentPage === totalPages}
           className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === totalPages
             ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer'
             }`}
         >
           Next

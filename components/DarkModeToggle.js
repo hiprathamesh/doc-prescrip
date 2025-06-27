@@ -65,7 +65,7 @@ export default function DarkModeToggle() {
     <button
       onClick={handleToggle}
       ref={ref}
-      className="p-2 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors duration-200 border border-gray-200 dark:border-slate-600"
+      className="p-2 rounded-lg bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors duration-200 border border-gray-200 dark:border-gray-700 cursor-pointer"
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
       {isDark ? (

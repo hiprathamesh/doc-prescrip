@@ -17,7 +17,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
   const patientHeaderRef = useRef(null);
   const [isPatientHeaderVisible, setIsPatientHeaderVisible] = useState(true);
   const searchInputRef = useRef(null);
-  
+
   // Add confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
@@ -129,7 +129,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
 
   const handleConfirmDelete = async (patientId) => {
     setConfirmDialog(prev => ({ ...prev, isLoading: true }));
-    
+
     try {
       await onPatientDelete(patientId);
       setConfirmDialog({
@@ -278,7 +278,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
               <div className="flex items-center space-x-3">
                 <button
                   onClick={onBack}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4 text-gray-600" />
                 </button>
@@ -292,9 +292,12 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                   placeholder="Search patients..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-64 pl-10 pr-16 py-2 text-sm border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-64 pl-10 pr-16 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors"
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded border">
+                <div
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded border cursor-pointer"
+                  onClick={() => searchInputRef.current?.focus()}
+                >
                   Ctrl K
                 </div>
               </div>
@@ -325,9 +328,12 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                   placeholder="Search patients..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-70 pl-9 pr-16 py-2.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="w-70 pl-9 pr-16 py-2.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors"
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border">
+                <div
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border cursor-pointer"
+                  onClick={() => searchInputRef.current?.focus()}
+                >
                   Ctrl K
                 </div>
               </div>
@@ -433,10 +439,10 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                       <div>
                         <span className="text-gray-500">Follow-up Status:</span>
                         <div className={`font-medium ${patient.followUpStatus === 'pending'
-                            ? 'text-orange-600'
-                            : patient.followUpStatus === 'overdue'
-                              ? 'text-red-600'
-                              : 'text-green-600'
+                          ? 'text-orange-600'
+                          : patient.followUpStatus === 'overdue'
+                            ? 'text-red-600'
+                            : 'text-green-600'
                           }`}>
                           {patient.followUpStatus === 'pending'
                             ? `Due: ${formatDate(patient.nextExpected)}`

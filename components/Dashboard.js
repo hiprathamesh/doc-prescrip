@@ -548,7 +548,7 @@ export default function Dashboard() {
               <DarkModeToggle />
               <button
                 onClick={handleLogout}
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 flex items-center space-x-2 text-sm"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 flex items-center space-x-2 text-sm cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
@@ -556,7 +556,7 @@ export default function Dashboard() {
 
               <button
                 onClick={() => handleNewPrescription()}
-                className="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white dark:text-gray-900 px-4 py-2 rounded text-sm font-medium flex items-center space-x-2 transition-all duration-200"
+                className="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white dark:text-gray-900 px-4 py-2 rounded text-sm font-medium flex items-center space-x-2 transition-all duration-200 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Prescription</span>
@@ -723,7 +723,7 @@ export default function Dashboard() {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => handleNewPrescription()}
-                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left cursor-pointer"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-blue-600 dark:bg-blue-500 rounded">
@@ -738,7 +738,7 @@ export default function Dashboard() {
 
                     <button
                       onClick={handleViewAllPatients}
-                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left cursor-pointer"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-green-600 dark:bg-green-500 rounded">
@@ -753,7 +753,7 @@ export default function Dashboard() {
 
                     <button
                       onClick={handleViewTemplates}
-                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left cursor-pointer"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-purple-600 dark:bg-purple-500 rounded">
@@ -768,7 +768,7 @@ export default function Dashboard() {
 
                     <button
                       onClick={handleViewMedicalData}
-                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left cursor-pointer"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-orange-600 dark:bg-orange-500 rounded">
@@ -784,7 +784,7 @@ export default function Dashboard() {
                     {isAdmin() && (
                       <button
                         onClick={() => setShowKeyGeneratorModal(true)}
-                        className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
+                        className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left cursor-pointer"
                       >
                         <div className="flex items-center space-x-3">
                           <div className="p-2 bg-indigo-600 dark:bg-indigo-500 rounded">
@@ -800,7 +800,7 @@ export default function Dashboard() {
 
                     <button
                       onClick={() => handleNewMedicalCertificate()}
-                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left"
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left cursor-pointer"
                     >
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-cyan-600 dark:bg-cyan-500 rounded">
@@ -821,7 +821,7 @@ export default function Dashboard() {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
                     <button
                       onClick={handleViewAllPatients}
-                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm cursor-pointer"
                     >
                       View All
                     </button>
