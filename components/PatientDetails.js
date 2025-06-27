@@ -10,12 +10,77 @@ import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
 import useScrollToTop from '../hooks/useScrollToTop';
 
+// Loading skeleton component for medical history
+const MedicalHistorySkeleton = () => (
+  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-3 animate-pulse"></div>
+    <div className="flex flex-wrap gap-2">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div key={index} className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-24 animate-pulse"></div>
+      ))}
+    </div>
+  </div>
+);
+
+// Loading skeleton component for visit timeline
+const VisitTimelineSkeleton = () => (
+  <div className="relative">
+    {/* Timeline line skeleton */}
+    <div className="absolute left-6 top-6 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-600"></div>
+
+    <div className="space-y-8">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="relative">
+          {/* Timeline circle and date row skeleton */}
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="relative flex-shrink-0">
+              <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse border-4 border-white dark:border-gray-900"></div>
+            </div>
+            <div className="flex-1">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-1 animate-pulse"></div>
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-32 animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Visit Card skeleton */}
+          <div className="ml-16 bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 border-gray-100 rounded-lg p-4 relative">
+            {/* Header skeleton */}
+            <div className="flex items-center justify-between mb-3 pr-8">
+              <div className="flex items-center space-x-3">
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-28 animate-pulse"></div>
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-16 animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Content skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+              {Array.from({ length: 3 }).map((_, colIndex) => (
+                <div key={colIndex}>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-2 animate-pulse"></div>
+                  <div className="space-y-1">
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   const [visits, setVisits] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [showFloatingHeader, setShowFloatingHeader] = useState(false);
   const headerRef = useRef(null);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  
+  // Add loading states
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [medicalHistory, setMedicalHistory] = useState([]);
   
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState({
@@ -77,6 +142,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   }, []);
 
   const loadPatientData = async () => {
+    setIsLoadingData(true);
     try {
       const patientPrescriptions = await storage.getPrescriptionsByPatient(patient.id);
       const patientBills = await storage.getBillsByPatient(patient.id);
@@ -157,9 +223,16 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       });
       
       setVisits(sortedVisits);
+      
+      // Calculate medical history from visits
+      const calculatedMedicalHistory = getMedicalHistory(sortedVisits);
+      setMedicalHistory(calculatedMedicalHistory);
     } catch (error) {
       console.error('Error loading patient data:', error);
       setVisits([]);
+      setMedicalHistory([]);
+    } finally {
+      setIsLoadingData(false);
     }
   };
 
@@ -376,8 +449,8 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
     return items.map(item => typeof item === 'string' ? item : item[keyField]).join(', ');
   };
 
-  const getMedicalHistory = () => {
-    const allDiagnoses = visits.flatMap(visit => visit.diagnosis || []);
+  const getMedicalHistory = (visitsData = visits) => {
+    const allDiagnoses = visitsData.flatMap(visit => visit.diagnosis || []);
     const uniqueDiagnoses = [...new Set(allDiagnoses.map(d => d.name))];
     return uniqueDiagnoses;
   };
@@ -487,9 +560,19 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
               <span className="text-sm font-medium">Billing</span>
             </div>
             <div className="space-y-1">
-              <p className="text-xs text-gray-600">Total: ₹{totalBills}</p>
-              <p className="text-xs text-green-600">Paid: ₹{paidBills}</p>
-              {pendingBills > 0 && <p className="text-xs text-red-600">Pending: ₹{pendingBills}</p>}
+              {isLoadingData ? (
+                <>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-12 animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse"></div>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs text-gray-600">Total: ₹{totalBills}</p>
+                  <p className="text-xs text-green-600">Paid: ₹{paidBills}</p>
+                  {pendingBills > 0 && <p className="text-xs text-red-600">Pending: ₹{pendingBills}</p>}
+                </>
+              )}
             </div>
           </div>
 
@@ -498,24 +581,32 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
               <FileText className="w-4 h-4" />
               <span className="text-sm font-medium">Visits</span>
             </div>
-            <p className="text-sm text-gray-900 dark:text-gray-100">{visits.length} total</p>
+            {isLoadingData ? (
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12 animate-pulse"></div>
+            ) : (
+              <p className="text-sm text-gray-900 dark:text-gray-100">{visits.length} total</p>
+            )}
           </div>
         </div>
 
         {/* Medical History */}
-        {getMedicalHistory().length > 0 && (
-          <>
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Medical History</h3>
-              <div className="flex flex-wrap gap-2">
-                {getMedicalHistory().map((condition, index) => (
-                  <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-800 border border-red-200">
-                    {condition}
-                  </span>
-                ))}
+        {isLoadingData ? (
+          <MedicalHistorySkeleton />
+        ) : (
+          medicalHistory.length > 0 && (
+            <>
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Medical History</h3>
+                <div className="flex flex-wrap gap-2">
+                  {medicalHistory.map((condition, index) => (
+                    <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-800 border border-red-200">
+                      {condition}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          </>
+            </>
+          )
         )}
       </div>
 
@@ -523,7 +614,9 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       <div className="bg-white dark:bg-gray-900 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Visit Timeline</h2>
 
-        {visits.length === 0 ? (
+        {isLoadingData ? (
+          <VisitTimelineSkeleton />
+        ) : visits.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600">No visits recorded yet</p>
