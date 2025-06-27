@@ -9,6 +9,32 @@ import { activityLogger } from '../utils/activityLogger';
 import CustomDropdown from './CustomDropdown';
 import useScrollToTop from '../hooks/useScrollToTop';
 
+// Loading skeleton for custom items
+const CustomItemsSkeleton = () => (
+  <div className="flex flex-wrap gap-2">
+    {Array.from({ length: 8 }).map((_, index) => (
+      <div 
+        key={index} 
+        className="h-7 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"
+        style={{ width: `${Math.random() * 60 + 60}px` }} // Random widths between 60-120px
+      />
+    ))}
+  </div>
+);
+
+// Loading skeleton for predefined items
+const PredefinedItemsSkeleton = () => (
+  <div className="flex flex-wrap gap-2">
+    {Array.from({ length: 24 }).map((_, index) => (
+      <div 
+        key={index} 
+        className="h-7 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"
+        style={{ width: `${Math.random() * 80 + 80}px` }} // Random widths between 80-160px
+      />
+    ))}
+  </div>
+);
+
 export default function MedicalDataManager({ onBack }) {
   const [activeTab, setActiveTab] = useState('symptoms');
   const [customSymptoms, setCustomSymptoms] = useState([]);
@@ -17,6 +43,8 @@ export default function MedicalDataManager({ onBack }) {
   const [customMedications, setCustomMedications] = useState([]);
   const [newItem, setNewItem] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  // Add loading state
+  const [isLoadingData, setIsLoadingData] = useState(true);
   // Add pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(24); // Show 24 items per page for better grid layout
@@ -77,6 +105,7 @@ export default function MedicalDataManager({ onBack }) {
   }, []);
 
   const loadData = async () => {
+    setIsLoadingData(true);
     try {
       const [symptoms, diagnoses, labTests, medications] = await Promise.all([
         storage.getCustomSymptoms(),
@@ -95,6 +124,8 @@ export default function MedicalDataManager({ onBack }) {
       setCustomDiagnoses([]);
       setCustomLabTests([]);
       setCustomMedications([]);
+    } finally {
+      setIsLoadingData(false);
     }
   };
 
@@ -318,7 +349,6 @@ export default function MedicalDataManager({ onBack }) {
 
         <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Search */}
-
           <div className="w-full flex justify-end">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -338,7 +368,6 @@ export default function MedicalDataManager({ onBack }) {
               </div>
             </div>
           </div>
-
 
           {/* Add new item */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
@@ -362,20 +391,23 @@ export default function MedicalDataManager({ onBack }) {
             </div>
           </div>
 
-
-
-
           {/* Custom items */}
           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {getTabLabel(activeTab)}
               </h3>
-              <span className="text-sm text-gray-500">
-                {getItemCount()} item{getItemCount() !== 1 ? 's' : ''}
-              </span>
+              {isLoadingData ? (
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-16 animate-pulse"></div>
+              ) : (
+                <span className="text-sm text-gray-500">
+                  {getItemCount()} item{getItemCount() !== 1 ? 's' : ''}
+                </span>
+              )}
             </div>
-            {filteredItems.length > 0 ? (
+            {isLoadingData ? (
+              <CustomItemsSkeleton />
+            ) : filteredItems.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {filteredItems.map((item, index) => (
                   <div
