@@ -559,6 +559,17 @@ class DatabaseService {
     }
   }
 
+  async getRegistrationKeyDetails(key) {
+    try {
+      const collection = await getCollection(this.collections.registrationKeys);
+      const keyData = await collection.findOne({ key });
+      return keyData;
+    } catch (error) {
+      console.error('Error getting registration key details:', error);
+      return null;
+    }
+  }
+
   async useRegistrationKey(key, doctorId) {
     try {
       const collection = await getCollection(this.collections.registrationKeys);

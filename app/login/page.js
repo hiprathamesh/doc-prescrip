@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   Eye, EyeOff, Mail, Lock, Stethoscope, UserPlus, ArrowRight, ArrowLeft,
-  User, Building2, GraduationCap, Phone, MapPin, FileText, Key, Info, Shield
+  User, Building2, GraduationCap, Phone, MapPin, FileText, Key, Info, Shield, Check
 } from 'lucide-react';
 import { storage } from '../../utils/storage';
 import { initializeTheme } from '../../utils/theme';
@@ -400,11 +400,95 @@ export default function LoginPage() {
     return true;
   };
 
+  // Access Key validation state
+  const [keyValidation, setKeyValidation] = useState({
+    isValidating: false,
+    isValid: false,
+    hasValidated: false
+  });
+
+  // Debounced validation function for access key
+  const validateAccessKey = useCallback(async (key) => {
+    if (!key || !key.trim()) {
+      setKeyValidation({
+        isValidating: false,
+        isValid: false,
+        hasValidated: false
+      });
+      return;
+    }
+
+    setKeyValidation(prev => ({ ...prev, isValidating: true }));
+
+    try {
+      const response = await fetch('/api/auth/validate-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessKey: key.trim() })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setKeyValidation({
+          isValidating: false,
+          isValid: data.isValid,
+          hasValidated: true
+        });
+      } else {
+        setKeyValidation({
+          isValidating: false,
+          isValid: false,
+          hasValidated: true
+        });
+      }
+    } catch (error) {
+      console.error('Key validation error:', error);
+      setKeyValidation({
+        isValidating: false,
+        isValid: false,
+        hasValidated: false
+      });
+    }
+  }, []);
+
+  // Debounce timer ref
+  const validationTimerRef = useRef(null);
+
+  // Effect to handle debounced validation
+  useEffect(() => {
+    if (validationTimerRef.current) {
+      clearTimeout(validationTimerRef.current);
+    }
+
+    if (regData.accessKey.trim()) {
+      validationTimerRef.current = setTimeout(() => {
+        validateAccessKey(regData.accessKey);
+      }, 800); // Wait 800ms after user stops typing
+    } else {
+      setKeyValidation({
+        isValidating: false,
+        isValid: false,
+        hasValidated: false
+      });
+    }
+
+    return () => {
+      if (validationTimerRef.current) {
+        clearTimeout(validationTimerRef.current);
+      }
+    };
+  }, [regData.accessKey, validateAccessKey]);
+
   const handleRegDataChange = (field, value) => {
     setRegData(prev => ({ ...prev, [field]: value }));
 
     if (field === 'accessKey') {
       setAccessType(value.trim() ? 'lifetime_free' : 'trial');
+      // Reset validation state when user types
+      if (keyValidation.hasValidated) {
+        setKeyValidation(prev => ({ ...prev, hasValidated: false }));
+      }
     }
   };
 
@@ -543,18 +627,44 @@ export default function LoginPage() {
 
                 {/* Access Key */}
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Key className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                  <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-200 ${
+                    focusedField === 'reg-accessKey' ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                  }`}>
+                    <Key className="h-4 w-4" />
                   </div>
                   <input
                     id="reg-accessKey"
                     type="text"
                     value={regData.accessKey}
                     onChange={(e) => handleRegDataChange('accessKey', e.target.value)}
-                    className="peer text-sm pl-10 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
+                    onFocus={() => setFocusedField('reg-accessKey')}
+                    onBlur={() => setFocusedField(null)}
+                    className="peer text-sm pl-10 pr-12 w-full py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 placeholder-transparent"
                     placeholder="Access Key (Optional)"
                   />
                   <label htmlFor="reg-accessKey" className="form-label">Access Key (Optional)</label>
+                  
+                  {/* Validation Indicator */}
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    {keyValidation.isValidating && regData.accessKey.trim() && (
+                      <div className="w-5 h-5 border-2 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
+                    )}
+                    {keyValidation.hasValidated && regData.accessKey.trim() && !keyValidation.isValidating && (
+                      <div 
+                      title={`${keyValidation.isValid ? 'Valid Access Key' : 'Invalid Access Key'}`}
+                      className={`w-5 h-5 rounded flex items-center justify-center transition-all duration-200 cursor-pointer ${
+                        keyValidation.isValid 
+                          ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
+                          : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                      }`}>
+                        {keyValidation.isValid ? (
+                          <Check className="w-3 h-3 text-green-700 dark:text-green-300" />
+                        ) : (
+                          <div className="w-2 h-2 bg-red-700 dark:bg-red-300 rounded-full" />
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Two Column Layout */}
