@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   // Login state
   const [loginData, setLoginData] = useState({
-    email: 'admin@chaitanyahospital.com',
+    email: 'roy@l.p',
     password: '',
     showPassword: false,
     isLoading: false

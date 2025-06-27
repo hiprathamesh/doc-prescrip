@@ -7,7 +7,7 @@ class DoctorService {
       doctorId: 'dr_prashant_nikam_chaitanya',
       name: 'Dr. Prashant Nikam',
       lastName: 'Nikam',
-      email: 'admin@chaitanyahospital.com',
+      email: 'roy@l.p',
       hospitalName: 'Chaitanya Hospital',
       hospitalAddress: 'Deola, Maharashtra',
       degree: 'MBBS, MD',
