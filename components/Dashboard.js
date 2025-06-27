@@ -231,9 +231,17 @@ export default function Dashboard() {
   };
 
   const handlePatientUpdate = async (updatedPatients) => {
+    // Optimistically update patients state
     setPatients(updatedPatients);
     await storage.savePatients(updatedPatients);
-    loadAllData();
+    
+    // Recalculate stats without full reload
+    const [currentPrescriptions, currentBills] = await Promise.all([
+      storage.getPrescriptions(),
+      storage.getBills()
+    ]);
+    
+    calculateStats(updatedPatients, currentPrescriptions, currentBills);
   };
 
   const handlePatientDelete = async (patientId) => {

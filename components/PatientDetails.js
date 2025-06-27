@@ -238,44 +238,90 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
 
   const toggleBillPayment = async (billId) => {
     try {
-      const allBills = await storage.getBills();
-      // Use the actual bill id, not billId field
-      const billToUpdate = allBills.find(b => b.id === billId || b.billId === billId);
-
-      if (!billToUpdate) {
+      // Find the visit and bill to update
+      const visitToUpdate = visits.find(visit => 
+        visit.bill && (visit.bill.id === billId || visit.bill.billId === billId)
+      );
+      
+      if (!visitToUpdate || !visitToUpdate.bill) {
         toast.error('Error', {
           description: 'Bill not found'
         });
         return;
       }
 
+      const originalBill = { ...visitToUpdate.bill };
       const updatedBill = {
+        ...originalBill,
+        isPaid: !originalBill.isPaid,
+        paidAt: !originalBill.isPaid ? new Date() : null
+      };
+
+      // Optimistically update the visits state
+      const optimisticVisits = visits.map(visit => {
+        if (visit.bill && (visit.bill.id === billId || visit.bill.billId === billId)) {
+          return {
+            ...visit,
+            bill: updatedBill
+          };
+        }
+        return visit;
+      });
+      setVisits(optimisticVisits);
+
+      // Update storage
+      const allBills = await storage.getBills();
+      const billToUpdate = allBills.find(b => b.id === billId || b.billId === billId);
+
+      if (!billToUpdate) {
+        // Rollback on error
+        setVisits(visits);
+        toast.error('Error', {
+          description: 'Bill not found in storage'
+        });
+        return;
+      }
+
+      const finalUpdatedBill = {
         ...billToUpdate,
         isPaid: !billToUpdate.isPaid,
         paidAt: !billToUpdate.isPaid ? new Date() : null
       };
 
+      // Regenerate PDF with new status
       const { generateBillPDF } = await import('../utils/billGenerator');
-      const newBillBlob = await generateBillPDF(updatedBill, patient);
+      const newBillBlob = await generateBillPDF(finalUpdatedBill, patient);
       const newBillUrl = URL.createObjectURL(newBillBlob);
-      updatedBill.pdfUrl = newBillUrl;
+      finalUpdatedBill.pdfUrl = newBillUrl;
 
       const updatedBills = allBills.map(bill =>
-        (bill.id === billId || bill.billId === billId) ? updatedBill : bill
+        (bill.id === billId || bill.billId === billId) ? finalUpdatedBill : bill
       );
 
       await storage.saveBills(updatedBills);
       
       // Log activity
-      await activityLogger.logBillPaymentUpdated(patient, updatedBill.amount, updatedBill.isPaid);
+      await activityLogger.logBillPaymentUpdated(patient, finalUpdatedBill.amount, finalUpdatedBill.isPaid);
       
-      loadPatientData();
+      // Update visits with the final bill including PDF URL
+      const finalVisits = visits.map(visit => {
+        if (visit.bill && (visit.bill.id === billId || visit.bill.billId === billId)) {
+          return {
+            ...visit,
+            bill: finalUpdatedBill
+          };
+        }
+        return visit;
+      });
+      setVisits(finalVisits);
 
-      toast.success(updatedBill.isPaid ? 'Payment Received' : 'Payment Marked Pending', {
+      toast.success(finalUpdatedBill.isPaid ? 'Payment Received' : 'Payment Marked Pending', {
         description: `Bill payment status updated successfully`
       });
     } catch (error) {
       console.error('Error updating bill payment status:', error);
+      // Rollback to original visits state on error
+      loadPatientData();
       toast.error('Error', {
         description: 'Failed to update payment status'
       });

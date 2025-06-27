@@ -122,16 +122,22 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
   const toggleBillPayment = async () => {
     if (!currentBill) return;
 
-    try {
-      // Only set loading state for bill PDF
-      setIsGeneratingBillPdf(true);
+    // Store original bill state for rollback if needed
+    const originalBill = { ...currentBill };
 
-      // Update bill status
+    try {
+      // Optimistically update the UI first
       const updatedBill = {
         ...currentBill,
         isPaid: !currentBill.isPaid,
         paidAt: !currentBill.isPaid ? new Date() : null
       };
+
+      // Update local state immediately (optimistic update)
+      setCurrentBill(updatedBill);
+
+      // Only set loading state for bill PDF regeneration
+      setIsGeneratingBillPdf(true);
 
       // Update bill in storage
       const allBills = await storage.getBills();
@@ -152,12 +158,14 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       );
       await storage.saveBills(finalUpdatedBills);
 
-      // Update local state
+      // Update local state with PDF URL
       setCurrentBill(updatedBill);
       setBillPdfUrl(newBillUrl);
 
     } catch (error) {
       console.error('Error updating bill payment status:', error);
+      // Rollback on error
+      setCurrentBill(originalBill);
       alert('Failed to update payment status');
     } finally {
       // Only reset loading state for bill PDF

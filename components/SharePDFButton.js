@@ -50,6 +50,8 @@ Your bill for the consultation on ${billDate} is ready.
 Amount: ₹${amount}
 Status: ${isPaid ? 'Paid' : 'Pending'}
 
+Please find your bill attached.
+
 Thank you for visiting us.
 
 Best regards,
@@ -60,6 +62,8 @@ Dr. Prashant Nikam`
 Your medical certificate dated ${certificateDate} is ready.
 
 Certificate Purpose: ${certificateFor}
+
+Please find your certificate attached.
 
 Thank you for visiting us.
 
