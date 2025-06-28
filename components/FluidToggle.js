@@ -1,36 +1,44 @@
-'use client';
-
 import React, { useState, useRef, useEffect } from 'react';
 
-export default function FluidToggle({ 
-  checked, 
-  onChange, 
+export default function FluidToggle({
+  checked = false,
+  onChange,
   disabled = false,
-  size = 'default', // 'small', 'default', 'large'
+  size = 'default',
   className = ''
 }) {
   const [isPressed, setIsPressed] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const timeoutRef = useRef(null);
 
-  // Size configurations
+  // Memoized size configurations with smoother scaling
   const sizeConfig = {
     small: {
       track: 'w-10 h-5',
-      thumb: 'w-4 h-4',
-      thumbPressed: 'w-6 h-4',
-      translate: 'translate-x-[1.375rem]' // 22px
+      thumb: 'w-3.5 h-3.5',
+      thumbPressed: 'w-5 h-3.5',
+      thumbHovered: 'w-4 h-4',
+      translateUnchecked: 'translate-x-0.5',
+      translateChecked: 'translate-x-[1.25rem]',
+      translateCheckedPressed: 'translate-x-[0.75rem]'
     },
     default: {
       track: 'w-12 h-6',
-      thumb: 'w-5 h-5',
-      thumbPressed: 'w-7 h-5',
-      translate: 'translate-x-[1.625rem]' // 26px
+      thumb: 'w-4 h-4',
+      thumbPressed: 'w-6 h-4',
+      thumbHovered: 'w-4 h-4',
+      translateUnchecked: 'translate-x-1',
+      translateChecked: 'translate-x-[1.75rem]',
+      translateCheckedPressed: 'translate-x-[1.25rem]'
     },
     large: {
       track: 'w-14 h-7',
-      thumb: 'w-6 h-6',
-      thumbPressed: 'w-8 h-6',
-      translate: 'translate-x-[1.875rem]' // 30px
+      thumb: 'w-5 h-5',
+      thumbPressed: 'w-7 h-5',
+      thumbHovered: 'w-6 h-6',
+      translateUnchecked: 'translate-x-1',
+      translateChecked: 'translate-x-[2.25rem]',
+      translateCheckedPressed: 'translate-x-[1.75rem]'
     }
   };
 
@@ -40,37 +48,34 @@ export default function FluidToggle({
     if (disabled) return;
     setIsPressed(true);
     
-    // Clear any existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
   };
 
   const handleMouseUp = () => {
-    if (disabled) return;
+    if (disabled || !isPressed) return;
     
-    // Immediately toggle the state
-    onChange(!checked);
+    onChange && onChange(!checked);
     
-    // Keep the pressed state for a brief moment to show the animation
     timeoutRef.current = setTimeout(() => {
       setIsPressed(false);
-    }, 150);
+      timeoutRef.current = null;
+    }, 80);
+  };
+
+  const handleMouseEnter = () => {
+    if (!disabled) setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
-    if (disabled) return;
-    
-    // If mouse leaves while pressed, still complete the toggle
+    setIsHovered(false);
     if (isPressed) {
-      onChange(!checked);
-      timeoutRef.current = setTimeout(() => {
-        setIsPressed(false);
-      }, 150);
+      handleMouseUp();
     }
   };
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -78,6 +83,27 @@ export default function FluidToggle({
       }
     };
   }, []);
+
+  // Pre-calculate thumb classes with smooth transitions
+  let thumbClasses = 'inline-block rounded-full bg-white shadow-lg transition-all duration-150 ease-out transform ';
+  
+  if (isPressed) {
+    thumbClasses += config.thumbPressed + ' ';
+  } else if (isHovered) {
+    thumbClasses += config.thumbHovered + ' ';
+  } else {
+    thumbClasses += config.thumb + ' ';
+  }
+
+  if (checked) {
+    if (isPressed) {
+      thumbClasses += config.translateCheckedPressed;
+    } else {
+      thumbClasses += config.translateChecked;
+    }
+  } else {
+    thumbClasses += config.translateUnchecked;
+  }
 
   return (
     <button
@@ -87,46 +113,24 @@ export default function FluidToggle({
       disabled={disabled}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={`
         relative inline-flex items-center ${config.track} rounded-full
-        transition-all duration-200 ease-in-out
-        focus:outline-none focus:ring-0
-        ${disabled 
-          ? 'opacity-50 cursor-not-allowed' 
+        transition-all duration-150 ease-out
+        focus:outline-none
+        ${disabled
+          ? 'opacity-40 cursor-not-allowed'
           : 'cursor-pointer'
         }
-        ${checked 
-          ? 'bg-blue-600 dark:bg-blue-500' 
-          : 'bg-gray-200 dark:bg-gray-700'
+        ${checked
+          ? `${isPressed ? 'bg-blue-700' : isHovered ? 'bg-blue-500' : 'bg-blue-600'}`
+          : `${isPressed ? 'bg-gray-300 dark:bg-gray-600' : isHovered ? 'bg-gray-200 dark:bg-gray-700' : 'bg-gray-200 dark:bg-gray-800'}`
         }
         ${className}
       `}
     >
-      {/* Thumb */}
-      <span
-        className={`
-          inline-block rounded-full bg-white dark:bg-gray-100 shadow-sm
-          transition-all duration-300 ease-out
-          transform
-          ${isPressed && checked ? 'translate-x-[1.125rem]' : (checked ? config.translate : 'translate-x-0.5')}
-          ${isPressed ? config.thumbPressed : config.thumb}
-        `}
-      />
-      
-      {/* Ripple effect on click */}
-      {/* {isPressed && (
-        <span
-          className={`
-            absolute inset-0 rounded-full
-            ${checked 
-              ? 'bg-blue-400 dark:bg-blue-300' 
-              : 'bg-gray-300 dark:bg-gray-600'
-            }
-            opacity-30 animate-ping
-          `}
-        />
-      )} */}
+      <span className={thumbClasses} />
     </button>
   );
 }
