@@ -547,8 +547,21 @@ export default function Dashboard() {
   };
 
   const loadDoctorContext = () => {
-    const doctor = storage.getDoctorContext();
-    setCurrentDoctor(doctor);
+    try {
+      const doctor = storage.getDoctorContext();
+      if (!doctor || !doctor.id) {
+        console.warn('No valid doctor context found, redirecting to login');
+        // Redirect to login if no valid doctor context
+        window.location.href = '/login';
+        return;
+      }
+      setCurrentDoctor(doctor);
+    } catch (error) {
+      console.error('Error loading doctor context:', error);
+      setCurrentDoctor(null);
+      // Redirect to login on error
+      window.location.href = '/login';
+    }
   };
 
   const isAdmin = () => {

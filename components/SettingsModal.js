@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Settings as SettingsIcon, Shield, User, Bell, Palette, Database, Download, Upload, Trash2, Save, FileText, DollarSign, Clock, Users, Stethoscope } from 'lucide-react';
+import { X, Settings as SettingsIcon, Shield, User, Bell, Palette, Database, Download, Upload, Trash2, Save, FileText, DollarSign, Clock, Users, Stethoscope, Image, AlertCircle } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { toast } from 'sonner';
 
@@ -145,10 +145,16 @@ export default function SettingsModal({ isOpen, onClose }) {
 	const sectionRefs = useRef({});
 	const contentRef = useRef(null);
 	const isClickScrolling = useRef(false);
+	const [hospitalLogo, setHospitalLogo] = useState({
+		isUploading: false,
+		logoData: null,
+		isLoading: true
+	});
 
 	useEffect(() => {
 		if (isOpen) {
 			loadSettings();
+			loadHospitalLogo();
 			// Prevent background scroll when modal is open
 			const scrollY = window.scrollY;
 			document.body.style.position = 'fixed';
@@ -245,6 +251,30 @@ export default function SettingsModal({ isOpen, onClose }) {
 		}
 	};
 
+	const loadHospitalLogo = async () => {
+		try {
+			setHospitalLogo(prev => ({ ...prev, isLoading: true }));
+			const currentDoctor = storage.getDoctorContext();
+			
+			if (currentDoctor?.id || currentDoctor?.doctorId) {
+				// Use either id or doctorId property
+				const doctorId = currentDoctor.id || currentDoctor.doctorId;
+				const logoData = await storage.getHospitalLogo(doctorId);
+				setHospitalLogo(prev => ({ 
+					...prev, 
+					logoData: logoData,
+					isLoading: false 
+				}));
+			} else {
+				console.warn('No valid doctor ID found in context:', currentDoctor);
+				setHospitalLogo(prev => ({ ...prev, isLoading: false }));
+			}
+		} catch (error) {
+			console.error('Error loading hospital logo:', error);
+			setHospitalLogo(prev => ({ ...prev, isLoading: false }));
+		}
+	};
+
 	const updateSetting = (section, key, value) => {
 		setSettings((prev) => ({
 			...prev,
@@ -306,6 +336,91 @@ export default function SettingsModal({ isOpen, onClose }) {
 		}
 	};
 
+	const handleLogoUpload = async (event) => {
+		const file = event.target.files[0];
+		if (!file) return;
+
+		// Validate file type
+		const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+		if (!allowedTypes.includes(file.type)) {
+			toast.error('Invalid File Type', {
+				description: 'Only PNG, JPEG, JPG, and WebP files are allowed.'
+			});
+			return;
+		}
+
+		// Validate file size (5MB)
+		const maxSize = 5 * 1024 * 1024;
+		if (file.size > maxSize) {
+			toast.error('File Too Large', {
+				description: 'Maximum file size is 5MB.'
+			});
+			return;
+		}
+
+		setHospitalLogo(prev => ({ ...prev, isUploading: true }));
+
+		try {
+			const currentDoctor = storage.getDoctorContext();
+			const doctorId = currentDoctor?.id || currentDoctor?.doctorId;
+			
+			if (!doctorId) {
+				throw new Error('Doctor context not found. Please log in again.');
+			}
+
+			const result = await storage.uploadHospitalLogo(file, doctorId);
+			
+			if (result.success) {
+				toast.success('Logo Uploaded', {
+					description: 'Hospital logo has been uploaded successfully.'
+				});
+				await loadHospitalLogo(); // Reload logo data
+			} else {
+				throw new Error('Upload failed');
+			}
+		} catch (error) {
+			console.error('Error uploading logo:', error);
+			toast.error('Upload Failed', {
+				description: error.message || 'Failed to upload logo. Please try again.'
+			});
+		} finally {
+			setHospitalLogo(prev => ({ ...prev, isUploading: false }));
+			// Clear the file input
+			event.target.value = '';
+		}
+	};
+
+	const handleLogoDelete = async () => {
+		if (!confirm('Are you sure you want to delete the hospital logo?')) {
+			return;
+		}
+
+		try {
+			const currentDoctor = storage.getDoctorContext();
+			const doctorId = currentDoctor?.id || currentDoctor?.doctorId;
+			
+			if (!doctorId) {
+				throw new Error('Doctor context not found. Please log in again.');
+			}
+
+			const success = await storage.deleteHospitalLogo(doctorId);
+			
+			if (success) {
+				toast.success('Logo Deleted', {
+					description: 'Hospital logo has been removed.'
+				});
+				setHospitalLogo(prev => ({ ...prev, logoData: null }));
+			} else {
+				throw new Error('Failed to delete logo');
+			}
+		} catch (error) {
+			console.error('Error deleting logo:', error);
+			toast.error('Delete Failed', {
+				description: error.message || 'Failed to delete logo. Please try again.'
+			});
+		}
+	};
+
 	if (!isOpen) return null;
 
 	const renderSectionContent = (sectionId) => {
@@ -317,6 +432,99 @@ export default function SettingsModal({ isOpen, onClose }) {
 							<h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
 								Doctor Profile
 							</h3>
+
+							{/* Hospital Logo Upload Section */}
+							<div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+								<div className="flex items-start space-x-3">
+									<div className="p-2 bg-blue-600 dark:bg-blue-500 rounded">
+										<Image className="w-5 h-5 text-white" />
+									</div>
+									<div className="flex-1">
+										<h4 className="text-sm font-medium text-blue-900 dark:text-blue-200 mb-1">
+											Hospital Logo
+										</h4>
+										<p className="text-xs text-blue-700 dark:text-blue-300 mb-3">
+											Upload your hospital/clinic logo to appear on prescriptions and documents. Supported formats: PNG, JPEG, JPG, WebP (Max 5MB)
+										</p>
+
+										{hospitalLogo.isLoading ? (
+											<div className="flex items-center space-x-2">
+												<div className="w-4 h-4 border-2 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full animate-spin" />
+												<span className="text-sm text-blue-700 dark:text-blue-300">Loading logo...</span>
+											</div>
+										) : hospitalLogo.logoData ? (
+											<div className="space-y-3">
+												<div className="flex items-center space-x-3">
+													<img 
+														src={hospitalLogo.logoData.base64} 
+														alt="Hospital Logo" 
+														className="w-16 h-16 object-contain border border-blue-200 dark:border-blue-700 rounded bg-white dark:bg-gray-800"
+													/>
+													<div className="flex-1">
+														<p className="text-sm font-medium text-blue-900 dark:text-blue-200">
+															{hospitalLogo.logoData.fileName}
+														</p>
+														<p className="text-xs text-blue-700 dark:text-blue-300">
+															Size: {Math.round(hospitalLogo.logoData.fileSize / 1024)} KB
+														</p>
+														<p className="text-xs text-blue-700 dark:text-blue-300">
+															Type: {hospitalLogo.logoData.mimeType}
+														</p>
+													</div>
+												</div>
+												<div className="flex space-x-2">
+													<label
+														htmlFor="logo-upload-replace"
+														className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer inline-block"
+													>
+														Replace Logo
+													</label>
+													<button
+														onClick={handleLogoDelete}
+														className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer"
+													>
+														Remove Logo
+													</button>
+												</div>
+												<input
+													id="logo-upload-replace"
+													type="file"
+													accept="image/png,image/jpeg,image/jpg,image/webp"
+													onChange={handleLogoUpload}
+													disabled={hospitalLogo.isUploading}
+													className="hidden"
+												/>
+											</div>
+										) : (
+											<div className="space-y-3">
+												<div className="border-2 border-dashed border-blue-300 dark:border-blue-700 rounded-lg p-4 text-center">
+													<Image className="mx-auto h-8 w-8 text-blue-400 dark:text-blue-500 mb-2" />
+													<p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
+														No logo uploaded
+													</p>
+													<label
+														htmlFor="logo-upload"
+														className={`bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer inline-block ${
+															hospitalLogo.isUploading ? 'opacity-50 cursor-not-allowed' : ''
+														}`}
+													>
+														{hospitalLogo.isUploading ? 'Uploading...' : 'Upload Logo'}
+													</label>
+												</div>
+												<input
+													id="logo-upload"
+													type="file"
+													accept="image/png,image/jpeg,image/jpg,image/webp"
+													onChange={handleLogoUpload}
+													disabled={hospitalLogo.isUploading}
+													className="hidden"
+												/>
+											</div>
+										)}
+									</div>
+								</div>
+							</div>
+
 							<div className="grid grid-cols-2 gap-4">
 								<div>
 									<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

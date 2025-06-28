@@ -58,10 +58,31 @@ async function apiCall(url, options = {}) {
   }
 }
 
-export const storage = {
+class Storage {
+  constructor() {
+    // Initialize databaseService for hospital logo operations
+    this.databaseService = null;
+    // Only initialize on server side
+    if (typeof window === 'undefined') {
+      this.initializeDatabaseService();
+    }
+  }
+
+  async initializeDatabaseService() {
+    try {
+      // Only import on server side
+      if (typeof window === 'undefined') {
+        // Dynamically import databaseService to avoid circular dependencies
+        const { databaseService } = await import('../services/databaseService');
+        this.databaseService = databaseService;
+      }
+    } catch (error) {
+      console.error('Failed to initialize database service:', error);
+    }
+  }
 
   // Doctor context management
-  setCurrentDoctor: (doctorId, doctorData) => {
+  setCurrentDoctor(doctorId, doctorData) {
     if (typeof window !== 'undefined') {
       if (!doctorId) {
         throw new Error('Doctor ID is required');
@@ -101,12 +122,23 @@ export const storage = {
       localStorage.setItem('currentDoctorHospitalName', hospitalName);
       localStorage.setItem('currentDoctorHospitalAddress', hospitalAddress);
     }
-  },
+  }
 
-  getCurrentDoctorId,
+  getCurrentDoctorId() {
+    // Check if we're in browser environment
+    if (typeof window !== 'undefined') {
+      const doctorId = localStorage.getItem('currentDoctorId');
+      if (!doctorId) {
+        console.error('No doctor ID found in localStorage');
+        throw new Error('Doctor not authenticated');
+      }
+      return doctorId;
+    }
+    throw new Error('Doctor context not available');
+  }
 
   // Add missing getDoctorContext method
-  getDoctorContext: () => {
+  getDoctorContext() {
     if (typeof window !== 'undefined') {
       const doctorId = localStorage.getItem('currentDoctorId');
       const doctorName = localStorage.getItem('currentDoctorName');
@@ -121,6 +153,7 @@ export const storage = {
       if (doctorId) {
         return {
           id: doctorId,
+          doctorId: doctorId, // Add doctorId property for consistency
           name: doctorName || 'Dr. Nikam',
           lastName: lastName || 'Nikam',
           accessType: accessType || 'doctor',
@@ -133,10 +166,10 @@ export const storage = {
       }
     }
     return null;
-  },
+  }
 
   // Clear doctor context on logout
-  clearDoctorContext: () => {
+  clearDoctorContext() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('currentDoctorId');
       localStorage.removeItem('currentDoctorName');
@@ -148,10 +181,10 @@ export const storage = {
       localStorage.removeItem('currentDoctorHospitalName');
       localStorage.removeItem('currentDoctorHospitalAddress');
     }
-  },
+  }
 
   // PATIENTS
-  getPatients: async () => {
+  async getPatients() {
     try {
       const response = await apiCall(API_ENDPOINTS.PATIENTS);
       return Array.isArray(response.data) ? response.data : [];
@@ -159,9 +192,9 @@ export const storage = {
       console.error('Error getting patients:', error);
       return [];
     }
-  },
+  }
 
-  savePatients: async (patients) => {
+  async savePatients(patients) {
     try {
       const response = await apiCall(API_ENDPOINTS.PATIENTS, {
         method: 'POST',
@@ -172,10 +205,10 @@ export const storage = {
       console.error('Error saving patients:', error);
       return false;
     }
-  },
+  }
 
   // PRESCRIPTIONS
-  getPrescriptions: async () => {
+  async getPrescriptions() {
     try {
       const response = await apiCall(API_ENDPOINTS.PRESCRIPTIONS);
       return Array.isArray(response.data) ? response.data : [];
@@ -183,9 +216,9 @@ export const storage = {
       console.error('Error getting prescriptions:', error);
       return [];
     }
-  },
+  }
 
-  savePrescriptions: async (prescriptions) => {
+  async savePrescriptions(prescriptions) {
     try {
       await apiCall(API_ENDPOINTS.PRESCRIPTIONS, {
         method: 'POST',
@@ -196,9 +229,9 @@ export const storage = {
       console.error('Error saving prescriptions:', error);
       return false;
     }
-  },
+  }
 
-  savePrescription: async (prescription) => {
+  async savePrescription(prescription) {
     try {
       if (!prescription.patientId) {
         throw new Error('Patient ID is required');
@@ -218,9 +251,9 @@ export const storage = {
       console.error('Error saving prescription:', error);
       throw error;
     }
-  },
+  }
 
-  getPrescriptionsByPatient: async (patientId) => {
+  async getPrescriptionsByPatient(patientId) {
     try {
       const normalizedPatientId = patientId?.toString();
       const response = await apiCall(`${API_ENDPOINTS.PRESCRIPTIONS}/patient/${normalizedPatientId}`);
@@ -229,10 +262,10 @@ export const storage = {
       console.error('Error getting prescriptions by patient:', error);
       return [];
     }
-  },
+  }
 
   // BILLS
-  getBills: async () => {
+  async getBills() {
     try {
       const response = await apiCall(API_ENDPOINTS.BILLS);
       return Array.isArray(response.data) ? response.data : [];
@@ -240,9 +273,9 @@ export const storage = {
       console.error('Error getting bills:', error);
       return [];
     }
-  },
+  }
 
-  saveBills: async (bills) => {
+  async saveBills(bills) {
     try {
       await apiCall(API_ENDPOINTS.BILLS, {
         method: 'POST',
@@ -253,9 +286,9 @@ export const storage = {
       console.error('Error saving bills:', error);
       return false;
     }
-  },
+  }
 
-  updateBill: async (billId, updates) => {
+  async updateBill(billId, updates) {
     try {
       const bills = await storage.getBills();
       const updatedBills = bills.map(bill =>
@@ -267,9 +300,9 @@ export const storage = {
       console.error('Error updating bill:', error);
       return null;
     }
-  },
+  }
 
-  getBillsByPatient: async (patientId) => {
+  async getBillsByPatient(patientId) {
     try {
       const normalizedPatientId = patientId?.toString();
       const response = await apiCall(`${API_ENDPOINTS.BILLS}/patient/${normalizedPatientId}`);
@@ -278,10 +311,10 @@ export const storage = {
       console.error('Error getting bills by patient:', error);
       return [];
     }
-  },
+  }
 
   // TEMPLATES
-  getTemplates: async () => {
+  async getTemplates() {
     try {
       const response = await apiCall(API_ENDPOINTS.TEMPLATES);
       return Array.isArray(response.data) ? response.data : [];
@@ -289,9 +322,9 @@ export const storage = {
       console.error('Error getting templates:', error);
       return [];
     }
-  },
+  }
 
-  saveTemplates: async (templates) => {
+  async saveTemplates(templates) {
     try {
       await apiCall(API_ENDPOINTS.TEMPLATES, {
         method: 'POST',
@@ -302,9 +335,9 @@ export const storage = {
       console.error('Error saving templates:', error);
       return false;
     }
-  },
+  }
 
-  saveTemplate: async (template) => {
+  async saveTemplate(template) {
     try {
       const response = await apiCall(`${API_ENDPOINTS.TEMPLATES}/single`, {
         method: 'POST',
@@ -315,10 +348,10 @@ export const storage = {
       console.error('Error saving template:', error);
       return null;
     }
-  },
+  }
 
   // Add method to update template usage
-  updateTemplateUsage: async (templateId) => {
+  async updateTemplateUsage(templateId) {
     try {
       const response = await apiCall(`${API_ENDPOINTS.TEMPLATES}/${templateId}/usage`, {
         method: 'PATCH',
@@ -341,9 +374,9 @@ export const storage = {
         return false;
       }
     }
-  },
+  }
 
-  deleteTemplate: async (templateId) => {
+  async deleteTemplate(templateId) {
     try {
       await apiCall(`${API_ENDPOINTS.TEMPLATES}/${templateId}`, {
         method: 'DELETE'
@@ -353,10 +386,10 @@ export const storage = {
       console.error('Error deleting template:', error);
       return false;
     }
-  },
+  }
 
   // CUSTOM DATA
-  getCustomSymptoms: async () => {
+  async getCustomSymptoms() {
     try {
       const response = await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/symptoms`);
       return Array.isArray(response.data) ? response.data : [];
@@ -364,9 +397,9 @@ export const storage = {
       console.error('Error getting custom symptoms:', error);
       return [];
     }
-  },
+  }
 
-  saveCustomSymptoms: async (symptoms) => {
+  async saveCustomSymptoms(symptoms) {
     try {
       await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/symptoms`, {
         method: 'POST',
@@ -377,9 +410,9 @@ export const storage = {
       console.error('Error saving custom symptoms:', error);
       return false;
     }
-  },
+  }
 
-  addCustomSymptom: async (symptom) => {
+  async addCustomSymptom(symptom) {
     try {
       const symptoms = await storage.getCustomSymptoms();
       if (!symptoms.includes(symptom)) {
@@ -391,9 +424,9 @@ export const storage = {
       console.error('Error adding custom symptom:', error);
       return false;
     }
-  },
+  }
 
-  getCustomDiagnoses: async () => {
+  async getCustomDiagnoses() {
     try {
       const response = await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/diagnoses`);
       return Array.isArray(response.data) ? response.data : [];
@@ -401,9 +434,9 @@ export const storage = {
       console.error('Error getting custom diagnoses:', error);
       return [];
     }
-  },
+  }
 
-  saveCustomDiagnoses: async (diagnoses) => {
+  async saveCustomDiagnoses(diagnoses) {
     try {
       await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/diagnoses`, {
         method: 'POST',
@@ -414,9 +447,9 @@ export const storage = {
       console.error('Error saving custom diagnoses:', error);
       return false;
     }
-  },
+  }
 
-  addCustomDiagnosis: async (diagnosis) => {
+  async addCustomDiagnosis(diagnosis) {
     try {
       const diagnoses = await storage.getCustomDiagnoses();
       if (!diagnoses.includes(diagnosis)) {
@@ -428,9 +461,9 @@ export const storage = {
       console.error('Error adding custom diagnosis:', error);
       return false;
     }
-  },
+  }
 
-  getCustomLabTests: async () => {
+  async getCustomLabTests() {
     try {
       const response = await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/lab-tests`);
       return Array.isArray(response.data) ? response.data : [];
@@ -438,9 +471,9 @@ export const storage = {
       console.error('Error getting custom lab tests:', error);
       return [];
     }
-  },
+  }
 
-  saveCustomLabTests: async (labTests) => {
+  async saveCustomLabTests(labTests) {
     try {
       await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/lab-tests`, {
         method: 'POST',
@@ -451,9 +484,9 @@ export const storage = {
       console.error('Error saving custom lab tests:', error);
       return false;
     }
-  },
+  }
 
-  addCustomLabTest: async (labTest) => {
+  async addCustomLabTest(labTest) {
     try {
       const labTests = await storage.getCustomLabTests();
       if (!labTests.includes(labTest)) {
@@ -465,9 +498,9 @@ export const storage = {
       console.error('Error adding custom lab test:', error);
       return false;
     }
-  },
+  }
 
-  getCustomMedications: async () => {
+  async getCustomMedications() {
     try {
       const response = await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/medications`);
       return Array.isArray(response.data) ? response.data : [];
@@ -475,9 +508,9 @@ export const storage = {
       console.error('Error getting custom medications:', error);
       return [];
     }
-  },
+  }
 
-  saveCustomMedications: async (medications) => {
+  async saveCustomMedications(medications) {
     try {
       await apiCall(`${API_ENDPOINTS.CUSTOM_DATA}/medications`, {
         method: 'POST',
@@ -488,9 +521,9 @@ export const storage = {
       console.error('Error saving custom medications:', error);
       return false;
     }
-  },
+  }
 
-  addCustomMedication: async (medication) => {
+  async addCustomMedication(medication) {
     try {
       const medications = await storage.getCustomMedications();
       if (!medications.includes(medication)) {
@@ -502,10 +535,10 @@ export const storage = {
       console.error('Error adding custom medication:', error);
       return false;
     }
-  },
+  }
 
   // Add new function for regenerating PDFs when blob URLs are invalid
-  regeneratePDFIfNeeded: async (item, patient, type) => {
+  async regeneratePDFIfNeeded(item, patient, type) {
     if (!item.pdfUrl) return null;
 
     try {
@@ -547,7 +580,7 @@ export const storage = {
       console.error(`Error regenerating ${type} PDF:`, error);
       return null;
     }
-  },
+  }
 
   // Settings methods
   async getSettings() {
@@ -558,7 +591,7 @@ export const storage = {
       console.error('Error loading settings:', error);
       return null;
     }
-  },
+  }
 
   async saveSettings(settings) {
     try {
@@ -568,7 +601,7 @@ export const storage = {
       console.error('Error saving settings:', error);
       throw error;
     }
-  },
+  }
 
   async exportAllData() {
     try {
@@ -593,7 +626,7 @@ export const storage = {
       console.error('Error exporting data:', error);
       throw error;
     }
-  },
+  }
 
   async importAllData(data) {
     try {
@@ -632,6 +665,139 @@ export const storage = {
       throw error;
     }
   }
-};
 
+  // Hospital Logo methods
+  async uploadHospitalLogo(file, doctorId) {
+    try {
+      if (!doctorId || doctorId === 'default-doctor') {
+        throw new Error('Valid doctor ID is required for logo upload');
+      }
+
+      // For client-side uploads, use the API endpoint instead
+      if (typeof window !== 'undefined') {
+        const formData = new FormData();
+        formData.append('logo', file);
+        
+        const response = await fetch('/api/hospital-logo/upload', {
+          method: 'POST',
+          headers: {
+            'X-Doctor-ID': doctorId,
+          },
+          body: formData,
+        });
+        
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to upload logo');
+        }
+        
+        return result;
+      }
+
+      // Server-side direct database access
+      // Ensure databaseService is initialized
+      if (!this.databaseService) {
+        await this.initializeDatabaseService();
+        if (!this.databaseService) {
+          throw new Error('Database service not available');
+        }
+      }
+
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const logoData = {
+              base64: e.target.result,
+              fileName: file.name,
+              fileSize: file.size,
+              mimeType: file.type
+            };
+
+            const success = await this.databaseService.saveHospitalLogo(doctorId, logoData);
+            if (success) {
+              resolve({ success: true, logoData });
+            } else {
+              reject(new Error('Failed to save logo to database'));
+            }
+          } catch (error) {
+            reject(error);
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+      });
+    } catch (error) {
+      console.error('Error uploading hospital logo:', error);
+      throw error;
+    }
+  }
+
+  async getHospitalLogo(doctorId) {
+    try {
+      if (!doctorId || doctorId === 'default-doctor') {
+        return null;
+      }
+
+      // For client-side requests, use the API endpoint
+      if (typeof window !== 'undefined') {
+        try {
+          const response = await fetch(`/api/hospital-logo?doctorId=${doctorId}`);
+          const result = await response.json();
+          return result.success ? result.logoData : null;
+        } catch (error) {
+          console.error('Error fetching logo via API:', error);
+          return null;
+        }
+      }
+
+      // Server-side direct database access
+      // Ensure databaseService is initialized
+      if (!this.databaseService) {
+        await this.initializeDatabaseService();
+        if (!this.databaseService) {
+          console.warn('Database service not available for logo retrieval');
+          return null;
+        }
+      }
+
+      const logoDocument = await this.databaseService.getHospitalLogo(doctorId);
+      if (logoDocument) {
+        return {
+          base64: logoDocument.logoBase64,
+          fileName: logoDocument.fileName,
+          fileSize: logoDocument.fileSize,
+          mimeType: logoDocument.mimeType
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting hospital logo:', error);
+      return null;
+    }
+  }
+
+  async deleteHospitalLogo(doctorId) {
+    try {
+      if (!doctorId || doctorId === 'default-doctor') {
+        throw new Error('Valid doctor ID is required for logo deletion');
+      }
+
+      // Ensure databaseService is initialized
+      if (!this.databaseService) {
+        await this.initializeDatabaseService();
+        if (!this.databaseService) {
+          throw new Error('Database service not available');
+        }
+      }
+
+      return await this.databaseService.deleteHospitalLogo(doctorId);
+    } catch (error) {
+      console.error('Error deleting hospital logo:', error);
+      throw error;
+    }
+  }
+}
+
+export const storage = new Storage();
 export default storage;

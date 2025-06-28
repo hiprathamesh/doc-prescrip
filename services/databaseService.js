@@ -11,7 +11,8 @@ class DatabaseService {
       customData: 'custom-data',
       doctors: 'doctors',
       registrationKeys: 'registration-keys',
-      otps: 'otps'
+      otps: 'otps',
+      hospitalLogos: 'hospital-logos' // Add new collection
     };
   }
 
@@ -674,6 +675,57 @@ class DatabaseService {
       return true;
     } catch (error) {
       console.error('Error cleaning up expired OTPs:', error);
+      return false;
+    }
+  }
+
+  // ==================== HOSPITAL LOGO OPERATIONS ====================
+  
+  async saveHospitalLogo(doctorId, logoData) {
+    try {
+      const collection = await getCollection(this.collections.hospitalLogos);
+      const logoDocument = {
+        doctorId,
+        logoBase64: logoData.base64,
+        fileName: logoData.fileName,
+        fileSize: logoData.fileSize,
+        mimeType: logoData.mimeType,
+        uploadedAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      // Use upsert to replace existing logo or create new one
+      const result = await collection.replaceOne(
+        { doctorId },
+        logoDocument,
+        { upsert: true }
+      );
+      
+      return result.acknowledged;
+    } catch (error) {
+      console.error('Error saving hospital logo:', error);
+      return false;
+    }
+  }
+
+  async getHospitalLogo(doctorId) {
+    try {
+      const collection = await getCollection(this.collections.hospitalLogos);
+      const logoDocument = await collection.findOne({ doctorId });
+      return logoDocument;
+    } catch (error) {
+      console.error('Error fetching hospital logo:', error);
+      return null;
+    }
+  }
+
+  async deleteHospitalLogo(doctorId) {
+    try {
+      const collection = await getCollection(this.collections.hospitalLogos);
+      const result = await collection.deleteOne({ doctorId });
+      return result.deletedCount > 0;
+    } catch (error) {
+      console.error('Error deleting hospital logo:', error);
       return false;
     }
   }

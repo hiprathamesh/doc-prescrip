@@ -243,19 +243,19 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
             <div className="flex items-center space-x-3">
               <button
                 onClick={onBack}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md transition-colors duration-200"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
-              <span className="text-xl font-semibold text-gray-900">Patients</span>
+              <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">Patients</span>
             </div>
           </div>
         </div>
 
         <div className="max-w-4xl mx-auto px-6">
-          <div className="bg-white rounded-lg shadow p-6 sm:p-8 text-center">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 sm:p-8 text-center">
             <User className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mb-4" />
-            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No patients found</h3>
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No patients found</h3>
             <p className="text-sm sm:text-base text-gray-600 mb-4">Start by creating a new prescription for a patient.</p>
           </div>
         </div>

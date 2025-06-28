@@ -31,6 +31,10 @@ export default function SharePDFButton({
   const [isUploading, setIsUploading] = useState(false)
 
   const generateMessage = () => {
+    // Get current doctor context
+    const currentDoctor = storage.getDoctorContext();
+    const doctorName = currentDoctor?.name || 'Dr. Prashant Nikam';
+    
     if (type === 'prescription') {
       return `Hello ${patientName},
 
@@ -41,7 +45,7 @@ Please find your prescription attached.
 Thank you for visiting us.
 
 Best regards,
-Dr. Prashant Nikam`
+${doctorName}`
     } else if (type === 'bill') {
       return `Hello ${patientName},
 
@@ -55,7 +59,7 @@ Please find your bill attached.
 Thank you for visiting us.
 
 Best regards,
-Dr. Prashant Nikam`
+${doctorName}`
     } else if (type === 'certificate') {
       return `Hello ${patientName},
 
@@ -68,7 +72,7 @@ Please find your certificate attached.
 Thank you for visiting us.
 
 Best regards,
-Dr. Prashant Nikam`
+${doctorName}`
     }
     return `Hello ${patientName}, your document is ready.`
   }

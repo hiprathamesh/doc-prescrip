@@ -16,14 +16,47 @@ export const generateBillPDF = async (bill, patient) => {
   const hospitalName = doctorContext?.hospitalName || 'Chaitanya Hospital';
   const hospitalAddress = doctorContext?.hospitalAddress || 'Deola';
 
+  // Get hospital logo for current doctor
+  let hospitalLogo = null;
+  try {
+    if (doctorContext?.doctorId) {
+      const logoData = await storage.getHospitalLogo(doctorContext.doctorId);
+      if (logoData && logoData.base64) {
+        hospitalLogo = logoData.base64;
+      }
+    }
+  } catch (error) {
+    console.warn('Could not load hospital logo:', error);
+  }
+
   // Header Section
-  // Hospital Logo (placeholder - left side)
-  pdf.setFillColor(240, 240, 240);
-  pdf.rect(margin, yPosition, 50, 20, 'F');
-  pdf.setFontSize(8);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(120, 120, 120);
-  pdf.text('HOSPITAL LOGO', margin + 25, yPosition + 12, { align: 'center' });
+  // Hospital Logo (left side)
+  if (hospitalLogo) {
+    try {
+      const imageFormat = hospitalLogo.split(';')[0].split('/')[1].toUpperCase();
+      const validFormats = ['PNG', 'JPEG', 'JPG', 'WEBP'];
+      const format = validFormats.includes(imageFormat) ? imageFormat : 'PNG';
+      
+      pdf.addImage(hospitalLogo, format, margin, yPosition, 50, 20);
+    } catch (error) {
+      console.warn('Could not add hospital logo to PDF:', error);
+      // Add placeholder text if logo fails to load
+      pdf.setFillColor(240, 240, 240);
+      pdf.rect(margin, yPosition, 50, 20, 'F');
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(120, 120, 120);
+      pdf.text('HOSPITAL LOGO', margin + 25, yPosition + 12, { align: 'center' });
+    }
+  } else {
+    // Fallback: Show hospital name as placeholder
+    pdf.setFillColor(240, 240, 240);
+    pdf.rect(margin, yPosition, 50, 20, 'F');
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(120, 120, 120);
+    pdf.text('HOSPITAL LOGO', margin + 25, yPosition + 12, { align: 'center' });
+  }
 
   // Doctor Details (right side)
   const doctorDetailsX = pageWidth - margin - 80;

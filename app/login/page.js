@@ -523,8 +523,8 @@ export default function LoginPage() {
             }}
           >
             <div className="inline-flex items-center justify-center gap-3 mb-4">
-              <Stethoscope className={`w-8 h-8 text-blue-600 dark:text-blue-400 transform transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-                isVisible ? 'scale-100 rotate-0' : 'scale-50 rotate-45'
+              <Stethoscope className={`w-8 h-8 text-blue-600 dark:text-blue-400 transform transition-all duration-500 ease-in-out ${
+                isVisible ? 'scale-100 rotate-0' : 'scale-75 rotate-0'
               }`} />
               <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                 Doc Prescrip

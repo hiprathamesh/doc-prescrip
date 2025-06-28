@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import { formatDate } from './dateUtils';
+import { storage } from './storage';
 
 export const generateMedicalCertificatePDF = async (certificate, patient, autoDownload = true) => {
   const pdf = new jsPDF('p', 'mm', 'a4');
@@ -7,6 +8,27 @@ export const generateMedicalCertificatePDF = async (certificate, patient, autoDo
   const pageHeight = pdf.internal.pageSize.getHeight();
   const margin = 15;
   const contentWidth = pageWidth - 2 * margin;
+
+  // Get current doctor details for multi-tenancy
+  const currentDoctor = storage.getDoctorContext();
+  const doctorName = currentDoctor?.name || 'Dr. Prashant Kisanrao Nikam';
+  const doctorDegree = currentDoctor?.degree || 'BAMS (College Name)';
+  const doctorRegNumber = currentDoctor?.registrationNumber || 'Reg. No: I-34621-A';
+  const hospitalName = currentDoctor?.hospitalName || 'Chaitnya Hospital & X Ray Clinic';
+  const hospitalAddress = currentDoctor?.hospitalAddress || 'Adgaon, Dist. Nashik.';
+
+  // Get hospital logo for current doctor
+  let hospitalLogo = null;
+  try {
+    if (currentDoctor?.doctorId) {
+      const logoData = await storage.getHospitalLogo(currentDoctor.doctorId);
+      if (logoData && logoData.base64) {
+        hospitalLogo = logoData.base64;
+      }
+    }
+  } catch (error) {
+    console.warn('Could not load hospital logo:', error);
+  }
 
   // Add decorative border
   pdf.setDrawColor(0, 0, 0);
@@ -19,13 +41,33 @@ export const generateMedicalCertificatePDF = async (certificate, patient, autoDo
   let yPosition = 25;
 
   // Header Section
-  // Hospital Logo (placeholder - left side)
-  pdf.setFillColor(240, 240, 240);
-  pdf.rect(margin, yPosition, 50, 20, 'F');
-  pdf.setFontSize(8);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(120, 120, 120);
-  pdf.text('HOSPITAL LOGO', margin + 25, yPosition + 12, { align: 'center' });
+  // Hospital Logo (left side)
+  if (hospitalLogo) {
+    try {
+      const imageFormat = hospitalLogo.split(';')[0].split('/')[1].toUpperCase();
+      const validFormats = ['PNG', 'JPEG', 'JPG', 'WEBP'];
+      const format = validFormats.includes(imageFormat) ? imageFormat : 'PNG';
+      
+      pdf.addImage(hospitalLogo, format, margin, yPosition, 50, 20);
+    } catch (error) {
+      console.warn('Could not add hospital logo to PDF:', error);
+      // Add placeholder text if logo fails to load
+      pdf.setFillColor(240, 240, 240);
+      pdf.rect(margin, yPosition, 50, 20, 'F');
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(120, 120, 120);
+      pdf.text('HOSPITAL LOGO', margin + 25, yPosition + 12, { align: 'center' });
+    }
+  } else {
+    // Fallback: Show hospital name as placeholder
+    pdf.setFillColor(240, 240, 240);
+    pdf.rect(margin, yPosition, 50, 20, 'F');
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(120, 120, 120);
+    pdf.text('HOSPITAL LOGO', margin + 25, yPosition + 12, { align: 'center' });
+  }
 
   // Doctor Details (right side)
   const doctorDetailsX = pageWidth - margin - 80;
@@ -33,15 +75,15 @@ export const generateMedicalCertificatePDF = async (certificate, patient, autoDo
   
   pdf.setFontSize(14);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Dr. Prashant Kisanrao Nikam', doctorDetailsX, yPosition + 5);
+  pdf.text(doctorName, doctorDetailsX, yPosition + 5);
   
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
-  pdf.text('BAMS (College Name)', doctorDetailsX, yPosition + 12);
+  pdf.text(doctorDegree, doctorDetailsX, yPosition + 12);
   
   pdf.setFontSize(9);
   pdf.setTextColor(80, 80, 80);
-  pdf.text('Reg. No: I-34621-A', doctorDetailsX, yPosition + 18);
+  pdf.text(doctorRegNumber, doctorDetailsX, yPosition + 18);
 
   yPosition += 35;
 
@@ -209,13 +251,13 @@ export const generateMedicalCertificatePDF = async (certificate, patient, autoDo
   // Doctor signature
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(11);
-  pdf.text('Dr. Prashant Kisanrao Nikam', pageWidth - margin - 60, footerY);
+  pdf.text(doctorName, pageWidth - margin - 60, footerY);
   yPosition += 5;
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(9);
-  pdf.text('Chaitnya Hospital & X Ray Clinic', pageWidth - margin - 60, footerY + 5);
-  pdf.text('Adgaon, Dist. Nashik.', pageWidth - margin - 60, footerY + 10);
-  pdf.text('Reg. No. I-34621-A', pageWidth - margin - 60, footerY + 15);
+  pdf.text(hospitalName, pageWidth - margin - 60, footerY + 5);
+  pdf.text(hospitalAddress, pageWidth - margin - 60, footerY + 10);
+  pdf.text(doctorRegNumber, pageWidth - margin - 60, footerY + 15);
 
   // Footer disclaimers
   pdf.setFontSize(6);
