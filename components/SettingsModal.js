@@ -228,10 +228,17 @@ export default function SettingsModal({ isOpen, onClose }) {
 		try {
 			const savedSettings = await storage.getSettings();
 			if (savedSettings) {
-				setSettings((prevSettings) => ({
-					...prevSettings,
-					...savedSettings,
-				}));
+				// Deep merge to ensure all properties exist
+				setSettings((prevSettings) => {
+					const mergedSettings = { ...prevSettings };
+					Object.keys(savedSettings).forEach(section => {
+						mergedSettings[section] = {
+							...prevSettings[section],
+							...savedSettings[section]
+						};
+					});
+					return mergedSettings;
+				});
 			}
 		} catch (error) {
 			console.error('Error loading settings:', error);
@@ -317,7 +324,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 									</label>
 									<input
 										type="text"
-										value={settings.profile.doctorName}
+										value={settings.profile?.doctorName || ''}
 										onChange={(e) => updateSetting('profile', 'doctorName', e.target.value)}
 										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										placeholder="Dr. John Smith"
@@ -330,7 +337,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 									</label>
 									<input
 										type="text"
-										value={settings.profile.specialization}
+										value={settings.profile?.specialization || ''}
 										onChange={(e) => updateSetting('profile', 'specialization', e.target.value)}
 										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										placeholder="General Medicine"
@@ -343,7 +350,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 									</label>
 									<input
 										type="text"
-										value={settings.profile.qualification}
+										value={settings.profile?.qualification || ''}
 										onChange={(e) => updateSetting('profile', 'qualification', e.target.value)}
 										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										placeholder="MBBS, MD"
@@ -356,7 +363,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 									</label>
 									<input
 										type="text"
-										value={settings.profile.registrationNumber}
+										value={settings.profile?.registrationNumber || ''}
 										onChange={(e) => updateSetting('profile', 'registrationNumber', e.target.value)}
 										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										placeholder="MCI Registration Number"
@@ -369,7 +376,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 									</label>
 									<input
 										type="text"
-										value={settings.profile.hospitalName}
+										value={settings.profile?.hospitalName || ''}
 										onChange={(e) => updateSetting('profile', 'hospitalName', e.target.value)}
 										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										placeholder="Chaitanya Hospital"
@@ -381,7 +388,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										Hospital/Clinic Address
 									</label>
 									<textarea
-										value={settings.profile.hospitalAddress}
+										value={settings.profile?.hospitalAddress || ''}
 										onChange={(e) => updateSetting('profile', 'hospitalAddress', e.target.value)}
 										rows={2}
 										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
@@ -395,7 +402,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 									</label>
 									<input
 										type="tel"
-										value={settings.profile.phoneNumber}
+										value={settings.profile?.phoneNumber || ''}
 										onChange={(e) => updateSetting('profile', 'phoneNumber', e.target.value)}
 										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										placeholder="+91 9876543210"
@@ -408,7 +415,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 									</label>
 									<input
 										type="email"
-										value={settings.profile.email}
+										value={settings.profile?.email || ''}
 										onChange={(e) => updateSetting('profile', 'email', e.target.value)}
 										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										placeholder="doctor@hospital.com"
@@ -456,7 +463,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										</label>
 										<input
 											type="number"
-											value={settings.general.defaultConsultationFee}
+											value={settings.general?.defaultConsultationFee || 0}
 											onChange={(e) =>
 												updateSetting(
 													'general',
@@ -474,7 +481,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										</label>
 										<input
 											type="number"
-											value={settings.general.defaultFollowUpDays}
+											value={settings.general?.defaultFollowUpDays || 0}
 											onChange={(e) =>
 												updateSetting(
 													'general',
@@ -491,7 +498,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Language
 										</label>
 										<select
-											value={settings.general.language}
+											value={settings.general?.language || 'english'}
 											onChange={(e) => updateSetting('general', 'language', e.target.value)}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										>
@@ -506,7 +513,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Timezone
 										</label>
 										<select
-											value={settings.general.timezone}
+											value={settings.general?.timezone || 'Asia/Kolkata'}
 											onChange={(e) => updateSetting('general', 'timezone', e.target.value)}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										>
@@ -558,7 +565,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										</label>
 										<input
 											type="text"
-											value={settings.prescription.defaultInstructions}
+											value={settings.prescription?.defaultInstructions || ''}
 											onChange={(e) => updateSetting('prescription', 'defaultInstructions', e.target.value)}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 											placeholder="Take as directed"
@@ -570,7 +577,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Default Duration
 										</label>
 										<select
-											value={settings.prescription.defaultDuration}
+											value={settings.prescription?.defaultDuration || '5 days'}
 											onChange={(e) => updateSetting('prescription', 'defaultDuration', e.target.value)}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										>
@@ -589,7 +596,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										Default Advice
 									</label>
 									<textarea
-										value={settings.prescription.defaultAdvice}
+										value={settings.prescription?.defaultAdvice || ''}
 										onChange={(e) => updateSetting('prescription', 'defaultAdvice', e.target.value)}
 										rows={2}
 										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
@@ -617,7 +624,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											<label className="relative inline-flex items-center cursor-pointer">
 												<input
 													type="checkbox"
-													checked={settings.prescription[setting.key]}
+													checked={settings.prescription?.[setting.key] || false}
 													onChange={(e) => updateSetting('prescription', setting.key, e.target.checked)}
 													className="sr-only peer"
 												/>
@@ -646,7 +653,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										</label>
 										<input
 											type="number"
-											value={settings.billing.defaultConsultationFee}
+											value={settings.billing?.defaultConsultationFee || 0}
 											onChange={(e) => updateSetting('billing', 'defaultConsultationFee', parseInt(e.target.value) || 0)}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										/>
@@ -657,7 +664,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Payment Terms
 										</label>
 										<select
-											value={settings.billing.defaultPaymentTerms}
+											value={settings.billing?.defaultPaymentTerms || 'immediate'}
 											onChange={(e) => updateSetting('billing', 'defaultPaymentTerms', e.target.value)}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										>
@@ -681,7 +688,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 									<label className="relative inline-flex items-center cursor-pointer">
 										<input
 											type="checkbox"
-											checked={settings.billing.enableGST}
+											checked={settings.billing?.enableGST || false}
 											onChange={(e) => updateSetting('billing', 'enableGST', e.target.checked)}
 											className="sr-only peer"
 										/>
@@ -697,7 +704,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											</label>
 											<input
 												type="text"
-												value={settings.billing.gstNumber}
+												value={settings.billing?.gstNumber || ''}
 												onChange={(e) => updateSetting('billing', 'gstNumber', e.target.value)}
 												className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 												placeholder="22AAAAA0000A1Z5"
@@ -710,7 +717,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											</label>
 											<input
 												type="number"
-												value={settings.billing.gstPercentage}
+												value={settings.billing?.gstPercentage || 18}
 												onChange={(e) => updateSetting('billing', 'gstPercentage', parseInt(e.target.value) || 18)}
 												className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 												min="0"
@@ -737,7 +744,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											<label className="relative inline-flex items-center cursor-pointer">
 												<input
 													type="checkbox"
-													checked={settings.billing[setting.key]}
+													checked={settings.billing?.[setting.key] || false}
 													onChange={(e) => updateSetting('billing', setting.key, e.target.checked)}
 													className="sr-only peer"
 												/>
@@ -759,7 +766,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 									<label className="relative inline-flex items-center cursor-pointer">
 										<input
 											type="checkbox"
-											checked={settings.billing.includeFollowUpDiscount}
+											checked={settings.billing?.includeFollowUpDiscount || false}
 											onChange={(e) => updateSetting('billing', 'includeFollowUpDiscount', e.target.checked)}
 											className="sr-only peer"
 										/>
@@ -774,7 +781,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										</label>
 										<input
 											type="number"
-											value={settings.billing.followUpDiscountPercentage}
+											value={settings.billing?.followUpDiscountPercentage || 20}
 											onChange={(e) => updateSetting('billing', 'followUpDiscountPercentage', parseInt(e.target.value) || 20)}
 											className="w-32 p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 											min="0"
@@ -801,7 +808,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Consultation Duration (minutes)
 										</label>
 										<select
-											value={settings.scheduling.consultationDuration}
+											value={settings.scheduling?.consultationDuration || 15}
 											onChange={(e) => updateSetting('scheduling', 'consultationDuration', parseInt(e.target.value))}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										>
@@ -820,7 +827,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										</label>
 										<input
 											type="time"
-											value={settings.scheduling.workingHoursStart}
+											value={settings.scheduling?.workingHoursStart || '09:00'}
 											onChange={(e) => updateSetting('scheduling', 'workingHoursStart', e.target.value)}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										/>
@@ -832,7 +839,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										</label>
 										<input
 											type="time"
-											value={settings.scheduling.workingHoursEnd}
+											value={settings.scheduling?.workingHoursEnd || '18:00'}
 											onChange={(e) => updateSetting('scheduling', 'workingHoursEnd', e.target.value)}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										/>
@@ -848,11 +855,11 @@ export default function SettingsModal({ isOpen, onClose }) {
 											<label key={day} className="flex items-center space-x-2 cursor-pointer">
 												<input
 													type="checkbox"
-													checked={settings.scheduling.workingDays.includes(day)}
+													checked={settings.scheduling?.workingDays?.includes(day) || false}
 													onChange={(e) => {
 														const days = e.target.checked
-															? [...settings.scheduling.workingDays, day]
-															: settings.scheduling.workingDays.filter(d => d !== day);
+															? [...(settings.scheduling?.workingDays || []), day]
+															: (settings.scheduling?.workingDays || []).filter(d => d !== day);
 														updateSetting('scheduling', 'workingDays', days);
 													}}
 													className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
@@ -869,7 +876,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Buffer Time Between Appointments (minutes)
 										</label>
 										<select
-											value={settings.scheduling.bufferTimeBetweenAppointments}
+											value={settings.scheduling?.bufferTimeBetweenAppointments || 5}
 											onChange={(e) => updateSetting('scheduling', 'bufferTimeBetweenAppointments', parseInt(e.target.value))}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										>
@@ -886,7 +893,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										</label>
 										<input
 											type="number"
-											value={settings.scheduling.maxPatientsPerDay}
+											value={settings.scheduling?.maxPatientsPerDay || 50}
 											onChange={(e) => updateSetting('scheduling', 'maxPatientsPerDay', parseInt(e.target.value) || 50)}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 											min="1"
@@ -911,7 +918,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											<label className="relative inline-flex items-center cursor-pointer">
 												<input
 													type="checkbox"
-													checked={settings.scheduling[setting.key]}
+													checked={settings.scheduling?.[setting.key] || false}
 													onChange={(e) => updateSetting('scheduling', setting.key, e.target.checked)}
 													className="sr-only peer"
 												/>
@@ -945,7 +952,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 									<label className="relative inline-flex items-center cursor-pointer">
 										<input
 											type="checkbox"
-											checked={settings.security.requirePasswordForDelete}
+											checked={settings.security?.requirePasswordForDelete || false}
 											onChange={(e) =>
 												updateSetting('security', 'requirePasswordForDelete', e.target.checked)
 											}
@@ -960,7 +967,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										Session Timeout (minutes)
 									</label>
 									<select
-										value={settings.security.sessionTimeout}
+										value={settings.security?.sessionTimeout || 30}
 										onChange={(e) =>
 											updateSetting('security', 'sessionTimeout', parseInt(e.target.value))
 										}
@@ -986,7 +993,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 									<label className="relative inline-flex items-center cursor-pointer">
 										<input
 											type="checkbox"
-											checked={settings.security.enableAuditLog}
+											checked={settings.security?.enableAuditLog || false}
 											onChange={(e) => updateSetting('security', 'enableAuditLog', e.target.checked)}
 											className="sr-only peer"
 										/>
@@ -1027,7 +1034,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<label className="relative inline-flex items-center cursor-pointer">
 											<input
 												type="checkbox"
-												checked={settings.notifications[setting.key]}
+												checked={settings.notifications?.[setting.key] || false}
 												onChange={(e) => updateSetting('notifications', setting.key, e.target.checked)}
 												className="sr-only peer"
 											/>
@@ -1054,7 +1061,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Theme
 										</label>
 										<select
-											value={settings.appearance.theme}
+											value={settings.appearance?.theme || 'system'}
 											onChange={(e) => updateSetting('appearance', 'theme', e.target.value)}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										>
@@ -1069,7 +1076,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Font Size
 										</label>
 										<select
-											value={settings.appearance.fontSize}
+											value={settings.appearance?.fontSize || 'medium'}
 											onChange={(e) => updateSetting('appearance', 'fontSize', e.target.value)}
 											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
 										>
@@ -1099,7 +1106,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											<label className="relative inline-flex items-center cursor-pointer">
 												<input
 													type="checkbox"
-													checked={settings.appearance[setting.key]}
+													checked={settings.appearance?.[setting.key] || false}
 													onChange={(e) => updateSetting('appearance', setting.key, e.target.checked)}
 													className="sr-only peer"
 												/>
