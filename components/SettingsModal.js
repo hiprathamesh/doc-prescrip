@@ -5,6 +5,7 @@ import { X, Settings as SettingsIcon, Shield, User, Bell, Palette, Database, Dow
 import { storage } from '../utils/storage';
 import { toast } from 'sonner';
 import FluidToggle from './FluidToggle';
+import CustomDropdown from './CustomDropdown';
 
 const SETTINGS_SECTIONS = [
 	{
@@ -729,30 +730,32 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 											Language
 										</label>
-										<select
+										<CustomDropdown
+											options={[
+												{ value: 'english', label: 'English' },
+												{ value: 'hindi', label: 'Hindi' },
+												{ value: 'marathi', label: 'Marathi' }
+											]}
 											value={settings.general?.language || 'english'}
-											onChange={(e) => updateSetting('general', 'language', e.target.value)}
-											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
-										>
-											<option value="english">English</option>
-											<option value="hindi">Hindi</option>
-											<option value="marathi">Marathi</option>
-										</select>
+											onChange={(value) => updateSetting('general', 'language', value)}
+											placeholder="Select language"
+										/>
 									</div>
 
 									<div>
 										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 											Timezone
 										</label>
-										<select
+										<CustomDropdown
+											options={[
+												{ value: 'Asia/Kolkata', label: 'Asia/Kolkata (IST)' },
+												{ value: 'Asia/Mumbai', label: 'Asia/Mumbai' },
+												{ value: 'Asia/Delhi', label: 'Asia/Delhi' }
+											]}
 											value={settings.general?.timezone || 'Asia/Kolkata'}
-											onChange={(e) => updateSetting('general', 'timezone', e.target.value)}
-											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
-										>
-											<option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
-											<option value="Asia/Mumbai">Asia/Mumbai</option>
-											<option value="Asia/Delhi">Asia/Delhi</option>
-										</select>
+											onChange={(value) => updateSetting('general', 'timezone', value)}
+											placeholder="Select timezone"
+										/>
 									</div>
 								</div>
 
@@ -801,18 +804,19 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 											Default Duration
 										</label>
-										<select
+										<CustomDropdown
+											options={[
+												{ value: '3 days', label: '3 days' },
+												{ value: '5 days', label: '5 days' },
+												{ value: '7 days', label: '7 days' },
+												{ value: '10 days', label: '10 days' },
+												{ value: '15 days', label: '15 days' },
+												{ value: '30 days', label: '30 days' }
+											]}
 											value={settings.prescription?.defaultDuration || '5 days'}
-											onChange={(e) => updateSetting('prescription', 'defaultDuration', e.target.value)}
-											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
-										>
-											<option value="3 days">3 days</option>
-											<option value="5 days">5 days</option>
-											<option value="7 days">7 days</option>
-											<option value="10 days">10 days</option>
-											<option value="15 days">15 days</option>
-											<option value="30 days">30 days</option>
-										</select>
+											onChange={(value) => updateSetting('prescription', 'defaultDuration', value)}
+											placeholder="Select duration"
+										/>
 									</div>
 								</div>
 
@@ -883,16 +887,17 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 											Payment Terms
 										</label>
-										<select
+										<CustomDropdown
+											options={[
+												{ value: 'immediate', label: 'Immediate' },
+												{ value: '7 days', label: '7 days' },
+												{ value: '15 days', label: '15 days' },
+												{ value: '30 days', label: '30 days' }
+											]}
 											value={settings.billing?.defaultPaymentTerms || 'immediate'}
-											onChange={(e) => updateSetting('billing', 'defaultPaymentTerms', e.target.value)}
-											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
-										>
-											<option value="immediate">Immediate</option>
-											<option value="7 days">7 days</option>
-											<option value="15 days">15 days</option>
-											<option value="30 days">30 days</option>
-										</select>
+											onChange={(value) => updateSetting('billing', 'defaultPaymentTerms', value)}
+											placeholder="Select payment terms"
+										/>
 									</div>
 								</div>
 
@@ -1012,18 +1017,19 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 											Consultation Duration (minutes)
 										</label>
-										<select
+										<CustomDropdown
+											options={[
+												{ value: 10, label: '10 minutes' },
+												{ value: 15, label: '15 minutes' },
+												{ value: 20, label: '20 minutes' },
+												{ value: 30, label: '30 minutes' },
+												{ value: 45, label: '45 minutes' },
+												{ value: 60, label: '1 hour' }
+											]}
 											value={settings.scheduling?.consultationDuration || 15}
-											onChange={(e) => updateSetting('scheduling', 'consultationDuration', parseInt(e.target.value))}
-											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
-										>
-											<option value={10}>10 minutes</option>
-											<option value={15}>15 minutes</option>
-											<option value={20}>20 minutes</option>
-											<option value={30}>30 minutes</option>
-											<option value={45}>45 minutes</option>
-											<option value={60}>1 hour</option>
-										</select>
+											onChange={(value) => updateSetting('scheduling', 'consultationDuration', parseInt(value))}
+											placeholder="Select duration"
+										/>
 									</div>
 
 									<div>
@@ -1080,16 +1086,17 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 											Buffer Time Between Appointments (minutes)
 										</label>
-										<select
+										<CustomDropdown
+											options={[
+												{ value: 0, label: 'No buffer' },
+												{ value: 5, label: '5 minutes' },
+												{ value: 10, label: '10 minutes' },
+												{ value: 15, label: '15 minutes' }
+											]}
 											value={settings.scheduling?.bufferTimeBetweenAppointments || 5}
-											onChange={(e) => updateSetting('scheduling', 'bufferTimeBetweenAppointments', parseInt(e.target.value))}
-											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
-										>
-											<option value={0}>No buffer</option>
-											<option value={5}>5 minutes</option>
-											<option value={10}>10 minutes</option>
-											<option value={15}>15 minutes</option>
-										</select>
+											onChange={(value) => updateSetting('scheduling', 'bufferTimeBetweenAppointments', parseInt(value))}
+											placeholder="Select buffer time"
+										/>
 									</div>
 
 									<div>
@@ -1159,19 +1166,20 @@ export default function SettingsModal({ isOpen, onClose }) {
 									<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 										Session Timeout (minutes)
 									</label>
-									<select
-										value={settings.security?.sessionTimeout || 30}
-										onChange={(e) =>
-											updateSetting('security', 'sessionTimeout', parseInt(e.target.value))
-										}
-										className="w-40 p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
-									>
-										<option value={15}>15 minutes</option>
-										<option value={30}>30 minutes</option>
-										<option value={60}>1 hour</option>
-										<option value={120}>2 hours</option>
-										<option value={0}>Never</option>
-									</select>
+									<div className="w-40">
+										<CustomDropdown
+											options={[
+												{ value: 15, label: '15 minutes' },
+												{ value: 30, label: '30 minutes' },
+												{ value: 60, label: '1 hour' },
+												{ value: 120, label: '2 hours' },
+												{ value: 0, label: 'Never' }
+											]}
+											value={settings.security?.sessionTimeout || 30}
+											onChange={(value) => updateSetting('security', 'sessionTimeout', parseInt(value))}
+											placeholder="Select timeout"
+										/>
+									</div>
 								</div>
 
 								<div className="flex items-center justify-between">
@@ -1243,30 +1251,32 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 											Theme
 										</label>
-										<select
+										<CustomDropdown
+											options={[
+												{ value: 'system', label: 'System' },
+												{ value: 'light', label: 'Light' },
+												{ value: 'dark', label: 'Dark' }
+											]}
 											value={settings.appearance?.theme || 'system'}
-											onChange={(e) => updateSetting('appearance', 'theme', e.target.value)}
-											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
-										>
-											<option value="system">System</option>
-											<option value="light">Light</option>
-											<option value="dark">Dark</option>
-										</select>
+											onChange={(value) => updateSetting('appearance', 'theme', value)}
+											placeholder="Select theme"
+										/>
 									</div>
 
 									<div>
 										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 											Font Size
 										</label>
-										<select
+										<CustomDropdown
+											options={[
+												{ value: 'small', label: 'Small' },
+												{ value: 'medium', label: 'Medium' },
+												{ value: 'large', label: 'Large' }
+											]}
 											value={settings.appearance?.fontSize || 'medium'}
-											onChange={(e) => updateSetting('appearance', 'fontSize', e.target.value)}
-											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
-										>
-											<option value="small">Small</option>
-											<option value="medium">Medium</option>
-											<option value="large">Large</option>
-										</select>
+											onChange={(value) => updateSetting('appearance', 'fontSize', value)}
+											placeholder="Select font size"
+										/>
 									</div>
 								</div>
 
