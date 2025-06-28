@@ -363,14 +363,8 @@ export default function SettingsModal({ isOpen, onClose }) {
 	};
 
 	const handleClose = () => {
-		if (hasUnsavedChanges) {
-			if (confirm('You have unsaved changes. Are you sure you want to close?')) {
-				setHasUnsavedChanges(false);
-				onClose();
-			}
-		} else {
-			onClose();
-		}
+		setHasUnsavedChanges(false);
+		onClose();
 	};
 
 	const handleLogoUpload = async (event) => {
@@ -571,7 +565,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										type="text"
 										value={settings.profile?.doctorName || ''}
 										onChange={(e) => updateSetting('profile', 'doctorName', e.target.value)}
-										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+										className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										placeholder="Dr. John Smith"
 									/>
 								</div>
@@ -584,7 +578,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										type="text"
 										value={settings.profile?.specialization || ''}
 										onChange={(e) => updateSetting('profile', 'specialization', e.target.value)}
-										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+										className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										placeholder="General Medicine"
 									/>
 								</div>
@@ -597,7 +591,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										type="text"
 										value={settings.profile?.qualification || ''}
 										onChange={(e) => updateSetting('profile', 'qualification', e.target.value)}
-										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+										className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										placeholder="MBBS, MD"
 									/>
 								</div>
@@ -610,7 +604,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										type="text"
 										value={settings.profile?.registrationNumber || ''}
 										onChange={(e) => updateSetting('profile', 'registrationNumber', e.target.value)}
-										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+										className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										placeholder="MCI Registration Number"
 									/>
 								</div>
@@ -623,7 +617,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										type="text"
 										value={settings.profile?.hospitalName || ''}
 										onChange={(e) => updateSetting('profile', 'hospitalName', e.target.value)}
-										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+										className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										placeholder="Chaitanya Hospital"
 									/>
 								</div>
@@ -636,7 +630,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										value={settings.profile?.hospitalAddress || ''}
 										onChange={(e) => updateSetting('profile', 'hospitalAddress', e.target.value)}
 										rows={2}
-										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+										className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										placeholder="Enter complete address"
 									/>
 								</div>
@@ -649,7 +643,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										type="tel"
 										value={settings.profile?.phoneNumber || ''}
 										onChange={(e) => updateSetting('profile', 'phoneNumber', e.target.value)}
-										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+										className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										placeholder="+91 9876543210"
 									/>
 								</div>
@@ -662,7 +656,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										type="email"
 										value={settings.profile?.email || ''}
 										onChange={(e) => updateSetting('profile', 'email', e.target.value)}
-										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+										className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										placeholder="doctor@hospital.com"
 									/>
 								</div>
@@ -709,7 +703,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 													parseInt(e.target.value) || 0
 												)
 											}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										/>
 									</div>
 
@@ -727,7 +721,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 													parseInt(e.target.value) || 0
 												)
 											}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										/>
 									</div>
 
@@ -738,7 +732,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<select
 											value={settings.general?.language || 'english'}
 											onChange={(e) => updateSetting('general', 'language', e.target.value)}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										>
 											<option value="english">English</option>
 											<option value="hindi">Hindi</option>
@@ -753,7 +747,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<select
 											value={settings.general?.timezone || 'Asia/Kolkata'}
 											onChange={(e) => updateSetting('general', 'timezone', e.target.value)}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										>
 											<option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
 											<option value="Asia/Mumbai">Asia/Mumbai</option>
@@ -798,7 +792,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											type="text"
 											value={settings.prescription?.defaultInstructions || ''}
 											onChange={(e) => updateSetting('prescription', 'defaultInstructions', e.target.value)}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 											placeholder="Take as directed"
 										/>
 									</div>
@@ -810,7 +804,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<select
 											value={settings.prescription?.defaultDuration || '5 days'}
 											onChange={(e) => updateSetting('prescription', 'defaultDuration', e.target.value)}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										>
 											<option value="3 days">3 days</option>
 											<option value="5 days">5 days</option>
@@ -830,7 +824,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										value={settings.prescription?.defaultAdvice || ''}
 										onChange={(e) => updateSetting('prescription', 'defaultAdvice', e.target.value)}
 										rows={2}
-										className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+										className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										placeholder="General advice for patients"
 									/>
 								</div>
@@ -881,7 +875,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											type="number"
 											value={settings.billing?.defaultConsultationFee || 0}
 											onChange={(e) => updateSetting('billing', 'defaultConsultationFee', parseInt(e.target.value) || 0)}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										/>
 									</div>
 
@@ -892,7 +886,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<select
 											value={settings.billing?.defaultPaymentTerms || 'immediate'}
 											onChange={(e) => updateSetting('billing', 'defaultPaymentTerms', e.target.value)}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										>
 											<option value="immediate">Immediate</option>
 											<option value="7 days">7 days</option>
@@ -927,7 +921,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 												type="text"
 												value={settings.billing?.gstNumber || ''}
 												onChange={(e) => updateSetting('billing', 'gstNumber', e.target.value)}
-												className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+												className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 												placeholder="22AAAAA0000A1Z5"
 											/>
 										</div>
@@ -940,7 +934,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 												type="number"
 												value={settings.billing?.gstPercentage || 18}
 												onChange={(e) => updateSetting('billing', 'gstPercentage', parseInt(e.target.value) || 18)}
-												className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+												className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 												min="0"
 												max="28"
 											/>
@@ -1021,7 +1015,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<select
 											value={settings.scheduling?.consultationDuration || 15}
 											onChange={(e) => updateSetting('scheduling', 'consultationDuration', parseInt(e.target.value))}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										>
 											<option value={10}>10 minutes</option>
 											<option value={15}>15 minutes</option>
@@ -1040,7 +1034,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											type="time"
 											value={settings.scheduling?.workingHoursStart || '09:00'}
 											onChange={(e) => updateSetting('scheduling', 'workingHoursStart', e.target.value)}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										/>
 									</div>
 
@@ -1052,7 +1046,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											type="time"
 											value={settings.scheduling?.workingHoursEnd || '18:00'}
 											onChange={(e) => updateSetting('scheduling', 'workingHoursEnd', e.target.value)}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										/>
 									</div>
 								</div>
@@ -1089,7 +1083,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<select
 											value={settings.scheduling?.bufferTimeBetweenAppointments || 5}
 											onChange={(e) => updateSetting('scheduling', 'bufferTimeBetweenAppointments', parseInt(e.target.value))}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										>
 											<option value={0}>No buffer</option>
 											<option value={5}>5 minutes</option>
@@ -1106,7 +1100,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											type="number"
 											value={settings.scheduling?.maxPatientsPerDay || 50}
 											onChange={(e) => updateSetting('scheduling', 'maxPatientsPerDay', parseInt(e.target.value) || 50)}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 											min="1"
 										/>
 									</div>
@@ -1252,7 +1246,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<select
 											value={settings.appearance?.theme || 'system'}
 											onChange={(e) => updateSetting('appearance', 'theme', e.target.value)}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										>
 											<option value="system">System</option>
 											<option value="light">Light</option>
@@ -1267,7 +1261,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 										<select
 											value={settings.appearance?.fontSize || 'medium'}
 											onChange={(e) => updateSetting('appearance', 'fontSize', e.target.value)}
-											className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										>
 											<option value="small">Small</option>
 											<option value="medium">Medium</option>
