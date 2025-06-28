@@ -493,11 +493,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 flex items-start justify-center p-4 transition-colors duration-300 overflow-y-auto">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-between transition-colors duration-300 overflow-y-auto ">
       {/* Dark Mode Toggle */}
       <div className="fixed top-4 right-4 z-10">
         <DarkModeToggle />
       </div>
+      <div className="photo w-1/2 h-screen bg-amber-100"></div>
 
       {/* Main Container */}
       <div className="w-full max-w-4xl py-8">

@@ -619,7 +619,7 @@ export default function Dashboard() {
               <button
                 title='Logout'
                 onClick={handleLogout}
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-700 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 flex items-center space-x-2 text-sm cursor-pointer"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-700 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 flex items-center space-x-2 text-sm cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
               </button>
