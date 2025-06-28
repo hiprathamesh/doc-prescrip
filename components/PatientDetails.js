@@ -645,7 +645,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                 <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Medical History</h3>
                 <div className="flex flex-wrap gap-2">
                   {medicalHistory.map((condition, index) => (
-                    <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-800 border border-red-200">
+                    <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-400/30 border border-red-200 dark:border-red-400/30">
                       {condition}
                     </span>
                   ))}
@@ -671,7 +671,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         ) : (
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-6 top-6 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-600"></div>
+            <div className="absolute left-6 top-6 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
 
             <div className="space-y-8">
               {visits.map((visit, index) => (
@@ -679,7 +679,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                   {/* Timeline circle and date row */}
                   <div className="flex items-center space-x-4 mb-4">
                     <div className="relative flex-shrink-0">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-sm ${
                         visit.type === 'certificate' 
                           ? 'bg-green-100' 
                           : 'bg-blue-100'
@@ -862,24 +862,31 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
                           <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Certificate Purpose</h4>
-                          <div className="text-gray-700 text-xs bg-green-50 p-2 rounded-md">
+                          <div className="text-gray-700 dark:text-gray-400 text-xs py-2">
                             {visit.certificateFor}
                           </div>
                         </div>
                         <div>
                           <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Fitness Status</h4>
-                          <div className={`text-xs font-medium p-2 rounded-md ${
-                            visit.fitnessStatus === 'fit' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {visit.fitnessStatus === 'fit' ? 'Medically Fit' : 'Medically Unfit'}
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-2 h-2 rounded-full ${
+                              visit.fitnessStatus === 'fit' 
+                                ? 'bg-green-500' 
+                                : 'bg-red-500'
+                            }`}></div>
+                            <div className={`text-xs font-medium py-2 ${
+                              visit.fitnessStatus === 'fit' 
+                                ? 'text-gray-700 dark:text-gray-400' 
+                                : 'text-gray-700 dark:text-gray-400'
+                            }`}>
+                              {visit.fitnessStatus === 'fit' ? 'Medically Fit' : 'Medically Unfit'}
+                            </div>
                           </div>
                         </div>
                         {visit.remarks && (
                           <div className="md:col-span-2">
                             <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Remarks</h4>
-                            <div className="text-xs text-gray-700 bg-gray-100 p-2 rounded-md">
+                            <div className="text-xs text-gray-700 dark:text-gray-400 py-2">
                               {visit.remarks}
                             </div>
                           </div>

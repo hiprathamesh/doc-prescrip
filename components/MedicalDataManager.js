@@ -412,12 +412,12 @@ export default function MedicalDataManager({ onBack }) {
                 {filteredItems.map((item, index) => (
                   <div
                     key={index}
-                    className="relative group px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hover:bg-blue-200 transition-colors cursor-default"
+                    className="relative group px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400 rounded-full text-sm hover:bg-blue-200 dark:hover:bg-blue-800/30 transition-colors cursor-default"
                   >
                     <span>{item}</span>
                     <button
                       onClick={() => handleDeleteItem(item)}
-                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs cursor-pointer"
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 dark:bg-red-500/50 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs cursor-pointer"
                       title="Remove item"
                     >
                       ×

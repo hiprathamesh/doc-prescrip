@@ -70,7 +70,7 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
   const generatePdf = async () => {
     try {
       setIsGeneratingPdf(true);
-      
+
       // Generate certificate PDF
       const certificateBlob = await generateMedicalCertificatePDF(certificate, patient, false);
       const certificateUrl = URL.createObjectURL(certificateBlob);
@@ -200,7 +200,7 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
               {/* Certificate Purpose */}
               <div>
                 <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Certificate Purpose</h4>
-                <div className="text-gray-700 text-xs bg-green-50 p-3 rounded-md border border-green-200">
+                <div className="text-gray-700 dark:text-gray-400 text-xs py-3">
                   {certificate.certificateFor}
                 </div>
               </div>
@@ -208,12 +208,17 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
               {/* Fitness Status */}
               <div>
                 <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Fitness Status</h4>
-                <div className={`text-xs font-medium p-3 rounded-md border ${
-                  certificate.fitnessStatus === 'fit' 
-                    ? 'bg-green-100 text-green-800 border-green-200' 
-                    : 'bg-red-100 text-red-800 border-red-200'
-                }`}>
-                  {certificate.fitnessStatus === 'fit' ? 'Medically Fit' : 'Medically Unfit'}
+                <div className="flex items-center space-x-2">
+                  <div className={`w-2 h-2 rounded-full ${certificate.fitnessStatus === 'fit'
+                    ? 'bg-green-500'
+                    : 'bg-red-500'
+                    }`}></div>
+                  <div className={`text-xs font-medium py-2 ${certificate.fitnessStatus === 'fit'
+                    ? 'text-gray-700 dark:text-gray-400'
+                    : 'text-gray-700 dark:text-gray-400'
+                    }`}>
+                    {certificate.fitnessStatus === 'fit' ? 'Medically Fit' : 'Medically Unfit'}
+                  </div>
                 </div>
               </div>
 
@@ -299,7 +304,7 @@ export default function MedicalCertificateSuccess({ certificate, patient, onBack
             {certificate.remarks && (
               <div className="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Remarks</h4>
-                <div className="text-xs text-gray-700 bg-gray-50 p-3 rounded-md">
+                <div className="text-xs text-gray-700 dark:text-gray-400 py-3">
                   {certificate.remarks}
                 </div>
               </div>
