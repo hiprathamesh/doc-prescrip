@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Settings as SettingsIcon, Shield, User, Bell, Palette, Database, Download, Upload, Trash2, Save, FileText, DollarSign, Clock, Users, Stethoscope, Image, AlertCircle } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { toast } from 'sonner';
+import FluidToggle from './FluidToggle';
 
 const SETTINGS_SECTIONS = [
 	{
@@ -651,17 +652,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Automatically save prescriptions and certificates
 										</p>
 									</div>
-									<label className="relative inline-flex items-center cursor-pointer">
-										<input
-											type="checkbox"
-											checked={settings.general.autoSave}
-											onChange={(e) =>
-												updateSetting('general', 'autoSave', e.target.checked)
-											}
-											className="sr-only peer"
-										/>
-										<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-									</label>
+									<FluidToggle
+										checked={settings.general.autoSave}
+										onChange={(value) => updateSetting('general', 'autoSave', value)}
+									/>
 								</div>
 
 								<div className="grid grid-cols-2 gap-4">
@@ -741,17 +735,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Display age alongside patient names
 										</p>
 									</div>
-									<label className="relative inline-flex items-center cursor-pointer">
-										<input
-											type="checkbox"
-											checked={settings.general.showPatientAge}
-											onChange={(e) =>
-												updateSetting('general', 'showPatientAge', e.target.checked)
-											}
-											className="sr-only peer"
-										/>
-										<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-									</label>
+									<FluidToggle
+										checked={settings.general.showPatientAge}
+										onChange={(value) => updateSetting('general', 'showPatientAge', value)}
+									/>
 								</div>
 							</div>
 						</div>
@@ -829,15 +816,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 													{setting.desc}
 												</p>
 											</div>
-											<label className="relative inline-flex items-center cursor-pointer">
-												<input
-													type="checkbox"
-													checked={settings.prescription?.[setting.key] || false}
-													onChange={(e) => updateSetting('prescription', setting.key, e.target.checked)}
-													className="sr-only peer"
-												/>
-												<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-											</label>
+											<FluidToggle
+												checked={settings.prescription?.[setting.key] || false}
+												onChange={(value) => updateSetting('prescription', setting.key, value)}
+											/>
 										</div>
 									))}
 								</div>
@@ -893,15 +875,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Include GST in billing
 										</p>
 									</div>
-									<label className="relative inline-flex items-center cursor-pointer">
-										<input
-											type="checkbox"
-											checked={settings.billing?.enableGST || false}
-											onChange={(e) => updateSetting('billing', 'enableGST', e.target.checked)}
-											className="sr-only peer"
-										/>
-										<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-									</label>
+									<FluidToggle
+										checked={settings.billing?.enableGST || false}
+										onChange={(value) => updateSetting('billing', 'enableGST', value)}
+									/>
 								</div>
 
 								{settings.billing.enableGST && (
@@ -949,15 +926,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 													{setting.desc}
 												</p>
 											</div>
-											<label className="relative inline-flex items-center cursor-pointer">
-												<input
-													type="checkbox"
-													checked={settings.billing?.[setting.key] || false}
-													onChange={(e) => updateSetting('billing', setting.key, e.target.checked)}
-													className="sr-only peer"
-												/>
-												<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-											</label>
+											<FluidToggle
+												checked={settings.billing?.[setting.key] || false}
+												onChange={(value) => updateSetting('billing', setting.key, value)}
+											/>
 										</div>
 									))}
 								</div>
@@ -971,15 +943,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Offer discount for follow-up visits
 										</p>
 									</div>
-									<label className="relative inline-flex items-center cursor-pointer">
-										<input
-											type="checkbox"
-											checked={settings.billing?.includeFollowUpDiscount || false}
-											onChange={(e) => updateSetting('billing', 'includeFollowUpDiscount', e.target.checked)}
-											className="sr-only peer"
-										/>
-										<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-									</label>
+									<FluidToggle
+										checked={settings.billing?.includeFollowUpDiscount || false}
+										onChange={(value) => updateSetting('billing', 'includeFollowUpDiscount', value)}
+									/>
 								</div>
 
 								{settings.billing.includeFollowUpDiscount && (
@@ -1123,15 +1090,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 													{setting.desc}
 												</p>
 											</div>
-											<label className="relative inline-flex items-center cursor-pointer">
-												<input
-													type="checkbox"
-													checked={settings.scheduling?.[setting.key] || false}
-													onChange={(e) => updateSetting('scheduling', setting.key, e.target.checked)}
-													className="sr-only peer"
-												/>
-												<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-											</label>
+											<FluidToggle
+												checked={settings.scheduling?.[setting.key] || false}
+												onChange={(value) => updateSetting('scheduling', setting.key, value)}
+											/>
 										</div>
 									))}
 								</div>
@@ -1157,17 +1119,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Extra confirmation for deleting patients or records
 										</p>
 									</div>
-									<label className="relative inline-flex items-center cursor-pointer">
-										<input
-											type="checkbox"
-											checked={settings.security?.requirePasswordForDelete || false}
-											onChange={(e) =>
-												updateSetting('security', 'requirePasswordForDelete', e.target.checked)
-											}
-											className="sr-only peer"
-										/>
-										<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-									</label>
+									<FluidToggle
+										checked={settings.security?.requirePasswordForDelete || false}
+										onChange={(value) => updateSetting('security', 'requirePasswordForDelete', value)}
+									/>
 								</div>
 
 								<div>
@@ -1198,15 +1153,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 											Track user actions for security purposes
 										</p>
 									</div>
-									<label className="relative inline-flex items-center cursor-pointer">
-										<input
-											type="checkbox"
-											checked={settings.security?.enableAuditLog || false}
-											onChange={(e) => updateSetting('security', 'enableAuditLog', e.target.checked)}
-											className="sr-only peer"
-										/>
-										<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-									</label>
+									<FluidToggle
+										checked={settings.security?.enableAuditLog || false}
+										onChange={(value) => updateSetting('security', 'enableAuditLog', value)}
+									/>
 								</div>
 							</div>
 						</div>
@@ -1239,15 +1189,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 												{setting.desc}
 											</p>
 										</div>
-										<label className="relative inline-flex items-center cursor-pointer">
-											<input
-												type="checkbox"
-												checked={settings.notifications?.[setting.key] || false}
-												onChange={(e) => updateSetting('notifications', setting.key, e.target.checked)}
-												className="sr-only peer"
-											/>
-											<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-										</label>
+										<FluidToggle
+											checked={settings.notifications?.[setting.key] || false}
+											onChange={(value) => updateSetting('notifications', setting.key, value)}
+										/>
 									</div>
 								))}
 							</div>
@@ -1311,15 +1256,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 													{setting.desc}
 												</p>
 											</div>
-											<label className="relative inline-flex items-center cursor-pointer">
-												<input
-													type="checkbox"
-													checked={settings.appearance?.[setting.key] || false}
-													onChange={(e) => updateSetting('appearance', setting.key, e.target.checked)}
-													className="sr-only peer"
-												/>
-												<div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-											</label>
+											<FluidToggle
+												checked={settings.appearance?.[setting.key] || false}
+												onChange={(value) => updateSetting('appearance', setting.key, value)}
+											/>
 										</div>
 									))}
 								</div>
