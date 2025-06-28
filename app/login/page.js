@@ -90,12 +90,9 @@ export default function LoginPage() {
     }
   }, [currentStep]);
 
+  // Remove artificial delay for content switch
   const handleModeSwitch = async (toStep) => {
     setIsTransitioning(true);
-
-    // Wait for animation to complete
-    await new Promise(resolve => setTimeout(resolve, 400));
-
     setCurrentStep(toStep);
     setIsTransitioning(false);
   };
@@ -493,43 +490,64 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-between transition-colors duration-300 overflow-y-auto ">
+    <div className="min-h-screen w-screen bg-white dark:bg-gray-900 flex items-center overflow-hidden transition-colors duration-300">
       {/* Dark Mode Toggle */}
       <div className="fixed top-4 right-4 z-10">
         <DarkModeToggle />
       </div>
-      <div className="photo w-1/2 h-screen bg-amber-100"></div>
+      {/* Photo section: hidden on small screens, always 1/2 width on md+ */}
+      <div className="photo hidden sm:block sm:w-1/2 h-screen bg-amber-100"></div>
 
       {/* Main Container */}
-      <div className="w-full max-w-4xl py-8">
-
-        {/* Header - Always visible */}
-        <div className={`text-center mb-8 transform transition-all duration-500 ease-out ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-          }`}>
-          <div className="inline-flex items-center justify-center gap-3 mb-4">
-            <Stethoscope className={`w-8 h-8 text-blue-600 dark:text-blue-400 transform transition-all duration-700 ease-out ${
-              isVisible ? 'scale-100 rotate-0' : 'scale-50 rotate-45'
+      <div className="flex flex-col flex-1 items-center sm:justify-center min-h-screen overflow-hidden w-full px-15 py-20 sm:p-8">
+        {/* Animated Header */}
+        <div
+          className="relative w-full flex flex-col items-center"
+          style={{
+            minHeight: 100, // enough for header+subtitle
+            transition: 'min-height 0.5s cubic-bezier(0.4,0,0.2,1)'
+          }}
+        >
+          <div
+            className={`absolute left-0 right-0 flex flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+              currentStep === 'login'
+                ? 'translate-y-0 opacity-100'
+                : currentStep === 'register'
+                  ? 'translate-y-[-40px] opacity-100'
+                  : 'translate-y-[20px] opacity-100'
+            }`}
+            style={{
+              zIndex: 2,
+              pointerEvents: 'none',
+              willChange: 'transform, opacity'
+            }}
+          >
+            <div className="inline-flex items-center justify-center gap-3 mb-4">
+              <Stethoscope className={`w-8 h-8 text-blue-600 dark:text-blue-400 transform transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                isVisible ? 'scale-100 rotate-0' : 'scale-50 rotate-45'
               }`} />
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-              Doc Prescrip
-            </h1>
-          </div>
-          <p className={`text-sm text-gray-500 dark:text-gray-400 transition-all duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                Doc Prescrip
+              </h1>
+            </div>
+            <p className={`text-sm text-gray-500 dark:text-gray-400 transition-all duration-500 ${
+              isTransitioning ? 'opacity-0' : 'opacity-100'
             }`}>
-            {currentStep === 'login' ? 'Welcome back' :
-              currentStep === 'register' ? 'Create your doctor account' :
-                'Verify your email'}
-          </p>
+              {currentStep === 'login' ? 'Welcome back'
+                : currentStep === 'register' ? 'Create your doctor account'
+                : 'Verify your email'}
+            </p>
+          </div>
         </div>
 
         {/* Content Container */}
-        <div className="relative min-h-[400px]">
-
+        <div className="relative w-full max-w-4xl flex items-start justify-center min-h-[400px]">
           {/* Login Form */}
-          <div className={`transform transition-all duration-500 ease-in-out ${currentStep === 'login'
+          <div className={`absolute left-0 right-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            currentStep === 'login'
               ? 'translate-x-0 opacity-100 pointer-events-auto'
-              : '-translate-x-40 opacity-0 pointer-events-none absolute inset-0'
-            } ${!isVisible ? 'translate-y-4 opacity-0' : ''}`}>
+              : '-translate-x-20 opacity-0 pointer-events-none'
+          }`}>
             <div className="max-w-sm mx-auto">
               <form onSubmit={handleLoginSubmit} className="space-y-6">
                 {/* Email Field */}
@@ -583,11 +601,11 @@ export default function LoginPage() {
                 </div>
 
                 {/* Submit Button */}
-                <div className="pt-4">
+                <div className="pt-2">
                   <button
                     type="submit"
                     disabled={loginData.isLoading}
-                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center relative overflow-hidden"
+                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center relative overflow-hidden cursor-pointer"
                   >
                     <div className={`flex items-center transition-all duration-200 ${loginData.isLoading ? 'opacity-0' : 'opacity-100'}`}>
                       Sign In
@@ -617,12 +635,13 @@ export default function LoginPage() {
           </div>
 
           {/* Registration Form */}
-          <div className={`transform transition-all duration-500 ease-in-out ${currentStep === 'register'
-              ? 'translate-x-0 opacity-100 pointer-events-auto'
+          <div className={`absolute left-0 right-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            currentStep === 'register'
+              ? 'translate-x-0 translate-y-[-40px] opacity-100 pointer-events-auto'
               : currentStep === 'login'
-                ? 'translate-x-40 opacity-0 pointer-events-none absolute inset-0'
-                : '-translate-x-40 opacity-0 pointer-events-none absolute inset-0'
-            }`}>
+                ? 'translate-x-20 translate-y-[-40px] opacity-0 pointer-events-none'
+                : '-translate-x-20 translate-y-[-40px] opacity-0 pointer-events-none'
+          }`}>
             <div className="max-w-2xl mx-auto">
               <form onSubmit={handleRegistrationSubmit} className="space-y-6">
 
@@ -774,7 +793,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => handleRegDataChange('showPassword', !regData.showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 hover:scale-110 active:scale-95"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
                     >
                       {regData.showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -801,7 +820,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => handleRegDataChange('showConfirmPassword', !regData.showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 hover:scale-110 active:scale-95"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer"
                     >
                       {regData.showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -890,11 +909,11 @@ export default function LoginPage() {
                 </div>
 
                 {/* Submit Button */}
-                <div className="pt-6">
+                <div className="pt-2">
                   <button
                     type="submit"
                     disabled={regData.isLoading}
-                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center relative overflow-hidden"
+                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center relative overflow-hidden cursor-pointer"
                   >
                     <div className={`flex items-center transition-all duration-200 ${regData.isLoading ? 'opacity-0' : 'opacity-100'}`}>
                       Register Doctor
@@ -924,18 +943,13 @@ export default function LoginPage() {
           </div>
 
           {/* OTP Verification Form */}
-          <div className={`transform transition-all duration-500 ease-in-out ${currentStep === 'otp'
-              ? 'translate-x-0 opacity-100 pointer-events-auto'
-              : 'translate-x-40 opacity-0 pointer-events-none absolute inset-0'
-            }`}>
+          <div className={`absolute left-0 right-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            currentStep === 'otp'
+              ? 'translate-x-0 translate-y-[20px] opacity-100 pointer-events-auto'
+              : 'translate-x-40 translate-y-[20px] opacity-0 pointer-events-none'
+          }`}>
             <div className="max-w-md mx-auto">
               <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-12 h-12 mb-4 bg-blue-100 dark:bg-blue-900 rounded-full">
-                  <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  Verify Your Email
-                </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   We've sent a 6-digit verification code to your email address
                 </p>
@@ -994,7 +1008,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={otpData.isLoading}
-                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center relative overflow-hidden"
+                    className="group w-full bg-blue-600 dark:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center relative overflow-hidden cursor-pointer"
                   >
                     <div className={`flex items-center transition-all duration-200 ${otpData.isLoading ? 'opacity-0' : 'opacity-100'}`}>
                       Verify & Register
@@ -1014,12 +1028,12 @@ export default function LoginPage() {
                       type="button"
                       onClick={handleResendOtp}
                       disabled={otpData.isLoading}
-                      className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 hover:underline focus:outline-none focus:underline disabled:opacity-50"
+                      className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 hover:underline focus:outline-none focus:underline disabled:opacity-50 cursor-pointer"
                     >
                       Resend verification code
                     </button>
                   ) : (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed">
                       Resend available in {otpData.countdown}s
                     </p>
                   )}
