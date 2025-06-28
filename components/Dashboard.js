@@ -8,6 +8,7 @@ import PrescriptionTemplates from './PrescriptionTemplates';
 import MedicalDataManager from './MedicalDataManager';
 import MedicalCertificate from './MedicalCertificate';
 import KeyGeneratorTooltip from './KeyGeneratorModal';
+import SettingsModal from './SettingsModal';
 import {
   Plus,
   Search,
@@ -27,7 +28,8 @@ import {
   LogOut,
   Trash2,
   Download,
-  Key
+  Key,
+  Settings
 } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, formatTimeAgo } from '../utils/dateUtils';
@@ -49,6 +51,7 @@ export default function Dashboard() {
   const [lastGreetingUpdate, setLastGreetingUpdate] = useState('');
   const [navigationSource, setNavigationSource] = useState('dashboard'); // Track where we came from
   const [showKeyGeneratorModal, setShowKeyGeneratorModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const keyGeneratorTriggerRef = useRef(null);
   const [currentDoctor, setCurrentDoctor] = useState(null);
   const [isDataLoading, setIsDataLoading] = useState(true);
@@ -573,8 +576,12 @@ export default function Dashboard() {
     </div>
   );
 
+  const handleViewSettings = () => {
+    setShowSettingsModal(true);
+  };
+
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className={`min-h-screen bg-white dark:bg-gray-900 ${showSettingsModal ? 'overflow-hidden' : ''}`}>
       {/* Minimal Header */}
       <header className="dashboard-header bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-6 py-4">
@@ -636,7 +643,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Content - Remove pointer-events manipulation */}
       <main className="max-w-5xl mx-auto px-6 py-8">
         {currentView === 'dashboard' && (
           <div className="space-y-8">
@@ -884,6 +891,21 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </button>
+
+                    <button
+                      onClick={handleViewSettings}
+                      className="p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 text-left cursor-pointer"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-gray-600 dark:bg-gray-500 rounded">
+                          <Settings className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">Settings</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-300">App preferences</p>
+                        </div>
+                      </div>
+                    </button>
                   </div>
                 </div>
 
@@ -1058,6 +1080,12 @@ export default function Dashboard() {
           <MedicalDataManager onBack={handleBackToDashboard} />
         )}
       </main>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+      />
     </div>
   );
 }

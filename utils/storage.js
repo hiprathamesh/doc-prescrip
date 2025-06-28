@@ -547,6 +547,90 @@ export const storage = {
       console.error(`Error regenerating ${type} PDF:`, error);
       return null;
     }
+  },
+
+  // Settings methods
+  async getSettings() {
+    try {
+      const settings = localStorage.getItem('doc-prescrip-settings');
+      return settings ? JSON.parse(settings) : null;
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      return null;
+    }
+  },
+
+  async saveSettings(settings) {
+    try {
+      localStorage.setItem('doc-prescrip-settings', JSON.stringify(settings));
+      return true;
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      throw error;
+    }
+  },
+
+  async exportAllData() {
+    try {
+      const [patients, prescriptions, bills, templates, settings] = await Promise.all([
+        this.getPatients(),
+        this.getPrescriptions(), 
+        this.getBills(),
+        this.getTemplates(),
+        this.getSettings()
+      ]);
+
+      return {
+        patients,
+        prescriptions,
+        bills,
+        templates,
+        settings,
+        exportDate: new Date().toISOString(),
+        version: '1.0'
+      };
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      throw error;
+    }
+  },
+
+  async importAllData(data) {
+    try {
+      if (data.version !== '1.0') {
+        throw new Error('Incompatible data version');
+      }
+
+      // Import patients, prescriptions, bills, templates, and settings
+      const importPatients = data.patients || [];
+      const importPrescriptions = data.prescriptions || [];
+      const importBills = data.bills || [];
+      const importTemplates = data.templates || [];
+      const importSettings = data.settings || {};
+
+      // Clear existing data (optional, based on your app's needs)
+      await Promise.all([
+        this.savePatients([]),
+        this.savePrescriptions([]),
+        this.saveBills([]),
+        this.saveTemplates([]),
+        this.saveSettings({})
+      ]);
+
+      // Import new data
+      await Promise.all([
+        this.savePatients(importPatients),
+        this.savePrescriptions(importPrescriptions),
+        this.saveBills(importBills),
+        this.saveTemplates(importTemplates),
+        this.saveSettings(importSettings)
+      ]);
+
+      return true;
+    } catch (error) {
+      console.error('Error importing data:', error);
+      throw error;
+    }
   }
 };
 
