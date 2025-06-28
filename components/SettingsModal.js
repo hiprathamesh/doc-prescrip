@@ -1403,7 +1403,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
 			{/* Backdrop with blur - prevent pointer events on background */}
 			<div
-				className="absolute inset-0 backdrop-blur-sm transition-opacity"
+				className="absolute inset-0 bg-black/32 transition-opacity"
 				onClick={handleClose}
 			/>
 
