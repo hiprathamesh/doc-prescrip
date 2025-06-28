@@ -145,6 +145,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const sectionRefs = useRef({});
 	const contentRef = useRef(null);
+	const sidebarRef = useRef(null); // Add sidebar ref
 	const isClickScrolling = useRef(false);
 	const [hospitalLogo, setHospitalLogo] = useState({
 		isUploading: false,
@@ -169,7 +170,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 
 					entries.forEach((entry) => {
 						if (entry.isIntersecting) {
-							setActiveSection(entry.target.id);
+							const newActiveSection = entry.target.id;
+							setActiveSection(newActiveSection);
+							// Scroll sidebar to show the active section
+							scrollSidebarToActiveSection(newActiveSection);
 						}
 					});
 				},
@@ -228,6 +232,38 @@ export default function SettingsModal({ isOpen, onClose }) {
 			setTimeout(() => {
 				isClickScrolling.current = false;
 			}, 1000); // Reset after scroll animation
+		}
+	};
+
+	// Add function to scroll sidebar to show active section
+	const scrollSidebarToActiveSection = (sectionId) => {
+		if (!sidebarRef.current) return;
+
+		const sidebarContainer = sidebarRef.current;
+		const activeSectionButton = sidebarContainer.querySelector(`[data-section="${sectionId}"]`);
+		
+		if (!activeSectionButton) return;
+
+		const containerRect = sidebarContainer.getBoundingClientRect();
+		const buttonRect = activeSectionButton.getBoundingClientRect();
+		
+		// Calculate if the button is out of view
+		const isAboveView = buttonRect.top < containerRect.top;
+		const isBelowView = buttonRect.bottom > containerRect.bottom;
+		
+		if (isAboveView || isBelowView) {
+			// Calculate scroll position to center the button in the container
+			const containerHeight = containerRect.height;
+			const buttonHeight = buttonRect.height;
+			const buttonOffsetTop = activeSectionButton.offsetTop;
+			
+			// Center the button in the visible area
+			const targetScrollTop = buttonOffsetTop - (containerHeight / 2) + (buttonHeight / 2);
+			
+			sidebarContainer.scrollTo({
+				top: Math.max(0, targetScrollTop),
+				behavior: 'smooth'
+			});
 		}
 	};
 
@@ -1410,7 +1446,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 				{/* Content */}
 				<div className="flex flex-1 overflow-hidden">
 					{/* Sidebar - Reduced padding and fixed button styling */}
-					<div className="w-1/3 border-r border-gray-200 dark:border-gray-700 p-3 overflow-y-auto">
+					<div ref={sidebarRef} className="w-1/3 border-r border-gray-200 dark:border-gray-700 p-3 overflow-y-auto">
 						<nav className="space-y-1">
 							{SETTINGS_SECTIONS.map((section) => {
 								const IconComponent = section.icon;
@@ -1419,6 +1455,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 								return (
 									<button
 										key={section.id}
+										data-section={section.id}
 										onClick={() => handleSectionClick(section.id)}
 										className={`w-full text-left p-2.5 rounded-lg transition-colors duration-200 cursor-pointer ${
 											isActive
