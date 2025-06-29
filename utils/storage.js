@@ -8,7 +8,8 @@ const API_ENDPOINTS = {
   PRESCRIPTIONS: '/api/prescriptions',
   BILLS: '/api/bills',
   TEMPLATES: '/api/templates',
-  CUSTOM_DATA: '/api/custom-data'
+  CUSTOM_DATA: '/api/custom-data',
+  ACTIVITIES: '/api/activities'
 };
 
 /**
@@ -795,6 +796,42 @@ class Storage {
     } catch (error) {
       console.error('Error deleting hospital logo:', error);
       throw error;
+    }
+  }
+
+  // ACTIVITIES
+  async getActivities() {
+    try {
+      const response = await apiCall(API_ENDPOINTS.ACTIVITIES);
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      console.error('Error getting activities:', error);
+      return [];
+    }
+  }
+
+  async saveActivity(activity) {
+    try {
+      const response = await apiCall(`${API_ENDPOINTS.ACTIVITIES}/single`, {
+        method: 'POST',
+        body: JSON.stringify({ activity })
+      });
+      return response.success !== false;
+    } catch (error) {
+      console.error('Error saving activity:', error);
+      return false;
+    }
+  }
+
+  async clearOldActivities(days = 30) {
+    try {
+      const response = await apiCall(`${API_ENDPOINTS.ACTIVITIES}/cleanup?days=${days}`, {
+        method: 'DELETE'
+      });
+      return response.success !== false;
+    } catch (error) {
+      console.error('Error clearing old activities:', error);
+      return false;
     }
   }
 }

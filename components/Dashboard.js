@@ -9,6 +9,7 @@ import MedicalDataManager from './MedicalDataManager';
 import MedicalCertificate from './MedicalCertificate';
 import KeyGeneratorTooltip from './KeyGeneratorModal';
 import SettingsModal from './SettingsModal';
+import RecentActivityPage from './RecentActivityPage';
 import {
   Plus,
   Search,
@@ -42,7 +43,7 @@ export default function Dashboard() {
   const [prescriptions, setPrescriptions] = useState([]);
   const [bills, setBills] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [currentView, setCurrentView] = useState('dashboard'); // Add 'templates' to possible values
+  const [currentView, setCurrentView] = useState('dashboard'); // Add 'activity' to possible values
   const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState({});
   const [isStatsHovered, setIsStatsHovered] = useState(false);
@@ -57,11 +58,14 @@ export default function Dashboard() {
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [isStatsLoading, setIsStatsLoading] = useState(true);
   const [isGreetingLoading, setIsGreetingLoading] = useState(true);
+  const [isActivitiesLoading, setIsActivitiesLoading] = useState(true);
+  const [maxRecentActivities, setMaxRecentActivities] = useState(3); // Default to 3
 
   useEffect(() => {
     loadAllData();
     loadRecentActivities();
     loadDoctorContext();
+    loadSettings(); // Load settings for activity preferences
 
     // Update greeting every minute to check for time period changes
     const greetingInterval = setInterval(() => {
@@ -70,6 +74,14 @@ export default function Dashboard() {
 
     return () => clearInterval(greetingInterval);
   }, []);
+
+  // Add effect to refresh activities when returning to dashboard
+  useEffect(() => {
+    if (currentView === 'dashboard') {
+      // Refresh activities when returning to dashboard
+      loadRecentActivities();
+    }
+  }, [currentView]);
 
   useEffect(() => {
     if (currentDoctor) {
@@ -109,11 +121,25 @@ export default function Dashboard() {
 
   const loadRecentActivities = async () => {
     try {
+      setIsActivitiesLoading(true);
       const activities = await activityLogger.getActivities();
-      setRecentActivities(activities.slice(0, 10)); // Show last 10 activities
+      setRecentActivities((activities || []).slice(0, maxRecentActivities));
     } catch (error) {
       console.error('Error loading recent activities:', error);
       setRecentActivities([]);
+    } finally {
+      setIsActivitiesLoading(false);
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      const settings = await storage.getSettings();
+      if (settings?.general?.maxRecentActivities) {
+        setMaxRecentActivities(Math.min(settings.general.maxRecentActivities, 10));
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
     }
   };
 
@@ -214,6 +240,7 @@ export default function Dashboard() {
     setCurrentView('dashboard');
     setSelectedPatient(null);
     loadAllData(); // Refresh data when returning to dashboard
+    // loadRecentActivities will be called automatically by useEffect when currentView changes
   };
 
   const handleViewAllPatients = () => {
@@ -231,6 +258,10 @@ export default function Dashboard() {
   const handleNewMedicalCertificate = (patient = null) => {
     setSelectedPatient(patient);
     setCurrentView('medical-certificate');
+  };
+
+  const handleViewAllActivities = () => {
+    setCurrentView('activity');
   };
 
   const handlePatientUpdate = async (updatedPatients) => {
@@ -927,7 +958,7 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
                     <button
-                      onClick={handleViewAllPatients}
+                      onClick={handleViewAllActivities}
                       className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm cursor-pointer"
                     >
                       View All
@@ -935,7 +966,21 @@ export default function Dashboard() {
                   </div>
 
                   <div className="space-y-0">
-                    {recentActivities.length > 0 ? (
+                    {isActivitiesLoading ? (
+                      // Activity loading skeleton
+                      <div className="space-y-3">
+                        {Array.from({ length: maxRecentActivities }).map((_, index) => (
+                          <div key={index} className="flex items-center space-x-3 py-3 animate-pulse">
+                            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                            <div className="flex-1 space-y-2">
+                              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                            </div>
+                            <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : recentActivities.length > 0 ? (
                       recentActivities.map((activity, index) => {
                         const IconComponent = getActivityIcon(activity.type);
                         const colorClass = getActivityColor(activity.type);
@@ -1087,6 +1132,11 @@ export default function Dashboard() {
             onBack={handleBackToDashboard}
             onPatientUpdate={handlePatientUpdate}
           />
+        )}
+
+        {/* Add activity view */}
+        {currentView === 'activity' && (
+          <RecentActivityPage onBack={handleBackToDashboard} />
         )}
 
         {currentView === 'medical-data' && (

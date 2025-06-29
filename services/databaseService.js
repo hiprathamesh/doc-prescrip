@@ -729,6 +729,62 @@ class DatabaseService {
       return false;
     }
   }
+
+  // Activity methods
+  async getActivities(doctorId) {
+    try {
+      const collection = await getCollection('activities');
+      const activities = await collection
+        .find({ doctorId })
+        .sort({ timestamp: -1 })
+        .limit(100)
+        .toArray();
+      
+      return activities;
+    } catch (error) {
+      console.error('Error getting activities:', error);
+      return [];
+    }
+  }
+
+  async saveActivity(activity, doctorId) {
+    try {
+      const collection = await getCollection('activities');
+      
+      // Ensure the activity has the correct doctorId
+      activity.doctorId = doctorId;
+      activity.timestamp = activity.timestamp || new Date().toISOString();
+      
+      const result = await collection.insertOne(activity);
+      
+      if (result.insertedId) {
+        return { ...activity, _id: result.insertedId };
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error saving activity:', error);
+      return null;
+    }
+  }
+
+  async clearOldActivities(doctorId, cutoffDays = 30) {
+    try {
+      const collection = await getCollection('activities');
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - cutoffDays);
+
+      const result = await collection.deleteMany({
+        doctorId,
+        timestamp: { $lt: cutoffDate.toISOString() }
+      });
+
+      return result.deletedCount;
+    } catch (error) {
+      console.error('Error clearing old activities:', error);
+      return 0;
+    }
+  }
 }
 
 export const databaseService = new DatabaseService();

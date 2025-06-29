@@ -85,6 +85,8 @@ export default function SettingsModal({ isOpen, onClose }) {
 			defaultFollowUpDays: 7,
 			language: 'english',
 			timezone: 'Asia/Kolkata',
+			maxRecentActivities: 3,
+			activityRetentionDays: 30
 		},
 		prescription: {
 			defaultInstructions: 'Take as directed',
@@ -724,6 +726,48 @@ export default function SettingsModal({ isOpen, onClose }) {
 											}
 											className="w-full text-sm p-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-500"
 										/>
+									</div>
+
+									<div>
+										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+											Recent Activities on Dashboard
+										</label>
+										<CustomDropdown
+											options={[
+												{ value: 1, label: '1 activity' },
+												{ value: 2, label: '2 activities' },
+												{ value: 3, label: '3 activities' },
+												{ value: 4, label: '4 activities' },
+												{ value: 5, label: '5 activities' },
+												{ value: 6, label: '6 activities' },
+												{ value: 7, label: '7 activities' },
+												{ value: 8, label: '8 activities' },
+												{ value: 9, label: '9 activities' },
+												{ value: 10, label: '10 activities' }
+											]}
+											value={settings.general?.maxRecentActivities || 3}
+											onChange={(value) => updateSetting('general', 'maxRecentActivities', parseInt(value))}
+											placeholder="Select count"
+										/>
+									</div>
+
+									<div>
+										<label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+											Activity Retention Period
+										</label>
+										<CustomDropdown
+											options={[
+												{ value: 7, label: '1 week' },
+												{ value: 14, label: '2 weeks' },
+												{ value: 30, label: '1 month' }
+											]}
+											value={settings.general?.activityRetentionDays || 30}
+											onChange={(value) => updateSetting('general', 'activityRetentionDays', parseInt(value))}
+											placeholder="Select retention period"
+										/>
+										<p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+											Activities older than this will be automatically deleted
+										</p>
 									</div>
 
 									<div>

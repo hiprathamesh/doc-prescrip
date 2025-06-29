@@ -229,7 +229,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       const success = await storage.savePatients(updatedPatients);
 
       if (success) {
-        // Log activity
+        // Log activity immediately after successful creation
         await activityLogger.logPatientCreated(newPatient);
         
         onPatientUpdate(updatedPatients);
@@ -709,8 +709,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         throw new Error('Failed to save prescription');
       }
 
-      // Log activity
-      await activityLogger.logPrescriptionCreated(selectedPatient, prescription.id);
+      // Log activity immediately after successful save
+      await activityLogger.logPrescriptionCreated(selectedPatient, prescription.prescriptionId);
 
       // Save bill with PDF URL if exists
       if (bill) {
@@ -868,7 +868,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               <div className="flex space-x-3">
                 <button
                   onClick={handleSavePrescription}
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium cursor-pointer"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save & Send</span>

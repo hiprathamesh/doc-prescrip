@@ -162,6 +162,9 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       setCurrentBill(updatedBill);
       setBillPdfUrl(newBillUrl);
 
+      // Log activity immediately after successful update
+      await activityLogger.logBillPaymentUpdated(patient, updatedBill.amount, updatedBill.isPaid);
+
     } catch (error) {
       console.error('Error updating bill payment status:', error);
       // Rollback on error

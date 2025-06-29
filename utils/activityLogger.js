@@ -56,33 +56,81 @@ export const ACTIVITY_COLORS = {
 
 class ActivityLogger {
   constructor() {
-    this.storageKey = 'recentActivities';
+    // Remove local storage reference
+    this.listeners = new Set(); // Add listeners for real-time updates
+  }
+
+  // Add method to subscribe to activity updates
+  subscribe(callback) {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  }
+
+  // Notify all listeners when activities change
+  notifyListeners() {
+    this.listeners.forEach(callback => {
+      try {
+        callback();
+      } catch (error) {
+        console.error('Error in activity listener:', error);
+      }
+    });
   }
 
   async logActivity(type, data) {
     try {
+      // Get current doctor ID from storage
+      let doctorId;
+      try {
+        doctorId = this.getCurrentDoctorId();
+      } catch (error) {
+        console.warn('No doctor context available for activity logging');
+        return null;
+      }
+
       const activity = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         type,
         timestamp: new Date().toISOString(),
+        doctorId,
         ...data
       };
 
-      const activities = await this.getActivities();
-      const updatedActivities = [activity, ...activities].slice(0, 50); // Keep only last 50 activities
+      // Save to MongoDB via storage service
+      const { storage } = await import('./storage');
+      const success = await storage.saveActivity(activity);
       
-      localStorage.setItem(this.storageKey, JSON.stringify(updatedActivities));
-      return activity;
+      if (success) {
+        // Notify listeners about the new activity
+        this.notifyListeners();
+        return activity;
+      } else {
+        console.warn('Failed to save activity to database');
+        return null;
+      }
     } catch (error) {
       console.error('Error logging activity:', error);
       return null;
     }
   }
 
+  getCurrentDoctorId() {
+    // Check if we're in browser environment
+    if (typeof window !== 'undefined') {
+      const doctorId = localStorage.getItem('currentDoctorId');
+      if (!doctorId) {
+        throw new Error('Doctor not authenticated');
+      }
+      return doctorId;
+    }
+    throw new Error('Doctor context not available');
+  }
+
   async getActivities() {
     try {
-      const stored = localStorage.getItem(this.storageKey);
-      return stored ? JSON.parse(stored) : [];
+      const { storage } = await import('./storage');
+      const activities = await storage.getActivities();
+      return activities;
     } catch (error) {
       console.error('Error getting activities:', error);
       return [];
@@ -91,8 +139,8 @@ class ActivityLogger {
 
   async clearActivities() {
     try {
-      localStorage.removeItem(this.storageKey);
-      return true;
+      const { storage } = await import('./storage');
+      return await storage.clearOldActivities();
     } catch (error) {
       console.error('Error clearing activities:', error);
       return false;

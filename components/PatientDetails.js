@@ -300,7 +300,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
 
       await storage.saveBills(updatedBills);
       
-      // Log activity
+      // Log activity immediately after successful update
       await activityLogger.logBillPaymentUpdated(patient, finalUpdatedBill.amount, finalUpdatedBill.isPaid);
       
       // Update visits with the final bill including PDF URL
