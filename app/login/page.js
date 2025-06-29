@@ -496,7 +496,7 @@ export default function LoginPage() {
         <DarkModeToggle />
       </div>
       {/* Photo section: hidden on small screens, always 1/2 width on md+ */}
-      <div className="photo hidden sm:block sm:w-1/2 h-screen bg-amber-100"></div>
+      <div className="photo hidden sm:block sm:w-1/2 h-screen bg-amber-100 dark:bg-amber-500"></div>
 
       {/* Main Container */}
       <div className="flex flex-col flex-1 items-center sm:justify-center min-h-screen overflow-hidden w-full px-15 py-20 sm:p-8">
