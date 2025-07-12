@@ -2,7 +2,7 @@ import { databaseService } from '../../../../../services/databaseService';
 import { NextResponse } from 'next/server';
 
 /**
- * PATCH /api/templates/[id]/usage - Update template last used timestamp
+ * PATCH /api/templates/[templateId]/usage - Update template last used timestamp
  */
 export async function PATCH(request, { params }) {
   try {
@@ -14,10 +14,10 @@ export async function PATCH(request, { params }) {
       );
     }
 
-    const { id } = await params;
+    const { id: templateId } = await params;
     const { lastUsed } = await request.json();
     
-    const success = await databaseService.updateTemplateUsage(id, lastUsed, doctorId);
+    const success = await databaseService.updateTemplateUsage(templateId, lastUsed, doctorId);
     
     if (success) {
       return NextResponse.json({ success: true });

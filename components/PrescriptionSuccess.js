@@ -10,6 +10,7 @@ import { formatDate, formatDateTime } from '../utils/dateUtils';
 import SharePDFButton from './SharePDFButton';
 import { toast } from 'sonner';
 import useScrollToTop from '../hooks/useScrollToTop';
+import { activityLogger } from '../utils/activityLogger';
 
 export default function PrescriptionSuccess({ prescription, patient, bill, onBack }) {
   const [prescriptionPdfUrl, setPrescriptionPdfUrl] = useState(null);
@@ -163,13 +164,25 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
       setBillPdfUrl(newBillUrl);
 
       // Log activity immediately after successful update
-      await activityLogger.logBillPaymentUpdated(patient, updatedBill.amount, updatedBill.isPaid);
+      try {
+        await activityLogger.logBillPaymentUpdated(patient, updatedBill.amount, updatedBill.isPaid);
+      } catch (activityError) {
+        console.warn('Failed to log activity:', activityError);
+        // Don't fail the entire operation if activity logging fails
+      }
+
+      // Show success toast
+      toast.success(updatedBill.isPaid ? 'Payment Received' : 'Payment Marked Pending', {
+        description: `Bill payment status updated successfully`
+      });
 
     } catch (error) {
       console.error('Error updating bill payment status:', error);
       // Rollback on error
       setCurrentBill(originalBill);
-      alert('Failed to update payment status');
+      toast.error('Error', {
+        description: 'Failed to update payment status'
+      });
     } finally {
       // Only reset loading state for bill PDF
       setIsGeneratingBillPdf(false);

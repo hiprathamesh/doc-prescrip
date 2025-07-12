@@ -239,7 +239,11 @@ class DatabaseService {
       const validDoctorId = this.validateDoctorId(doctorId);
       const collection = await getCollection(this.collections.templates);
       const templates = await collection.find({ doctorId: validDoctorId }).sort({ createdAt: -1 }).toArray();
-      return templates.map(template => ({ ...template, id: template._id.toString() }));
+      return templates.map(template => ({ 
+        ...template, 
+        id: template._id.toString(),
+        templateId: template.templateId || template._id.toString() // Fallback for existing templates
+      }));
     } catch (error) {
       console.error('Error fetching templates:', error);
       return [];
@@ -274,21 +278,34 @@ class DatabaseService {
     try {
       const validDoctorId = this.validateDoctorId(doctorId);
       const collection = await getCollection(this.collections.templates);
+      
+      // Generate templateId if not provided
+      const templateId = template.templateId || `template_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
       const templateToSave = {
         ...template,
+        templateId,
         doctorId: validDoctorId,
         createdAt: template.createdAt || new Date(),
         updatedAt: new Date()
       };
       
-      if (template.id) {
-        // Update existing template
+      if (template.id && template.templateId) {
+        // Update existing template using templateId
         const { id, ...updateData } = templateToSave;
-        await collection.replaceOne(
-          { _id: new ObjectId(id), doctorId: validDoctorId },
+        const result = await collection.replaceOne(
+          { templateId: template.templateId, doctorId: validDoctorId },
           updateData
         );
-        templateToSave.id = id;
+        
+        if (result.matchedCount === 0) {
+          // If no match found, try by _id for backwards compatibility
+          await collection.replaceOne(
+            { _id: new ObjectId(template.id), doctorId: validDoctorId },
+            { ...updateData, templateId }
+          );
+        }
+        templateToSave.id = template.id;
       } else {
         // Insert new template
         const result = await collection.insertOne(templateToSave);
@@ -306,8 +323,11 @@ class DatabaseService {
     try {
       const validDoctorId = this.validateDoctorId(doctorId);
       const collection = await getCollection(this.collections.templates);
-      await collection.deleteOne({ _id: new ObjectId(templateId), doctorId: validDoctorId });
-      return true;
+      const result = await collection.deleteOne({ 
+        templateId: templateId, 
+        doctorId: validDoctorId 
+      });
+      return result.deletedCount > 0;
     } catch (error) {
       console.error('Error deleting template:', error);
       return false;
@@ -316,12 +336,13 @@ class DatabaseService {
 
   async updateTemplateUsage(templateId, lastUsed, doctorId) {
     try {
+      const validDoctorId = this.validateDoctorId(doctorId);
       // Update the template's lastUsed field in the database
       const collection = await getCollection(this.collections.templates);
       const result = await collection.updateOne(
         { 
-          _id: new ObjectId(templateId),
-          doctorId: doctorId 
+          templateId: templateId,
+          doctorId: validDoctorId 
         },
         { 
           $set: { 

@@ -15,7 +15,15 @@ export async function GET(request) {
     }
 
     const templates = await databaseService.getTemplates(doctorId);
-    return NextResponse.json({ success: true, data: templates });
+    // Ensure all templates have templateId
+    const templatesWithId = templates.map((template) => ({
+      ...template,
+      templateId:
+        template.templateId ||
+        template.id ||
+        `template_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    }));
+    return NextResponse.json({ success: true, data: templatesWithId });
   } catch (error) {
     console.error('API Error fetching templates:', error);
     return NextResponse.json(
@@ -39,8 +47,17 @@ export async function POST(request) {
     }
 
     const { templates } = await request.json();
-    const success = await databaseService.saveTemplates(templates, doctorId);
-    
+
+    // Ensure all templates have templateId
+    const templatesWithId = templates.map((template) => ({
+      ...template,
+      templateId:
+        template.templateId ||
+        `template_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    }));
+
+    const success = await databaseService.saveTemplates(templatesWithId, doctorId);
+
     if (success) {
       return NextResponse.json({ success: true });
     } else {

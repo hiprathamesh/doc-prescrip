@@ -167,7 +167,7 @@ class ActivityLogger {
 
   async logTemplateCreated(template) {
     return this.logActivity(ACTIVITY_TYPES.TEMPLATE_CREATED, {
-      templateId: template.id,
+      templateId: template.templateId,
       templateName: template.name,
       description: `Created template: ${template.name}`
     });
@@ -175,7 +175,7 @@ class ActivityLogger {
 
   async logTemplateEdited(template) {
     return this.logActivity(ACTIVITY_TYPES.TEMPLATE_EDITED, {
-      templateId: template.id,
+      templateId: template.templateId,
       templateName: template.name,
       description: `Updated template: ${template.name}`
     });

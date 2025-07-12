@@ -2,7 +2,7 @@ import { databaseService } from '../../../../services/databaseService';
 import { NextResponse } from 'next/server';
 
 /**
- * DELETE /api/templates/[id] - Delete a specific template
+ * DELETE /api/templates/[templateId] - Delete a specific template
  */
 export async function DELETE(request, { params }) {
   try {
@@ -14,8 +14,8 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const { id } = await params;
-    const success = await databaseService.deleteTemplate(id, doctorId);
+    const { id: templateId } = await params;
+    const success = await databaseService.deleteTemplate(templateId, doctorId);
     
     if (success) {
       return NextResponse.json({ success: true });

@@ -218,7 +218,7 @@ export default function PrescriptionTemplates({ onBack }) {
   };
 
   const handleDelete = async (templateId) => {
-    const templateToDelete = templates.find(t => t.id === templateId);
+    const templateToDelete = templates.find(t => t.templateId === templateId);
     if (templateToDelete) {
       setDeleteConfirmation({
         isOpen: true,
@@ -233,7 +233,7 @@ export default function PrescriptionTemplates({ onBack }) {
     setDeleteConfirmation(prev => ({ ...prev, isDeleting: true }));
 
     try {
-      const templateToDelete = templates.find(t => t.id === deleteConfirmation.templateId);
+      const templateToDelete = templates.find(t => t.templateId === deleteConfirmation.templateId);
       const success = await storage.deleteTemplate(deleteConfirmation.templateId);
       if (success) {
         // Log activity
@@ -280,8 +280,8 @@ export default function PrescriptionTemplates({ onBack }) {
         // Editing existing template
         isEditing = true;
         updatedTemplates = templates.map(t =>
-          t.id === selectedTemplate.id
-            ? { ...templateData, id: selectedTemplate.id, updatedAt: new Date() }
+          t.templateId === selectedTemplate.templateId
+            ? { ...templateData, templateId: selectedTemplate.templateId, id: selectedTemplate.id, updatedAt: new Date() }
             : t
         );
       } else {
@@ -289,6 +289,7 @@ export default function PrescriptionTemplates({ onBack }) {
         const newTemplate = {
           ...templateData,
           id: Date.now().toString(),
+          templateId: `template_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           createdAt: new Date(),
           updatedAt: new Date(),
           lastUsed: null
@@ -346,6 +347,105 @@ export default function PrescriptionTemplates({ onBack }) {
 
   const handleSortDirectionToggle = () => {
     setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
+
+  const applyTemplate = async (template) => {
+    if (!template) return;
+
+    // Store previous state for undo functionality
+    const previousState = {
+      symptoms,
+      diagnoses,
+      medications,
+      labResults,
+      doctorNotesList,
+      adviceList
+    };
+
+    // Apply symptoms with proper structure
+    if (template.symptoms && Array.isArray(template.symptoms) && template.symptoms.length > 0) {
+      setSymptoms(template.symptoms.map(symptom => ({
+        ...symptom,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+      })));
+    }
+
+    // Apply diagnosis with proper structure
+    if (template.diagnosis && Array.isArray(template.diagnosis) && template.diagnosis.length > 0) {
+      setDiagnoses(template.diagnosis.map(diagnosis => ({
+        ...diagnosis,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+      })));
+    }
+
+    // Apply medications with proper structure
+    if (template.medications && Array.isArray(template.medications) && template.medications.length > 0) {
+      setMedications(template.medications.map(medication => ({
+        ...medication,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+      })));
+    }
+
+    // Apply lab results with proper structure
+    if (template.labResults && Array.isArray(template.labResults) && template.labResults.length > 0) {
+      setLabResults(template.labResults.map(labResult => ({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        testName: labResult.testName || labResult.name || labResult
+      })));
+    }
+
+    // Convert template notes to list format
+    if (template.doctorNotes && template.doctorNotes.trim()) {
+      const notes = template.doctorNotes.split('\n').filter(note => note.trim()).map(note => ({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        text: note.trim()
+      }));
+      setDoctorNotesList(notes);
+    }
+
+    // Convert template advice to list format
+    if (template.advice && template.advice.trim()) {
+      const advice = template.advice.split('\n').filter(a => a.trim()).map(a => ({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        text: a.trim()
+      }));
+      setAdviceList(advice);
+    }
+
+    // Update template usage tracking
+    try {
+      await storage.updateTemplateUsage(template.templateId);
+    } catch (error) {
+      console.error('Failed to update template usage:', error);
+      // Don't block the template application if usage tracking fails
+    }
+
+    setShowTemplates(false);
+    setTemplateSearch('');
+
+    // Show success toast with undo functionality
+    const undoToast = () => {
+      // Restore previous state
+      setSymptoms(previousState.symptoms);
+      setDiagnoses(previousState.diagnoses);
+      setMedications(previousState.medications);
+      setLabResults(previousState.labResults);
+      setDoctorNotesList(previousState.doctorNotesList);
+      setAdviceList(previousState.adviceList);
+      
+      // Show undo confirmation
+      toast.info('Template Undone', {
+        description: `"${template.name}" has been removed`
+      });
+    };
+
+    toast.success('Template Applied', {
+      description: `"${template.name}" has been applied successfully`,
+      action: {
+        label: 'Undo',
+        onClick: undoToast
+      }
+    });
   };
 
   if (currentView === 'create' || currentView === 'edit') {
@@ -461,7 +561,7 @@ export default function PrescriptionTemplates({ onBack }) {
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredTemplates.map((template, index) => (
                     <div
-                      key={template.id}
+                      key={template.templateId}
                       className={`p-4 transition-colors duration-200
                         ${index === 0 ? 'first-template-item hover:bg-gray-50 dark:hover:bg-gray-800 rounded-t-xl' : ''}
                         ${index === filteredTemplates.length - 1 ? 'last-template-item hover:bg-gray-50 dark:hover:bg-gray-800 rounded-b-xl' : ''}
@@ -480,7 +580,7 @@ export default function PrescriptionTemplates({ onBack }) {
                                 <Edit className="w-3.5 h-3.5" />
                               </button>
                               <button
-                                onClick={() => handleDelete(template.id)}
+                                onClick={() => handleDelete(template.templateId)}
                                 className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 rounded-md transition-colors cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />

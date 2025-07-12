@@ -342,7 +342,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
     // Update template usage tracking
     try {
-      await storage.updateTemplateUsage(template.id);
+      await storage.updateTemplateUsage(template.templateId);
     } catch (error) {
       console.error('Failed to update template usage:', error);
       // Don't block the template application if usage tracking fails
@@ -1093,7 +1093,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                       {filteredTemplates.length > 0 ? (
                         filteredTemplates.map((template) => (
                           <div
-                            key={template.id}
+                            key={template.templateId}
                             onClick={() => applyTemplate(template)}
                             className="flex-shrink-0 w-80 p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:border-purple-300 hover:bg-purple-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer group"
                           >

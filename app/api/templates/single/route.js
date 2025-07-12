@@ -15,6 +15,12 @@ export async function POST(request) {
     }
 
     const { template } = await request.json();
+    
+    // Ensure template has a templateId
+    if (!template.templateId) {
+      template.templateId = `template_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+    
     const savedTemplate = await databaseService.saveTemplate(template, doctorId);
     
     if (savedTemplate) {

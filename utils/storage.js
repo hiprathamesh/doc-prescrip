@@ -351,40 +351,37 @@ class Storage {
     }
   }
 
-  // Add method to update template usage
-  async updateTemplateUsage(templateId) {
+  async deleteTemplate(templateId) {
     try {
-      const response = await apiCall(`${API_ENDPOINTS.TEMPLATES}/${templateId}/usage`, {
-        method: 'PATCH',
-        body: JSON.stringify({ lastUsed: new Date().toISOString() })
-      });
-      return response.success !== false;
+      // Get current templates from localStorage
+      const templates = await this.getTemplates();
+      
+      // Filter out the template to delete using templateId
+      const updatedTemplates = templates.filter(template => template.templateId !== templateId);
+      
+      // Save the updated templates back to localStorage
+      await this.saveTemplates(updatedTemplates);
+      
+      return true; // Return success
     } catch (error) {
-      console.error('Error updating template usage:', error);
-      // Fallback: update locally if API fails
-      try {
-        const templates = await storage.getTemplates();
-        const updatedTemplates = templates.map(template =>
-          template.id === templateId
-            ? { ...template, lastUsed: new Date().toISOString() }
-            : template
-        );
-        return await storage.saveTemplates(updatedTemplates);
-      } catch (fallbackError) {
-        console.error('Fallback template usage update failed:', fallbackError);
-        return false;
-      }
+      console.error('Error deleting template:', error);
+      return false; // Return failure
     }
   }
 
-  async deleteTemplate(templateId) {
+  // Add method to update template usage
+  async updateTemplateUsage(templateId) {
     try {
-      await apiCall(`${API_ENDPOINTS.TEMPLATES}/${templateId}`, {
-        method: 'DELETE'
-      });
+      const templates = await this.getTemplates();
+      const updatedTemplates = templates.map(template => 
+        template.templateId === templateId 
+          ? { ...template, lastUsed: new Date() }
+          : template
+      );
+      await this.saveTemplates(updatedTemplates);
       return true;
     } catch (error) {
-      console.error('Error deleting template:', error);
+      console.error('Error updating template usage:', error);
       return false;
     }
   }
