@@ -36,6 +36,11 @@ async function resetOtpAttempts(key, lockKey) {
 }
 
 export async function POST(request) {
+  // Redirect HTTP to HTTPS (only in production)
+  if (process.env.NODE_ENV === 'production' && request.headers.get('x-forwarded-proto') === 'http') {
+    return NextResponse.redirect(`https://${request.headers.get('host')}${request.url}`, 308);
+  }
+
   try {
     const { firstName, lastName, email, phone, resend } = await request.json();
 

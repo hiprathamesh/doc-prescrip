@@ -36,6 +36,11 @@ async function resetLoginAttempts(key, lockKey) {
 }
 
 export async function POST(request) {
+  // Redirect HTTP to HTTPS (only in production)
+  if (process.env.NODE_ENV === 'production' && request.headers.get('x-forwarded-proto') === 'http') {
+    return NextResponse.redirect(`https://${request.headers.get('host')}${request.url}`, 308);
+  }
+
   try {
     const { email, password } = await request.json();
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
@@ -105,7 +110,7 @@ export async function POST(request) {
     // Set authentication cookie
     response.cookies.set('doctor-auth', doctor.doctorId, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true, // Always true for security
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 // 7 days
     });

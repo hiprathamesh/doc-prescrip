@@ -110,7 +110,7 @@ export default function LoginPage() {
     setLoginData(prev => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(getApiUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -161,7 +161,7 @@ export default function LoginPage() {
     setRegData(prev => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await fetch('/api/auth/send-otp', {
+      const response = await fetch(getApiUrl('/api/auth/send-otp'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -219,7 +219,7 @@ export default function LoginPage() {
     setOtpData(prev => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await fetch('/api/auth/verify-otp', {
+      const response = await fetch(getApiUrl('/api/auth/verify-otp'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -280,7 +280,7 @@ export default function LoginPage() {
     setOtpData(prev => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await fetch('/api/auth/send-otp', {
+      const response = await fetch(getApiUrl('/api/auth/send-otp'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -420,7 +420,7 @@ export default function LoginPage() {
     setKeyValidation(prev => ({ ...prev, isValidating: true }));
 
     try {
-      const response = await fetch('/api/auth/validate-key', {
+      const response = await fetch(getApiUrl('/api/auth/validate-key'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accessKey: key.trim() })
@@ -1048,3 +1048,11 @@ export default function LoginPage() {
     </div>
   );
 }
+
+// Helper to get API base URL (enforce HTTPS in production)
+const getApiUrl = (path) => {
+  if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+    return path.startsWith('/') ? `https://${window.location.host}${path}` : path;
+  }
+  return path; // fallback for dev/local
+};

@@ -37,6 +37,11 @@ async function resetOtpVerifyAttempts(key, lockKey) {
 }
 
 export async function POST(request) {
+  // Redirect HTTP to HTTPS (only in production)
+  if (process.env.NODE_ENV === 'production' && request.headers.get('x-forwarded-proto') === 'http') {
+    return NextResponse.redirect(`https://${request.headers.get('host')}${request.url}`, 308);
+  }
+
   try {
     const { email, emailOtp, registrationData } = await request.json();
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
