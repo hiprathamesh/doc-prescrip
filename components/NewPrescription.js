@@ -195,21 +195,10 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
     return `${prefix}${timestamp}`;
   };
 
-  // Add validation confirmation dialog state
-  const [validationDialog, setValidationDialog] = useState({
-    isOpen: false,
-    title: '',
-    message: '',
-    onConfirm: null
-  });
-
   const handleCreateNewPatient = async () => {
     if (!newPatientData.name || !newPatientData.age || !newPatientData.phone) {
-      setValidationDialog({
-        isOpen: true,
-        title: 'Missing Information',
-        message: 'Please fill all required fields for new patient (Name, Age, and Phone are required).',
-        onConfirm: () => setValidationDialog({ isOpen: false, title: '', message: '', onConfirm: null })
+      toast.error('Missing Information', {
+        description: 'Please fill all required fields for new patient (Name, Age, and Phone are required).'
       });
       return;
     }
@@ -235,21 +224,19 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         onPatientUpdate(updatedPatients);
         setSelectedPatient(newPatient);
         setIsNewPatient(false);
+        
+        toast.success('Patient Created', {
+          description: `${newPatient.name} has been successfully created.`
+        });
       } else {
-        setValidationDialog({
-          isOpen: true,
-          title: 'Error',
-          message: 'Failed to create patient. Please try again.',
-          onConfirm: () => setValidationDialog({ isOpen: false, title: '', message: '', onConfirm: null })
+        toast.error('Error', {
+          description: 'Failed to create patient. Please try again.'
         });
       }
     } catch (error) {
       console.error('Error creating patient:', error);
-      setValidationDialog({
-        isOpen: true,
-        title: 'Error',
-        message: 'Failed to create patient. Please try again.',
-        onConfirm: () => setValidationDialog({ isOpen: false, title: '', message: '', onConfirm: null })
+      toast.error('Error', {
+        description: 'Failed to create patient. Please try again.'
       });
     }
   };
@@ -585,11 +572,8 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
   const handleSavePrescription = async () => {
     if (!selectedPatient) {
-      setValidationDialog({
-        isOpen: true,
-        title: 'No Patient Selected',
-        message: 'Please select a patient before saving the prescription.',
-        onConfirm: () => setValidationDialog({ isOpen: false, title: '', message: '', onConfirm: null })
+      toast.error('No Patient Selected', {
+        description: 'Please select a patient before saving the prescription.'
       });
       return;
     }
@@ -1632,16 +1616,6 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
           )}
         </div>
       </div>
-
-      {/* Validation Dialog */}
-      <ConfirmationDialog
-        isOpen={validationDialog.isOpen}
-        title={validationDialog.title}
-        message={validationDialog.message}
-        onConfirm={validationDialog.onConfirm}
-        onCancel={() => setValidationDialog({ isOpen: false, title: '', message: '', onConfirm: null })}
-        isLoading={false}
-      />
 
       {/* Confirmation Dialog */}
       <ConfirmationDialog
