@@ -1,9 +1,54 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import { Redis } from '@upstash/redis';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
+
+const OTP_VERIFY_LIMIT = 5;
+const OTP_VERIFY_WINDOW = 15 * 60; // 15 minutes
+const OTP_VERIFY_LOCKOUT = 30 * 60; // 30 minutes
+
+async function checkOtpVerifyRateLimit(email, ip) {
+  const key = `otp:verify:attempts:${email}:${ip}`;
+  const lockKey = `otp:verify:lockout:${email}:${ip}`;
+  const locked = await redis.get(lockKey);
+  if (locked) return { locked: true };
+
+  let attempts = await redis.get(key);
+  attempts = attempts ? parseInt(attempts) : 0;
+  if (attempts >= OTP_VERIFY_LIMIT) {
+    await redis.set(lockKey, '1', { ex: OTP_VERIFY_LOCKOUT });
+    return { locked: true };
+  }
+  return { locked: false, attempts, key, lockKey };
+}
+
+async function incrementOtpVerifyAttempts(key) {
+  await redis.incr(key);
+  await redis.expire(key, OTP_VERIFY_WINDOW);
+}
+
+async function resetOtpVerifyAttempts(key, lockKey) {
+  await redis.del(key);
+  await redis.del(lockKey);
+}
 
 export async function POST(request) {
   try {
     const { email, emailOtp, registrationData } = await request.json();
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+
+    // Rate limiting and lockout
+    const rate = await checkOtpVerifyRateLimit(email, ip);
+    if (rate.locked) {
+      return NextResponse.json(
+        { success: false, error: 'Too many OTP verification attempts. Please try again later.' },
+        { status: 429 }
+      );
+    }
 
     // Validate required fields
     if (!email || !emailOtp || !registrationData) {
@@ -27,11 +72,14 @@ export async function POST(request) {
     const emailValid = await doctorService.verifyOtp(email, 'email', emailOtp);
 
     if (!emailValid) {
+      await incrementOtpVerifyAttempts(rate.key);
       return NextResponse.json(
         { success: false, error: 'Invalid email verification code' },
         { status: 400 }
       );
     }
+
+    await resetOtpVerifyAttempts(rate.key, rate.lockKey);
 
     // Validate registration data
     const {

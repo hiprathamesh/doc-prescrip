@@ -1,5 +1,40 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import { Redis } from '@upstash/redis';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
+
+const REGISTER_ATTEMPT_LIMIT = 5;
+const REGISTER_ATTEMPT_WINDOW = 30 * 60; // 30 minutes
+const REGISTER_LOCKOUT_TIME = 60 * 60; // 1 hour
+
+async function checkRegisterRateLimit(email, phone, ip) {
+  const key = `register:attempts:${email}:${phone}:${ip}`;
+  const lockKey = `register:lockout:${email}:${phone}:${ip}`;
+  const locked = await redis.get(lockKey);
+  if (locked) return { locked: true };
+
+  let attempts = await redis.get(key);
+  attempts = attempts ? parseInt(attempts) : 0;
+  if (attempts >= REGISTER_ATTEMPT_LIMIT) {
+    await redis.set(lockKey, '1', { ex: REGISTER_LOCKOUT_TIME });
+    return { locked: true };
+  }
+  return { locked: false, attempts, key, lockKey };
+}
+
+async function incrementRegisterAttempts(key) {
+  await redis.incr(key);
+  await redis.expire(key, REGISTER_ATTEMPT_WINDOW);
+}
+
+async function resetRegisterAttempts(key, lockKey) {
+  await redis.del(key);
+  await redis.del(lockKey);
+}
 
 export async function POST(request) {
   try {
@@ -113,10 +148,22 @@ export async function POST(request) {
       isActive: true
     };
 
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+
+    // Rate limiting and lockout
+    const rate = await checkRegisterRateLimit(email, phone, ip);
+    if (rate.locked) {
+      return NextResponse.json(
+        { success: false, error: 'Too many registration attempts. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     // Save doctor
     const success = await doctorService.createDoctor(newDoctor);
 
     if (success) {
+      await resetRegisterAttempts(rate.key, rate.lockKey);
       // If access key was used, mark it as used
       if (accessKey && accessKey.trim()) {
         await doctorService.useRegistrationKey(accessKey.trim(), doctorId);
@@ -141,6 +188,7 @@ export async function POST(request) {
         }
       });
     } else {
+      await incrementRegisterAttempts(rate.key);
       return NextResponse.json(
         { success: false, error: 'Failed to register doctor' },
         { status: 500 }
