@@ -231,10 +231,17 @@ class DoctorService {
     try {
       // Generate 6-digit OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      // Store OTP with 10-minute expiry
-      const success = await databaseService.storeOtp(identifier, type, otp);
-      return success ? otp : null;
+      const salt = await bcrypt.genSalt(10);
+      const otpHash = await bcrypt.hash(otp, salt);
+      const expiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+      // Store OTP hash, expiry, and reset failed attempts
+      const success = await databaseService.storeOtp(identifier, type, otpHash, expiry);
+      if (success) {
+        await databaseService.resetOtpAttempts(identifier, type); // Reset failed attempts on new OTP
+        return otp;
+      }
+      return null;
     } catch (error) {
       console.error('Error generating OTP:', error);
       return null;
@@ -243,7 +250,30 @@ class DoctorService {
 
   async verifyOtp(identifier, type, otp) {
     try {
-      return await databaseService.verifyOtp(identifier, type, otp);
+      // Get OTP record: { otpHash, expiry, used, failedAttempts }
+      const otpRecord = await databaseService.getOtpRecord(identifier, type);
+      if (!otpRecord || otpRecord.used) return false;
+
+      // Check expiry
+      if (Date.now() > otpRecord.expiry) {
+        await databaseService.markOtpUsed(identifier, type); // Expire OTP
+        return false;
+      }
+
+      // Compare hash
+      const isValid = await bcrypt.compare(otp, otpRecord.otpHash);
+      if (isValid) {
+        await databaseService.markOtpUsed(identifier, type); // One-time use
+        await databaseService.resetOtpAttempts(identifier, type);
+        return true;
+      } else {
+        // Increment failed attempts
+        const attempts = await databaseService.incrementOtpAttempts(identifier, type);
+        if (attempts >= 5) {
+          await databaseService.lockOtp(identifier, type, 30 * 60 * 1000); // 30 min lockout
+        }
+        return false;
+      }
     } catch (error) {
       console.error('Error verifying OTP:', error);
       return false;

@@ -613,22 +613,23 @@ class DatabaseService {
   }
 
   // ==================== OTP OPERATIONS ====================
-  
-  async storeOtp(identifier, type, otp) {
+
+  // Store OTP hash, expiry, and reset failed attempts
+  async storeOtp(identifier, type, otpHash, expiry) {
     try {
       const collection = await getCollection(this.collections.otps);
-      
       // Remove any existing OTP for this identifier and type
       await collection.deleteMany({ identifier, type });
-      
       const otpData = {
         identifier,
         type,
-        otp,
-        createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes from now
+        otpHash,
+        expiry,
+        used: false,
+        failedAttempts: 0,
+        lockedUntil: null,
+        createdAt: new Date()
       };
-      
       const result = await collection.insertOne(otpData);
       return result.acknowledged;
     } catch (error) {
@@ -637,45 +638,89 @@ class DatabaseService {
     }
   }
 
-  async verifyOtp(identifier, type, otp) {
+  // Get OTP record for verification
+  async getOtpRecord(identifier, type) {
     try {
       const collection = await getCollection(this.collections.otps);
-      
-      const otpData = await collection.findOne({
-        identifier,
-        type,
-        otp,
-        expiresAt: { $gt: new Date() } // Not expired
-      });
-      
-      if (otpData) {
-        // Remove the OTP after successful verification
-        await collection.deleteOne({ _id: otpData._id });
-        return true;
-      }
-      
-      return false;
+      const otpRecord = await collection.findOne({ identifier, type });
+      return otpRecord;
     } catch (error) {
-      console.error('Error verifying OTP:', error);
+      console.error('Error getting OTP record:', error);
+      return null;
+    }
+  }
+
+  // Mark OTP as used (one-time use or expired)
+  async markOtpUsed(identifier, type) {
+    try {
+      const collection = await getCollection(this.collections.otps);
+      await collection.updateOne(
+        { identifier, type },
+        { $set: { used: true } }
+      );
+      return true;
+    } catch (error) {
+      console.error('Error marking OTP used:', error);
       return false;
     }
   }
 
+  // Increment failed OTP attempts and return new count
+  async incrementOtpAttempts(identifier, type) {
+    try {
+      const collection = await getCollection(this.collections.otps);
+      const result = await collection.findOneAndUpdate(
+        { identifier, type },
+        { $inc: { failedAttempts: 1 } },
+        { returnDocument: 'after' }
+      );
+      return result.value ? result.value.failedAttempts : 0;
+    } catch (error) {
+      console.error('Error incrementing OTP attempts:', error);
+      return 0;
+    }
+  }
+
+  // Reset OTP failed attempts
+  async resetOtpAttempts(identifier, type) {
+    try {
+      const collection = await getCollection(this.collections.otps);
+      await collection.updateOne(
+        { identifier, type },
+        { $set: { failedAttempts: 0, lockedUntil: null } }
+      );
+      return true;
+    } catch (error) {
+      console.error('Error resetting OTP attempts:', error);
+      return false;
+    }
+  }
+
+  // Lock OTP for a period (e.g., after too many failed attempts)
+  async lockOtp(identifier, type, lockDurationMs) {
+    try {
+      const collection = await getCollection(this.collections.otps);
+      const lockedUntil = Date.now() + lockDurationMs;
+      await collection.updateOne(
+        { identifier, type },
+        { $set: { lockedUntil } }
+      );
+      return true;
+    } catch (error) {
+      console.error('Error locking OTP:', error);
+      return false;
+    }
+  }
+
+  // Remove OTPs for given email and/or phone
   async cleanupOtps(email, phone) {
     try {
       const collection = await getCollection(this.collections.otps);
-      
-      // Build query conditions
       const conditions = [{ identifier: email }];
       if (phone) {
         conditions.push({ identifier: phone });
       }
-      
-      // Remove all OTPs for the given email and optionally phone
-      await collection.deleteMany({
-        $or: conditions
-      });
-      
+      await collection.deleteMany({ $or: conditions });
       return true;
     } catch (error) {
       console.error('Error cleaning up OTPs:', error);
@@ -683,15 +728,13 @@ class DatabaseService {
     }
   }
 
+  // Remove expired OTPs
   async cleanupExpiredOtps() {
     try {
       const collection = await getCollection(this.collections.otps);
-      
-      // Remove all expired OTPs
       const result = await collection.deleteMany({
-        expiresAt: { $lt: new Date() }
+        expiry: { $lt: Date.now() }
       });
-      
       console.log(`Cleaned up ${result.deletedCount} expired OTPs`);
       return true;
     } catch (error) {
