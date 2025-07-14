@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { Redis } from '@upstash/redis';
+import jwt from 'jsonwebtoken';
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
@@ -34,6 +35,16 @@ async function incrementOtpVerifyAttempts(key) {
 async function resetOtpVerifyAttempts(key, lockKey) {
   await redis.del(key);
   await redis.del(lockKey);
+}
+
+// JWT validation utility
+function validateJwt(token) {
+  try {
+    const secret = process.env.JWT_SECRET || 'default_jwt_secret';
+    return jwt.verify(token, secret);
+  } catch (err) {
+    return null;
+  }
 }
 
 export async function POST(request) {
@@ -172,7 +183,29 @@ export async function POST(request) {
       // Clean up OTPs
       await doctorService.cleanupOtps(email, null);
 
-      return NextResponse.json({
+      // Generate JWT access token (short-lived)
+      const jwtPayload = {
+        doctorId: newDoctor.doctorId,
+        email: newDoctor.email,
+        name: newDoctor.name,
+        accessType: newDoctor.accessType,
+        iss: process.env.JWT_ISSUER,
+        aud: process.env.JWT_AUDIENCE
+      };
+      const jwtSecret = process.env.JWT_SECRET || 'default_jwt_secret';
+      const accessToken = jwt.sign(jwtPayload, jwtSecret, { expiresIn: '15m' });
+
+      // Generate refresh token (long-lived, random string)
+      const refreshToken = jwt.sign(
+        { doctorId: newDoctor.doctorId, type: 'refresh', iss: process.env.JWT_ISSUER, aud: process.env.JWT_AUDIENCE },
+        jwtSecret,
+        { expiresIn: '30d' }
+      );
+
+      // Store refresh token in Redis for rotation/revocation
+      await redis.set(`refresh:${newDoctor.doctorId}:${refreshToken}`, 'valid', { ex: 30 * 24 * 60 * 60 });
+
+      const response = NextResponse.json({
         success: true,
         message: 'Doctor registered successfully',
         doctor: {
@@ -190,6 +223,24 @@ export async function POST(request) {
           expiryDate: newDoctor.expiryDate
         }
       });
+
+      // Set authentication cookies
+      response.cookies.set('doctor-auth', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 15 * 60, // 15 minutes
+        path: '/'
+      });
+      response.cookies.set('doctor-refresh', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+        path: '/'
+      });
+
+      return response;
     } else {
       return NextResponse.json(
         { success: false, error: 'Failed to register doctor' },

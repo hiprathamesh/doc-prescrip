@@ -307,7 +307,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     try {
-      // Clear doctor context
+      // Clear doctor context first
       storage.clearDoctorContext();
       
       const response = await fetch('/api/logout', {
@@ -318,19 +318,21 @@ export default function Dashboard() {
       });
 
       if (response.ok) {
-        // Force a page reload to ensure middleware takes effect
-        window.location.href = '/login';
+        // Force a full page reload to ensure middleware takes effect and cookies are cleared
+        window.location.replace('/login');
       } else {
         console.error('Logout failed');
-        // Fallback: clear cookies and redirect
+        // Fallback: clear cookies manually and redirect
         document.cookie = 'doctor-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        window.location.href = '/login';
+        document.cookie = 'pin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        window.location.replace('/login');
       }
     } catch (error) {
       console.error('Logout error:', error);
-      // Fallback: clear cookies and redirect
+      // Fallback: clear cookies manually and redirect
       document.cookie = 'doctor-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      window.location.href = '/login';
+      document.cookie = 'pin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      window.location.replace('/login');
     }
   };
 
@@ -583,7 +585,9 @@ export default function Dashboard() {
       if (!doctor || !doctor.id) {
         console.warn('No valid doctor context found, redirecting to login');
         // Redirect to login if no valid doctor context
-        window.location.href = '/login';
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 300);
         return;
       }
       setCurrentDoctor(doctor);
@@ -591,7 +595,9 @@ export default function Dashboard() {
       console.error('Error loading doctor context:', error);
       setCurrentDoctor(null);
       // Redirect to login on error
-      window.location.href = '/login';
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 300);
     }
   };
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Redis } from '@upstash/redis';
+import jwt from 'jsonwebtoken';
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
@@ -35,6 +36,16 @@ async function resetLoginAttempts(key, lockKey) {
   await redis.del(lockKey);
 }
 
+// JWT validation utility
+function validateJwt(token) {
+  try {
+    const secret = process.env.JWT_SECRET || 'default_jwt_secret';
+    return jwt.verify(token, secret);
+  } catch (err) {
+    return null;
+  }
+}
+
 export async function POST(request) {
   // Redirect HTTP to HTTPS (only in production)
   if (process.env.NODE_ENV === 'production' && request.headers.get('x-forwarded-proto') === 'http') {
@@ -53,13 +64,13 @@ export async function POST(request) {
     }
 
     // Strong password validation
-    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{};':",.<>/?\\|`~]).{8,}$/;
-    if (!strongPasswordRegex.test(password)) {
-      return NextResponse.json(
-        { success: false, error: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.' },
-        { status: 400 }
-      );
-    }
+    // const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{};':",.<>/?\\|`~]).{8,}$/;
+    // if (!strongPasswordRegex.test(password)) {
+    //   return NextResponse.json(
+    //     { success: false, error: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.' },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Rate limiting and lockout
     const rate = await checkLoginRateLimit(email, ip);
@@ -89,6 +100,28 @@ export async function POST(request) {
 
     await resetLoginAttempts(rate.key, rate.lockKey);
 
+    // Generate JWT access token (short-lived)
+    const jwtPayload = {
+      doctorId: doctor.doctorId,
+      email: doctor.email,
+      name: doctor.name,
+      accessType: doctor.accessType || 'doctor',
+      iss: process.env.JWT_ISSUER,
+      aud: process.env.JWT_AUDIENCE
+    };
+    const jwtSecret = process.env.JWT_SECRET || 'default_jwt_secret';
+    const accessToken = jwt.sign(jwtPayload, jwtSecret, { expiresIn: '15m' });
+
+    // Generate refresh token (long-lived, random string)
+    const refreshToken = jwt.sign(
+      { doctorId: doctor.doctorId, type: 'refresh', iss: process.env.JWT_ISSUER, aud: process.env.JWT_AUDIENCE },
+      jwtSecret,
+      { expiresIn: '30d' }
+    );
+
+    // Store refresh token in Redis for rotation/revocation
+    await redis.set(`refresh:${doctor.doctorId}:${refreshToken}`, 'valid', { ex: 30 * 24 * 60 * 60 });
+
     // Create response with doctor data
     const response = NextResponse.json({
       success: true,
@@ -103,16 +136,24 @@ export async function POST(request) {
         degree: doctor.degree,
         registrationNumber: doctor.registrationNumber,
         phone: doctor.phone,
-        accessType: doctor.accessType || 'doctor' // Include accessType
+        accessType: doctor.accessType || 'doctor'
       }
     });
 
-    // Set authentication cookie
-    response.cookies.set('doctor-auth', doctor.doctorId, {
+    // Set authentication cookies
+    response.cookies.set('doctor-auth', accessToken, {
       httpOnly: true,
-      secure: true, // Always true for security
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 // 7 days
+      maxAge: 15 * 60, // 15 minutes
+      path: '/'
+    });
+    response.cookies.set('doctor-refresh', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+      path: '/'
     });
 
     return response;

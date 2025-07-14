@@ -831,6 +831,108 @@ class Storage {
       return false;
     }
   }
+
+  // Add JWT utility methods
+  parseJwtToken(token) {
+    if (!token) return null;
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      const payload = parts[1];
+      const decoded = JSON.parse(atob(payload));
+      // Check issuer/audience
+      if (
+        decoded.iss !== process.env.JWT_ISSUER ||
+        decoded.aud !== process.env.JWT_AUDIENCE
+      ) {
+        return null;
+      }
+      // Check if token is expired
+      if (decoded.exp && Date.now() >= decoded.exp * 1000) {
+        return null;
+      }
+      return decoded;
+    } catch (error) {
+      console.error('Error parsing JWT token:', error);
+      return null;
+    }
+  }
+
+  setCurrentDoctor(doctorId, additionalData = {}) {
+    if (typeof window !== 'undefined') {
+      // Store individual doctor properties for backward compatibility
+      localStorage.setItem('currentDoctorId', doctorId);
+      localStorage.setItem('currentDoctorName', additionalData.name || '');
+      localStorage.setItem('currentDoctorLastName', additionalData.lastName || '');
+      localStorage.setItem('currentDoctorAccessType', additionalData.accessType || 'doctor');
+      localStorage.setItem('currentDoctorPhone', additionalData.phone || '');
+      localStorage.setItem('currentDoctorDegree', additionalData.degree || '');
+      localStorage.setItem('currentDoctorRegistrationNumber', additionalData.registrationNumber || '');
+      localStorage.setItem('currentDoctorHospitalName', additionalData.hospitalName || '');
+      localStorage.setItem('currentDoctorHospitalAddress', additionalData.hospitalAddress || '');
+    }
+  }
+
+  getDoctorContext() {
+    if (typeof window === 'undefined') return null;
+
+    // First try to get doctor info from JWT token in cookie
+    const cookies = document.cookie.split(';');
+    const doctorAuthCookie = cookies.find(cookie => 
+      cookie.trim().startsWith('doctor-auth=')
+    );
+    
+    if (doctorAuthCookie) {
+      const token = doctorAuthCookie.split('=')[1];
+      const decoded = this.parseJwtToken(token);
+      
+      if (decoded && decoded.doctorId) {
+        return {
+          id: decoded.doctorId,
+          doctorId: decoded.doctorId,
+          name: decoded.name || localStorage.getItem('currentDoctorName') || '',
+          lastName: decoded.name ? decoded.name.split(' ').slice(1).join(' ') : localStorage.getItem('currentDoctorLastName') || '',
+          accessType: decoded.accessType || localStorage.getItem('currentDoctorAccessType') || 'doctor',
+          phone: localStorage.getItem('currentDoctorPhone') || '',
+          degree: localStorage.getItem('currentDoctorDegree') || '',
+          registrationNumber: localStorage.getItem('currentDoctorRegistrationNumber') || '',
+          hospitalName: localStorage.getItem('currentDoctorHospitalName') || '',
+          hospitalAddress: localStorage.getItem('currentDoctorHospitalAddress') || ''
+        };
+      }
+    }
+
+    // Fallback to localStorage for backward compatibility
+    const doctorId = localStorage.getItem('currentDoctorId');
+    if (!doctorId) return null;
+
+    return {
+      id: doctorId,
+      doctorId: doctorId,
+      name: localStorage.getItem('currentDoctorName') || '',
+      lastName: localStorage.getItem('currentDoctorLastName') || '',
+      accessType: localStorage.getItem('currentDoctorAccessType') || 'doctor',
+      phone: localStorage.getItem('currentDoctorPhone') || '',
+      degree: localStorage.getItem('currentDoctorDegree') || '',
+      registrationNumber: localStorage.getItem('currentDoctorRegistrationNumber') || '',
+      hospitalName: localStorage.getItem('currentDoctorHospitalName') || '',
+      hospitalAddress: localStorage.getItem('currentDoctorHospitalAddress') || ''
+    };
+  }
+
+  clearDoctorContext() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('currentDoctorId');
+      localStorage.removeItem('currentDoctorName');
+      localStorage.removeItem('currentDoctorLastName');
+      localStorage.removeItem('currentDoctorAccessType');
+      localStorage.removeItem('currentDoctorPhone');
+      localStorage.removeItem('currentDoctorDegree');
+      localStorage.removeItem('currentDoctorRegistrationNumber');
+      localStorage.removeItem('currentDoctorHospitalName');
+      localStorage.removeItem('currentDoctorHospitalAddress');
+    }
+  }
 }
 
 export const storage = new Storage();
