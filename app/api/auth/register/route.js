@@ -78,9 +78,10 @@ export async function POST(request) {
     }
 
     // Validate password strength
-    if (password.length < 8) {
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{};':",.<>/?\\|`~]).{8,}$/;
+    if (!strongPasswordRegex.test(password)) {
       return NextResponse.json(
-        { success: false, error: 'Password must be at least 8 characters long' },
+        { success: false, error: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.' },
         { status: 400 }
       );
     }

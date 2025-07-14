@@ -47,6 +47,15 @@ export async function POST(request) {
       );
     }
 
+    // Strong password validation
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{};':",.<>/?\\|`~]).{8,}$/;
+    if (!strongPasswordRegex.test(password)) {
+      return NextResponse.json(
+        { success: false, error: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.' },
+        { status: 400 }
+      );
+    }
+
     // Rate limiting and lockout
     const rate = await checkLoginRateLimit(email, ip);
     if (rate.locked) {

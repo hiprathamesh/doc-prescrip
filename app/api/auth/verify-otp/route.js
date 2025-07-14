@@ -94,9 +94,19 @@ export async function POST(request) {
       accessKey
     } = registrationData;
 
-    if (!firstName || !lastName || !password || !hospitalName || !degree || !registrationNumber) {
+    // Validate all required registration fields
+    if (!firstName || !lastName || !password || !hospitalName || !degree || !registrationNumber || !phone) {
       return NextResponse.json(
-        { success: false, error: 'All required registration fields must be provided' },
+        { success: false, error: 'All registration fields must be provided' },
+        { status: 400 }
+      );
+    }
+
+    // Strong password validation
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{};':",.<>/?\\|`~]).{8,}$/;
+    if (!strongPasswordRegex.test(password)) {
+      return NextResponse.json(
+        { success: false, error: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.' },
         { status: 400 }
       );
     }

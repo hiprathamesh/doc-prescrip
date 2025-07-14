@@ -377,8 +377,10 @@ export default function LoginPage() {
       return false;
     }
 
-    if (regData.password.length < 8) {
-      toast.error('Error', { description: 'Password must be at least 8 characters long' });
+    // Strong password validation
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{};':",.<>/?\\|`~]).{8,}$/;
+    if (!strongPasswordRegex.test(regData.password)) {
+      toast.error('Error', { description: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.' });
       return false;
     }
 
