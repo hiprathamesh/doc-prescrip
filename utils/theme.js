@@ -11,6 +11,26 @@ export const toggleDarkMode = () => {
   }
 };
 
+export const getInitialTheme = () => {
+  if (typeof window === 'undefined') return false;
+  
+  const savedTheme = localStorage.getItem('theme');
+  return savedTheme === 'dark' || 
+    (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+};
+
+export const initializeThemeSync = () => {
+  if (typeof window === 'undefined') return false;
+  
+  const isDark = getInitialTheme();
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+  return isDark;
+};
+
 export const initializeTheme = () => {
   const savedTheme = localStorage.getItem('theme');
   if (

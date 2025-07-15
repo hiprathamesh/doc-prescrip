@@ -8,8 +8,9 @@ import {
   User, Building2, GraduationCap, Phone, MapPin, FileText, Key, Info, Shield, Check
 } from 'lucide-react';
 import { storage } from '../../utils/storage';
-import { initializeTheme } from '../../utils/theme';
+import { initializeTheme, initializeThemeSync, getInitialTheme } from '../../utils/theme';
 import DarkModeToggle from '../../components/DarkModeToggle';
+import PlaceholderImageWithLogo from '../../components/PlaceholderImageWithLogo';
 
 export default function LoginPage() {
   const [currentStep, setCurrentStep] = useState('login'); // 'login', 'register', 'otp'
@@ -19,7 +20,7 @@ export default function LoginPage() {
 
   // Login state
   const [loginData, setLoginData] = useState({
-    email: 'roy@l.p',
+    email: '',
     password: '',
     showPassword: false,
     isLoading: false
@@ -52,12 +53,41 @@ export default function LoginPage() {
   });
 
   const [accessType, setAccessType] = useState('trial');
+  const [isDarkTheme, setIsDarkTheme] = useState(() => {
+    // Initialize theme synchronously on first render
+    if (typeof window !== 'undefined') {
+      return initializeThemeSync();
+    }
+    return false;
+  });
+  const [themeInitialized, setThemeInitialized] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    // Ensure theme is properly initialized
     initializeTheme();
+    setThemeInitialized(true);
+
+    // Check initial theme
+    const checkTheme = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setIsDarkTheme(isDark);
+    };
+
+    checkTheme();
+
+    // Listen for theme changes
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
     const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
   }, []);
 
   // Countdown timer for OTP resend
@@ -497,8 +527,14 @@ export default function LoginPage() {
       <div className="fixed top-4 right-4 z-10">
         <DarkModeToggle />
       </div>
+
       {/* Photo section: hidden on small screens, always 1/2 width on md+ */}
-      <div className="photo hidden sm:block sm:w-1/2 h-screen bg-amber-100 dark:bg-amber-500"></div>
+      <div className="photo hidden sm:block sm:w-1/2 h-screen relative overflow-hidden">
+        <PlaceholderImageWithLogo 
+          isDarkTheme={isDarkTheme} 
+          themeInitialized={themeInitialized} 
+        />
+      </div>
 
       {/* Main Container */}
       <div className="flex flex-col flex-1 items-center sm:justify-center min-h-screen overflow-hidden w-full px-15 py-20 sm:p-8">
