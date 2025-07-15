@@ -25,7 +25,7 @@ export default function PlaceholderImageWithLogo({ isDarkTheme, themeInitialized
       
       {/* Overlay with Logo and Text */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center select-none">
           <div className="inline-flex items-center justify-center gap-4 mb-2">
             <Stethoscope className="w-12 h-12 text-blue-600" />
             <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
