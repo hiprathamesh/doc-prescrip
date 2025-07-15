@@ -27,8 +27,8 @@ export default function PlaceholderImageWithLogo({ isDarkTheme, themeInitialized
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center select-none">
           <div className="inline-flex items-center justify-center gap-4 mb-2">
-            <Stethoscope className="w-11 h-11 text-blue-700 dark:text-blue-500" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <Stethoscope className="w-11 h-11 text-blue-700 dark:text-blue-500 drop-shadow-lg" style={{ filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.5)) drop-shadow(0 0 8px rgba(255,255,255,0.3))' }} />
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100" style={{ textShadow: '2px 2px 5px rgba(20,20,20,0.25), 0 0 8px rgba(255,255,255,0.3), 1px 1px 2px rgba(20,20,20,0.3)' }}>
               Doc Prescrip
             </h1>
           </div>
@@ -36,7 +36,7 @@ export default function PlaceholderImageWithLogo({ isDarkTheme, themeInitialized
       </div>
       
       {/* Optional gradient overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/0"></div>
+      <div className="absolute inset-0 bg-black/15"></div>
     </div>
   );
 }
