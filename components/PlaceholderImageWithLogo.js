@@ -27,8 +27,8 @@ export default function PlaceholderImageWithLogo({ isDarkTheme, themeInitialized
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center select-none">
           <div className="inline-flex items-center justify-center gap-4 mb-2">
-            <Stethoscope className="w-12 h-12 text-blue-600" />
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+            <Stethoscope className="w-11 h-11 text-blue-700 dark:text-blue-500" />
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               Doc Prescrip
             </h1>
           </div>
