@@ -2,7 +2,7 @@ import { databaseService } from '../../../../services/databaseService';
 import { NextResponse } from 'next/server';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/avif'];
 
 export async function POST(request) {
   try {
@@ -27,7 +27,7 @@ export async function POST(request) {
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid file type. Only PNG, JPEG, JPG, and WebP are allowed.' },
+        { success: false, error: 'Invalid file type. Only PNG, JPEG, JPG, WebP, and AVIF are allowed.' },
         { status: 400 }
       );
     }

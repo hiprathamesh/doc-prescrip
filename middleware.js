@@ -25,7 +25,7 @@ async function verifyJwt(token) {
 }
 
 export async function middleware(request) {
-  const staticAssetPattern = /^\/(darkUI\d\.png|lightUI\d\.png|favicon\.ico|logo\.png|.*\.(css|js|jpg|jpeg|png|webp|svg|ico))$/;
+  const staticAssetPattern = /^\/(darkUI\d\.png|lightUI\d\.png|favicon\.ico|logo\.png|.*\.(css|js|jpg|jpeg|png|webp|avif|svg|ico))$/;
   if (staticAssetPattern.test(request.nextUrl.pathname)) {
     return NextResponse.next();
   }

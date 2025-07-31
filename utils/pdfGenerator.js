@@ -55,7 +55,7 @@ export const generatePDF = async (prescription, patient, autoDownload = true) =>
     try {
       // Extract image format from base64 data URL
       const imageFormat = hospitalLogo.split(';')[0].split('/')[1].toUpperCase();
-      const validFormats = ['PNG', 'JPEG', 'JPG', 'WEBP'];
+      const validFormats = ['PNG', 'JPEG', 'JPG', 'WEBP', 'AVIF'];
       const format = validFormats.includes(imageFormat) ? imageFormat : 'PNG';
       
       pdf.addImage(hospitalLogo, format, margin, yPosition, 50, 20);

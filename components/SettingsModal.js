@@ -375,10 +375,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 		if (!file) return;
 
 		// Validate file type
-		const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+		const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/avif'];
 		if (!allowedTypes.includes(file.type)) {
 			toast.error('Invalid File Type', {
-				description: 'Only PNG, JPEG, JPG, and WebP files are allowed.'
+				description: 'Only PNG, JPEG, JPG, WebP, and AVIF files are allowed.'
 			});
 			return;
 		}

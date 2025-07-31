@@ -45,7 +45,7 @@ export const generateMedicalCertificatePDF = async (certificate, patient, autoDo
   if (hospitalLogo) {
     try {
       const imageFormat = hospitalLogo.split(';')[0].split('/')[1].toUpperCase();
-      const validFormats = ['PNG', 'JPEG', 'JPG', 'WEBP'];
+      const validFormats = ['PNG', 'JPEG', 'JPG', 'WEBP', 'AVIF'];
       const format = validFormats.includes(imageFormat) ? imageFormat : 'PNG';
       
       pdf.addImage(hospitalLogo, format, margin, yPosition, 50, 20);
