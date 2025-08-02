@@ -12,7 +12,7 @@ export const metadata = {
   title: 'Dr. Practice Management System',
   description: 'Comprehensive web app for medical practice management',
   icons: {
-    icon: '/doc-pill.svg', // Can also use { rel: 'icon', url: '/favicon.ico' }
+    icon: '/favicon.svg', // Can also use { rel: 'icon', url: '/favicon.ico' }
   },
 };
 
