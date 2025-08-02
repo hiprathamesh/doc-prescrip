@@ -37,6 +37,10 @@ import { formatDate, formatTimeAgo } from '../utils/dateUtils';
 import { activityLogger, ACTIVITY_ICONS, ACTIVITY_COLORS } from '../utils/activityLogger';
 import useScrollToTop from '../hooks/useScrollToTop';
 import DarkModeToggle from './DarkModeToggle';
+import { logout } from '../utils/auth';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import DocPill from './icons/DocPill';
 
 export default function Dashboard() {
   const [patients, setPatients] = useState([]);
@@ -307,6 +311,8 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     try {
+      await logout();
+
       // Clear doctor context first
       storage.clearDoctorContext();
       
@@ -640,8 +646,8 @@ export default function Dashboard() {
               className="flex items-center space-x-3 cursor-pointer"
               onClick={handleBackToDashboard}
             >
-              <div className="p-2 bg-blue-600 dark:bg-blue-500 rounded">
-                <Stethoscope className="w-5 h-5 text-white" />
+              <div className="p-2 rounded">
+                <DocPill className="w-10 h-10 text-white" />
               </div>
               <div>
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white">

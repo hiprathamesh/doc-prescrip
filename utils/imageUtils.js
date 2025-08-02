@@ -61,17 +61,17 @@ export const getCompressionSavings = (format) => {
 export const logImageLoad = (format, src, additionalInfo = {}) => {
   const browserSupport = getBrowserImageSupport();
   
-  console.log(`✅ Image loaded successfully:`, {
-    format: format?.toUpperCase(),
-    src,
-    browserSupport: {
-      AVIF: browserSupport.avif,
-      WebP: browserSupport.webp
-    },
-    compressionSavings: getCompressionSavings(format),
-    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent.split(' ').pop() : 'Unknown',
-    ...additionalInfo
-  });
+  // console.log(`✅ Image loaded successfully:`, {
+  //   format: format?.toUpperCase(),
+  //   src,
+  //   browserSupport: {
+  //     AVIF: browserSupport.avif,
+  //     WebP: browserSupport.webp
+  //   },
+  //   compressionSavings: getCompressionSavings(format),
+  //   userAgent: typeof navigator !== 'undefined' ? navigator.userAgent.split(' ').pop() : 'Unknown',
+  //   ...additionalInfo
+  // });
 };
 
 export const logImageError = (format, src, additionalInfo = {}) => {

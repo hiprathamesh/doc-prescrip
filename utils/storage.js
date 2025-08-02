@@ -20,8 +20,9 @@ function getCurrentDoctorId() {
   if (typeof window !== 'undefined') {
     const doctorId = localStorage.getItem('currentDoctorId');
     if (!doctorId) {
-      console.error('No doctor ID found in localStorage');
-      throw new Error('Doctor not authenticated');
+      // Try to wait for StoreDoctorId component to set the context
+      console.warn('No doctor ID found in localStorage - this might be during Google auth initialization');
+      throw new Error('Doctor not authenticated - Please wait for authentication to complete');
     }
     return doctorId;
   }
@@ -33,7 +34,59 @@ function getCurrentDoctorId() {
  */
 async function apiCall(url, options = {}) {
   try {
-    const doctorId = getCurrentDoctorId();
+    let doctorId;
+    
+    try {
+      doctorId = getCurrentDoctorId();
+    } catch (error) {
+      // If doctor ID not found in localStorage, try to get it from NextAuth session
+      if (typeof window !== 'undefined') {
+        // Check if we're in the middle of Google auth process
+        const cookies = document.cookie.split(';');
+        const nextAuthSessionCookie = cookies.find(cookie => 
+          cookie.trim().startsWith('next-auth.session-token=') ||
+          cookie.trim().startsWith('__Secure-next-auth.session-token=')
+        );
+        
+        if (nextAuthSessionCookie) {
+          // Wait a bit for StoreDoctorId component to set localStorage
+          console.log('⏳ Waiting for doctor context to be available...');
+          
+          // Try to wait for doctorContextReady event with shorter timeout
+          return new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              reject(new Error('Timeout waiting for doctor context - please refresh the page'));
+            }, 3000); // Reduced timeout to 3 seconds
+            
+            const handleDoctorContextReady = () => {
+              clearTimeout(timeout);
+              window.removeEventListener('doctorContextReady', handleDoctorContextReady);
+              
+              // Now try the API call again
+              apiCall(url, options).then(resolve).catch(reject);
+            };
+            
+            window.addEventListener('doctorContextReady', handleDoctorContextReady);
+            
+            // Also try polling localStorage as a fallback with shorter intervals
+            const pollInterval = setInterval(() => {
+              const currentDoctorId = localStorage.getItem('currentDoctorId');
+              if (currentDoctorId) {
+                clearInterval(pollInterval);
+                clearTimeout(timeout);
+                window.removeEventListener('doctorContextReady', handleDoctorContextReady);
+                
+                // Now try the API call again
+                apiCall(url, options).then(resolve).catch(reject);
+              }
+            }, 50); // Check every 50ms
+          });
+        }
+      }
+      
+      // Re-throw the original error if we can't resolve it
+      throw error;
+    }
 
     const response = await fetch(url, {
       headers: {
@@ -932,6 +985,32 @@ class Storage {
       localStorage.removeItem('currentDoctorHospitalName');
       localStorage.removeItem('currentDoctorHospitalAddress');
     }
+  }
+
+  // Method to ensure doctor context is available (for Google auth users)
+  async ensureDoctorContext(session) {
+    if (typeof window !== 'undefined') {
+      const existingDoctorId = localStorage.getItem('currentDoctorId');
+      
+      // If no doctor context in localStorage but we have a session, populate it
+      if (!existingDoctorId && session?.user?.doctorId) {
+        console.log('🔄 Populating doctor context from session data...');
+        this.setCurrentDoctor(session.user.doctorId, {
+          name: session.user.doctorContext?.name || session.user.name || 'Dr. Nikam',
+          firstName: session.user.doctorContext?.firstName || session.user.name?.split(' ')[0] || 'Dr.',
+          lastName: session.user.doctorContext?.lastName || session.user.name?.split(' ').pop() || 'Nikam',
+          accessType: session.user.doctorContext?.accessType || 'doctor',
+          phone: session.user.doctorContext?.phone || '',
+          degree: session.user.doctorContext?.degree || '',
+          registrationNumber: session.user.doctorContext?.registrationNumber || '',
+          hospitalName: session.user.doctorContext?.hospitalName || 'Chaitanya Hospital',
+          hospitalAddress: session.user.doctorContext?.hospitalAddress || 'Deola, Maharashtra'
+        });
+        return true;
+      }
+      return !!existingDoctorId;
+    }
+    return false;
   }
 }
 

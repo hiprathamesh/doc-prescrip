@@ -31,10 +31,10 @@ export default function PlaceholderImageWithLogo({ isDarkTheme, themeInitialized
   useEffect(() => {
     if (themeInitialized) {
       const browserSupport = getBrowserImageSupport();
-      console.log('🎨 PlaceholderImage - Theme initialized:', {
-        theme: isDarkTheme ? 'Dark' : 'Light',
-        browserSupport
-      });
+      // console.log('🎨 PlaceholderImage - Theme initialized:', {
+      //   theme: isDarkTheme ? 'Dark' : 'Light',
+      //   browserSupport
+      // });
     }
   }, [themeInitialized, isDarkTheme]);
 
@@ -43,24 +43,11 @@ export default function PlaceholderImageWithLogo({ isDarkTheme, themeInitialized
       {/* Background Image */}
       {themeInitialized && (
         <picture className="w-full h-full">
-          {/* AVIF - Most efficient, latest browsers */}
-          <source 
-            srcSet={isDarkTheme ? '/placeholderIMG.avif' : '/placeholderIMGlight.avif'} 
-            type="image/avif"
-          />
-          
-          {/* WebP - Good compression, wide support */}
-          <source 
-            srcSet={isDarkTheme ? '/placeholderIMG.webp' : '/placeholderIMGlight.webp'} 
-            type="image/webp"
-          />
-          
           {/* PNG - Fallback for older browsers */}
           <img
             src={isDarkTheme ? '/placeholderIMG.png' : '/placeholderIMGlight.png'}
             alt="Login placeholder"
             className="w-full h-full object-cover transition-opacity duration-300"
-            style={{ filter: 'brightness(1) contrast(1)' }}
             draggable="false"
             onLoad={handleImageLoad}
             onError={handleImageError}
@@ -70,19 +57,7 @@ export default function PlaceholderImageWithLogo({ isDarkTheme, themeInitialized
       {!themeInitialized && (
         <div className="w-full h-full bg-gray-200 dark:bg-gray-800" />
       )}
-      
-      {/* Overlay with Logo and Text */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center select-none">
-          <div className="inline-flex items-center justify-center gap-4 mb-2">
-            <Stethoscope className="w-11 h-11 text-blue-700 dark:text-blue-500 drop-shadow-lg" style={{ filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.5)) drop-shadow(0 0 8px rgba(255,255,255,0.3))' }} />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100" style={{ textShadow: '2px 2px 5px rgba(20,20,20,0.25), 0 0 8px rgba(255,255,255,0.3), 1px 1px 2px rgba(20,20,20,0.3)' }}>
-              Doc Prescrip
-            </h1>
-          </div>
-        </div>
-      </div>
-      
+    
       {/* Development indicator for loaded image format */}
       {process.env.NODE_ENV === 'development' && loadedImageFormat && (
         <div 
@@ -94,7 +69,7 @@ export default function PlaceholderImageWithLogo({ isDarkTheme, themeInitialized
       )}
       
       {/* Optional gradient overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/15"></div>
+      <div className="absolute inset-0 bg-black/2"></div>
     </div>
   );
 }

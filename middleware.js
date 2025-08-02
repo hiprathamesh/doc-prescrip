@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
+import { getToken } from 'next-auth/jwt';
 
 // Secure JWT validation using jose
 if (!process.env.JWT_SECRET) {
@@ -30,29 +31,42 @@ export async function middleware(request) {
     return NextResponse.next();
   }
   
-  // Check doctor authentication
-  const doctorAuthCookie = request.cookies.get('doctor-auth');
-  const cookieValue = doctorAuthCookie?.value;
-
-  let isValidDoctorAuth = false;
+  // Check NextAuth session first
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  let isAuthenticated = false;
   let doctorId = null;
+  let userEmail = null;
 
-  if (cookieValue) {
-    // Use jose for JWT verification
-    let decoded = null;
-    if (cookieValue.split('.').length === 3) {
-      decoded = await verifyJwt(cookieValue);
+  // If user has valid NextAuth session (Google auth)
+  if (token && token.email && token.doctorId) {
+    isAuthenticated = true;
+    doctorId = token.doctorId;
+    userEmail = token.email;
+    console.log('✅ Middleware: Google auth session found, doctorId:', doctorId);
+  }
+
+  // If no NextAuth session, check custom JWT authentication
+  if (!isAuthenticated) {
+    const doctorAuthCookie = request.cookies.get('doctor-auth');
+    const cookieValue = doctorAuthCookie?.value;
+
+    if (cookieValue) {
+      // Use jose for JWT verification
+      let decoded = null;
+      if (cookieValue.split('.').length === 3) {
+        decoded = await verifyJwt(cookieValue);
+      }
+      if (decoded && decoded.doctorId) {
+        doctorId = decoded.doctorId;
+        isAuthenticated = !!doctorId;
+      } 
     }
-    if (decoded && decoded.doctorId) {
-      doctorId = decoded.doctorId;
-      isValidDoctorAuth = !!doctorId;
-    } 
   }
 
   // If accessing login page, allow through
   if (request.nextUrl.pathname === '/login') {
     // If already authenticated with valid doctor ID, redirect to home
-    if (isValidDoctorAuth) {
+    if (isAuthenticated && doctorId) {
       return NextResponse.redirect(new URL('/', request.url));
     }
     return NextResponse.next();
@@ -73,13 +87,18 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
+  // Allow logout API route
+  if (request.nextUrl.pathname.startsWith('/api/logout')) {
+    return NextResponse.next();
+  }
+
   // Allow refresh endpoint through
   if (request.nextUrl.pathname.startsWith('/api/auth/refresh')) {
     return NextResponse.next();
   }
 
   // For all other routes, check authentication with proper doctor ID
-  if (!isValidDoctorAuth) {
+  if (!isAuthenticated || !doctorId) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

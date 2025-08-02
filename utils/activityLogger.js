@@ -88,6 +88,12 @@ class ActivityLogger {
         return null;
       }
 
+      // If doctorId is null (e.g., during Google auth setup), skip logging for now
+      if (!doctorId) {
+        console.warn('Skipping activity logging - doctor context not ready yet');
+        return null;
+      }
+
       const activity = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         type,
@@ -117,13 +123,37 @@ class ActivityLogger {
   getCurrentDoctorId() {
     // Check if we're in browser environment
     if (typeof window !== 'undefined') {
-      const doctorId = localStorage.getItem('currentDoctorId');
+      // First try localStorage
+      let doctorId = localStorage.getItem('currentDoctorId');
+      
+      // If not found in localStorage, try to get from NextAuth session cookie
       if (!doctorId) {
-        throw new Error('Doctor not authenticated');
+        try {
+          // Try to get doctor ID from NextAuth session
+          const cookies = document.cookie.split(';');
+          const nextAuthSessionCookie = cookies.find(cookie => 
+            cookie.trim().startsWith('next-auth.session-token=') ||
+            cookie.trim().startsWith('__Secure-next-auth.session-token=')
+          );
+          
+          if (nextAuthSessionCookie) {
+            // If we have a NextAuth session, the StoreDoctorId component should handle setting localStorage
+            // Return null to indicate we're waiting for initialization
+            console.log('⏳ Doctor context is being initialized from NextAuth session...');
+            return null; // Return null instead of throwing to avoid breaking the flow
+          }
+        } catch (error) {
+          console.warn('Could not check NextAuth session cookie:', error);
+        }
+      }
+      
+      if (!doctorId) {
+        console.warn('No doctor context available for activity logging - may be during initialization');
+        return null;
       }
       return doctorId;
     }
-    throw new Error('Doctor context not available');
+    return null; // Return null instead of throwing for server-side
   }
 
   async getActivities() {

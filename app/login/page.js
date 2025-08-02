@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { signIn, signOut, getSession, useSession} from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -11,6 +12,7 @@ import { storage } from '../../utils/storage';
 import { initializeTheme, initializeThemeSync, getInitialTheme } from '../../utils/theme';
 import DarkModeToggle from '../../components/DarkModeToggle';
 import PlaceholderImageWithLogo from '../../components/PlaceholderImageWithLogo';
+import DocPill from '../../components/icons/DocPill';
 
 export default function LoginPage() {
   const [currentStep, setCurrentStep] = useState('login'); // 'login', 'register', 'otp'
@@ -182,6 +184,21 @@ export default function LoginPage() {
       setLoginData(prev => ({ ...prev, isLoading: false }));
     }
   };
+
+  const handleGoogleSignIn = async () => {
+    console.log('Initiating Google sign-in...');
+    try {
+      // Set loading state to prevent multiple clicks
+      setLoginData(prev => ({ ...prev, isLoading: true }));
+      
+      signIn('google', {
+        callbackUrl: '/',
+      });
+    } catch (error) {
+      console.error('Google sign in error:', error);
+      setLoginData(prev => ({ ...prev, isLoading: false }));
+    } 
+  }
 
   const handleRegistrationSubmit = async (e) => {
     e.preventDefault();
@@ -561,8 +578,8 @@ export default function LoginPage() {
             }}
           >
             <div className="inline-flex items-center justify-center gap-3 mb-4">
-              <Stethoscope className={`w-8 h-8 text-blue-600 dark:text-blue-400 transform transition-all duration-500 ease-in-out ${
-                isVisible ? 'scale-100 rotate-0' : 'scale-75 rotate-0'
+              <DocPill className={`w-10 h-10 text-blue-600 dark:text-blue-400 transform transition-all duration-500 ease-in-out ${
+                isVisible ? 'scale-100 rotate-0' : 'scale-75 rotate-360'
               }`} />
               <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                 Doc Prescrip
@@ -696,6 +713,7 @@ export default function LoginPage() {
               <div className="mb-6">
                 <button
                   type="button"
+                  onClick={handleGoogleSignIn}
                   className="w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-200 cursor-pointer"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
