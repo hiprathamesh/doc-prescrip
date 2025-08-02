@@ -133,9 +133,17 @@ export default function LoginPage() {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
-    if (!loginData.email || !loginData.password) {
-      toast.error('Error', {
-        description: 'Please enter both email and password'
+    // Custom validation with field-specific messages
+    if (!loginData.email.trim()) {
+      toast.error('Email Required', {
+        description: 'Please enter your email address'
+      });
+      return;
+    }
+
+    if (!loginData.password.trim()) {
+      toast.error('Password Required', {
+        description: 'Please enter your password'
       });
       return;
     }
@@ -665,7 +673,6 @@ export default function LoginPage() {
                   <input
                     id="login-email"
                     type="email"
-                    required
                     value={loginData.email}
                     onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))
                     }
@@ -686,7 +693,6 @@ export default function LoginPage() {
                   <input
                     id="login-password"
                     type={loginData.showPassword ? 'text' : 'password'}
-                    required
                     value={loginData.password}
                     onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))
                     }
