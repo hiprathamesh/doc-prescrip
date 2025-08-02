@@ -783,9 +783,9 @@ export default function LoginPage() {
               <div className="mb-6 text-center">
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   By continuing, you agree to Doc Prescrip's{' '}
-                  <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">Terms of Service</a>
+                  <a href="/terms" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Terms of Service</a>
                   {' '}and{' '}
-                  <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">Privacy Policy</a>.
+                  <a href="/privacy" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Privacy Policy</a>.
                 </p>
               </div>
             </div>

@@ -15,8 +15,8 @@ export default function AuthGuard({ children }) {
   useEffect(() => {
     const initializeDoctorContext = async () => {
       try {
-        // Don't guard the login page
-        if (pathname === '/login') {
+        // Don't guard the login page, terms, or privacy pages
+        if (pathname === '/login' || pathname === '/terms' || pathname === '/privacy') {
           setIsInitializing(false);
           setDoctorContextReady(true);
           return;
@@ -101,8 +101,8 @@ export default function AuthGuard({ children }) {
     initializeDoctorContext();
   }, [session, status, router, pathname]);
 
-  // Don't guard the login page
-  if (pathname === '/login') {
+  // Don't guard the login page, terms, or privacy pages
+  if (pathname === '/login' || pathname === '/terms' || pathname === '/privacy') {
     return children;
   }
 

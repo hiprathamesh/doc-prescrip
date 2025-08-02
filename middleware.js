@@ -63,12 +63,21 @@ export async function middleware(request) {
     }
   }
 
+  // If accessing terms or privacy policy, always allow through (no auth required)
+  if (request.nextUrl.pathname === '/terms' || 
+      request.nextUrl.pathname === '/privacy') {
+    console.log('🔓 Middleware: Allowing access to public page:', request.nextUrl.pathname);
+    return NextResponse.next();
+  }
+
   // If accessing login page, allow through
   if (request.nextUrl.pathname === '/login') {
-    // If already authenticated with valid doctor ID, redirect to home
+    // If already authenticated with valid doctor ID and accessing login, redirect to home
     if (isAuthenticated && doctorId) {
+      console.log('🔄 Middleware: Redirecting authenticated user from login to home');
       return NextResponse.redirect(new URL('/', request.url));
     }
+    console.log('🔓 Middleware: Allowing access to login page');
     return NextResponse.next();
   }
 
