@@ -9,10 +9,10 @@ import AuthGuard from '../components/AuthGuard';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Dr. Practice Management System',
+  title: 'Doc Prescrip',
   description: 'Comprehensive web app for medical practice management',
   icons: {
-    icon: '/favicon.svg', // Can also use { rel: 'icon', url: '/favicon.ico' }
+    icon: '/favicon.svg',
   },
 };
 
