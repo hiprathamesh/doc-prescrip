@@ -25,7 +25,8 @@ export default function LoginPage() {
     email: '',
     password: '',
     showPassword: false,
-    isLoading: false
+    isLoading: false,
+    isForgotPasswordLoading: false
   });
 
   // Registration state
@@ -198,6 +199,56 @@ export default function LoginPage() {
       console.error('Google sign in error:', error);
       setLoginData(prev => ({ ...prev, isLoading: false }));
     } 
+  }
+
+  const handleForgotPassword = async () => {
+    // Validate email first
+    if (!loginData.email || !loginData.email.trim()) {
+      toast.error('Error', {
+        description: 'Please enter your email address first'
+      });
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(loginData.email)) {
+      toast.error('Error', {
+        description: 'Please enter a valid email address'
+      });
+      return;
+    }
+
+    setLoginData(prev => ({ ...prev, isForgotPasswordLoading: true }));
+
+    try {
+      const response = await fetch(getApiUrl('/api/auth/forgot-password'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: loginData.email
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('Password Reset Sent', {
+          description: 'A new password has been sent to your email address'
+        });
+      } else {
+        toast.error('Password Reset Failed', {
+          description: data.error || 'Failed to send password reset email'
+        });
+      }
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      toast.error('Error', {
+        description: 'Network error. Please try again.'
+      });
+    } finally {
+      setLoginData(prev => ({ ...prev, isForgotPasswordLoading: false }));
+    }
   }
 
   const handleRegistrationSubmit = async (e) => {
@@ -690,7 +741,9 @@ export default function LoginPage() {
                 <div>
                   <button
                     type="button"
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 hover:underline focus:outline-none focus:underline cursor-pointer"
+                    onClick={handleForgotPassword}
+                    disabled={loginData.isForgotPasswordLoading}
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 hover:underline focus:outline-none focus:underline disabled:opacity-50 cursor-pointer"
                   >
                     Forgot Password?
                   </button>

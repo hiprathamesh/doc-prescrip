@@ -23,6 +23,23 @@ class EmailService {
     }
   }
 
+  async sendPasswordResetEmail(email, newPassword, firstName) {
+    try {
+      const response = await this.resend.emails.send({
+        from: this.fromEmail,
+        to: email,
+        subject: 'Doc Prescrip - Password Reset',
+        html: this.generatePasswordResetEmailTemplate(newPassword, firstName)
+      });
+
+      console.log('Password reset email sent successfully:', response);
+      return true;
+    } catch (error) {
+      console.error('Failed to send password reset email:', error);
+      return false;
+    }
+  }
+
   generateOtpEmailTemplate(otp, firstName) {
     return `
       <!DOCTYPE html>
@@ -110,6 +127,128 @@ class EmailService {
             <div class="warning">
               <strong>Important:</strong> This verification code will expire in 10 minutes for security reasons. If you didn't request this verification, please ignore this email.
             </div>
+            
+            <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+            
+            <p>Best regards,<br>
+            The Doc Prescrip Team</p>
+            
+            <div class="footer">
+              <p>This is an automated email. Please do not reply to this message.</p>
+              <p>© ${new Date().getFullYear()} Doc Prescrip. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+  }
+
+  generatePasswordResetEmailTemplate(newPassword, firstName) {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Password Reset - Doc Prescrip</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              background-color: #f8fafc;
+            }
+            .container {
+              background: white;
+              border-radius: 8px;
+              padding: 32px;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 32px;
+            }
+            .logo {
+              display: inline-flex;
+              align-items: center;
+              gap: 8px;
+              font-size: 24px;
+              font-weight: bold;
+              color: #2563eb;
+              margin-bottom: 16px;
+            }
+            .password-box {
+              background: #fef2f2;
+              border: 2px solid #dc2626;
+              border-radius: 8px;
+              font-size: 20px;
+              font-weight: bold;
+              text-align: center;
+              padding: 20px;
+              margin: 24px 0;
+              color: #991b1b;
+              font-family: 'Courier New', monospace;
+              word-break: break-all;
+            }
+            .warning {
+              background: #fef3c7;
+              border-left: 4px solid #f59e0b;
+              padding: 16px;
+              margin: 24px 0;
+              border-radius: 4px;
+            }
+            .security-notice {
+              background: #fee2e2;
+              border-left: 4px solid #dc2626;
+              padding: 16px;
+              margin: 24px 0;
+              border-radius: 4px;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 32px;
+              padding-top: 24px;
+              border-top: 1px solid #e5e7eb;
+              color: #6b7280;
+              font-size: 14px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo">
+                🩺 Doc Prescrip
+              </div>
+              <h1 style="margin: 0; color: #1f2937;">Password Reset</h1>
+            </div>
+            
+            <p>Hello ${firstName || 'Doctor'},</p>
+            
+            <p>We have received a request to reset your password for your Doc Prescrip account. Your new temporary password is:</p>
+            
+            <div class="password-box">${newPassword}</div>
+            
+            <p>Please use this password to log in to your account. For security reasons, we strongly recommend that you change this password immediately after logging in.</p>
+            
+            <div class="security-notice">
+              <strong>Security Notice:</strong> This is a temporary password generated for security purposes. Please change it as soon as you log in to your account.
+            </div>
+            
+            <div class="warning">
+              <strong>Important:</strong> If you didn't request this password reset, please contact our support team immediately. Your account security is important to us.
+            </div>
+            
+            <p>To change your password after logging in:</p>
+            <ol>
+              <li>Log in to your Doc Prescrip account using the new password above</li>
+              <li>Go to your profile settings</li>
+              <li>Select "Change Password"</li>
+              <li>Enter a strong, unique password</li>
+            </ol>
             
             <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
             
