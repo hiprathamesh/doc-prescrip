@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
+import DocPill from './icons/DocPill';
 
 export default function AuthGuard({ children }) {
   const { data: session, status } = useSession();
   const [isInitializing, setIsInitializing] = useState(true);
   const [doctorContextReady, setDoctorContextReady] = useState(false);
+  const [minDisplayTimeElapsed, setMinDisplayTimeElapsed] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -41,7 +43,10 @@ export default function AuthGuard({ children }) {
           if (existingDoctorId) {
             // Context is already ready
             setDoctorContextReady(true);
-            setIsInitializing(false);
+            // Only end initialization when both context is ready AND minimum display time has elapsed
+            if (minDisplayTimeElapsed) {
+              setIsInitializing(false);
+            }
             return;
           }
 
@@ -52,7 +57,10 @@ export default function AuthGuard({ children }) {
           const handleDoctorContextReady = () => {
             console.log('✅ Doctor context is now ready');
             setDoctorContextReady(true);
-            setIsInitializing(false);
+            // Only end initialization when both context is ready AND minimum display time has elapsed
+            if (minDisplayTimeElapsed) {
+              setIsInitializing(false);
+            }
           };
 
           window.addEventListener('doctorContextReady', handleDoctorContextReady);
@@ -65,7 +73,10 @@ export default function AuthGuard({ children }) {
               clearInterval(pollInterval);
               window.removeEventListener('doctorContextReady', handleDoctorContextReady);
               setDoctorContextReady(true);
-              setIsInitializing(false);
+              // Only end initialization when both context is ready AND minimum display time has elapsed
+              if (minDisplayTimeElapsed) {
+                setIsInitializing(false);
+              }
             }
           }, 100); // Check every 100ms
 
@@ -99,7 +110,21 @@ export default function AuthGuard({ children }) {
     };
 
     initializeDoctorContext();
-  }, [session, status, router, pathname]);
+  }, [session, status, router, pathname, minDisplayTimeElapsed]);
+
+  // Minimum display time effect (for testing purposes)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.log('⏰ Minimum display time elapsed');
+      setMinDisplayTimeElapsed(true);
+      // If doctor context is already ready, end initialization
+      if (doctorContextReady) {
+        setIsInitializing(false);
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [doctorContextReady]);
 
   // Don't guard the login page, terms, or privacy pages
   if (pathname === '/login' || pathname === '/terms' || pathname === '/privacy') {
@@ -109,9 +134,13 @@ export default function AuthGuard({ children }) {
   // Show loading screen while initializing
   if (isInitializing || !doctorContextReady) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="mb-6">
+            <DocPill 
+              className="w-12 h-12 text-blue-600 dark:text-blue-400 mx-auto doc-pill-loading" 
+            />
+          </div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
             Initializing Application
           </h2>
