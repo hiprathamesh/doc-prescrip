@@ -274,17 +274,17 @@ export default function RecentActivityPage({ onBack }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={exportActivities}
-                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  className="h-12 px-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-[#BFDBFE] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                   title="Export Activities"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-5 h-5" />
                 </button>
                 <button
                   onClick={clearAllActivities}
-                  className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
+                  className="h-12 px-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
                   title="Clear All Activities"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-5 h-5" />
                 </button>
                 <div className="min-w-48">
                   <CustomDropdown
@@ -319,17 +319,17 @@ export default function RecentActivityPage({ onBack }) {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={exportActivities}
-                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                  className="h-12 px-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-[#BFDBFE] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                   title="Export Activities"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-5 h-5" />
                 </button>
                 <button
                   onClick={clearAllActivities}
-                  className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
+                  className="h-12 px-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
                   title="Clear All Activities"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-5 h-5" />
                 </button>
                 <div className="min-w-48">
                   <CustomDropdown
