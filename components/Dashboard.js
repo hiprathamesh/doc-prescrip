@@ -351,7 +351,7 @@ export default function Dashboard() {
     const date = now.getDate();
 
     // Get current doctor's last name
-    const doctorLastName = currentDoctor?.lastName || 'Doctor';
+    const doctorLastName = currentDoctor?.lastName ? `Dr. ${currentDoctor.lastName}` : 'Doc';
 
     // Create a stable seed based on current date and hour for consistent message selection
     const seed = `${now.getFullYear()}-${month}-${date}-${hour}`;
@@ -394,56 +394,56 @@ export default function Dashboard() {
     // Festival greetings (these take priority and don't shuffle)
     if (specialDays.diwali2024) {
       return {
-        title: `Happy Diwali, Dr. ${doctorLastName}!`,
+        title: `Happy Diwali, ${doctorLastName}!`,
         subtitle: "May this festival of lights brighten your practice and bring prosperity to all your patients"
       };
     }
 
     if (specialDays.holi2024) {
       return {
-        title: `Happy Holi, Dr. ${doctorLastName}!`,
+        title: `Happy Holi, ${doctorLastName}!`,
         subtitle: "Let the colors of joy and healing fill your practice today"
       };
     }
 
     if (specialDays.doctorsDay) {
       return {
-        title: `Happy National Doctors' Day, Dr. ${doctorLastName}!`,
+        title: `Happy National Doctors' Day, ${doctorLastName}!`,
         subtitle: "Thank you for your dedication to healing and caring for the community"
       };
     }
 
     if (specialDays.worldHealthDay) {
       return {
-        title: `Happy World Health Day, Dr. ${doctorLastName}!`,
+        title: `Happy World Health Day, ${doctorLastName}!`,
         subtitle: "Your commitment to health makes the world a better place"
       };
     }
 
     if (specialDays.independenceDay) {
       return {
-        title: `Happy Independence Day, Dr. ${doctorLastName}!`,
+        title: `Happy Independence Day, ${doctorLastName}!`,
         subtitle: "Freedom through health - your service strengthens our nation"
       };
     }
 
     if (specialDays.republicDay) {
       return {
-        title: `Happy Republic Day, Dr. ${doctorLastName}!`,
+        title: `Happy Republic Day, ${doctorLastName}!`,
         subtitle: "Serving the republic with compassion and care"
       };
     }
 
     if (specialDays.newYear) {
       return {
-        title: `Happy New Year, Dr. ${doctorLastName}!`,
+        title: `Happy New Year, ${doctorLastName}!`,
         subtitle: "Here's to another year of healing hearts and changing lives"
       };
     }
 
     if (specialDays.christmas) {
       return {
-        title: `Merry Christmas, Dr. ${doctorLastName}!`,
+        title: `Merry Christmas, ${doctorLastName}!`,
         subtitle: "Spreading joy and wellness this festive season"
       };
     }
@@ -452,11 +452,11 @@ export default function Dashboard() {
     if (day === 5) { // Friday
       const fridayMessages = [
         {
-          title: `Happy Friday, Dr. ${doctorLastName}!`,
+          title: `Happy Friday, ${doctorLastName}!`,
           subtitle: "End the week strong with your healing touch"
         },
         {
-          title: `TGIF, Dr. ${doctorLastName}!`,
+          title: `TGIF, ${doctorLastName}!`,
           subtitle: "Friday energy for healing and caring"
         }
       ];
@@ -466,7 +466,7 @@ export default function Dashboard() {
     if (day === 1) { // Monday
       const mondayMessages = [
         {
-          title: `Fresh start, Dr. ${doctorLastName}!`,
+          title: `Fresh start, ${doctorLastName}!`,
           subtitle: "New week, new opportunities to heal and help"
         }
       ];
@@ -475,7 +475,7 @@ export default function Dashboard() {
 
     if (day === 0 || day === 6) { // Weekend
       return {
-        title: `Weekend warrior, Dr. ${doctorLastName}!`,
+        title: `Weekend warrior, ${doctorLastName}!`,
         subtitle: "Even on weekends, your dedication to care never stops"
       };
     }
@@ -484,15 +484,15 @@ export default function Dashboard() {
     if (hour >= 5 && hour < 12) {
       const morningMessages = [
         {
-          title: `Good morning, Dr. ${doctorLastName}!`,
+          title: `Good morning, ${doctorLastName}!`,
           subtitle: "Ready to make a difference in people's lives today"
         },
         {
-          title: `Rise and heal, Dr. ${doctorLastName}!`,
+          title: `Rise and heal, ${doctorLastName}!`,
           subtitle: "Another day to spread wellness and hope"
         },
         {
-          title: `Morning energy, Dr. ${doctorLastName}!`,
+          title: `Morning energy, ${doctorLastName}!`,
           subtitle: "Starting the day with purpose and healing"
         }
       ];
@@ -500,11 +500,11 @@ export default function Dashboard() {
     } else if (hour >= 12 && hour < 17) {
       const afternoonMessages = [
         {
-          title: `Good afternoon, Dr. ${doctorLastName}!`,
+          title: `Good afternoon, ${doctorLastName}!`,
           subtitle: "Midday momentum for continued excellent care"
         },
         {
-          title: `Afternoon power, Dr. ${doctorLastName}!`,
+          title: `Afternoon power, ${doctorLastName}!`,
           subtitle: "Keeping the healing energy strong"
         }
       ];
@@ -512,11 +512,11 @@ export default function Dashboard() {
     } else if (hour >= 17 && hour < 21) {
       const eveningMessages = [
         {
-          title: `Good evening, Dr. ${doctorLastName}!`,
+          title: `Good evening, ${doctorLastName}!`,
           subtitle: "Winding down another day of compassionate care"
         },
         {
-          title: `Evening excellence, Dr. ${doctorLastName}!`,
+          title: `Evening excellence, ${doctorLastName}!`,
           subtitle: "Your dedication brightens even the evening hours"
         }
       ];
@@ -524,11 +524,11 @@ export default function Dashboard() {
     } else {
       const lateMessages = [
         {
-          title: `Dedicated healer, Dr. ${doctorLastName}!`,
+          title: `Dedicated healer, ${doctorLastName}!`,
           subtitle: "Your commitment to patient care knows no bounds"
         },
         {
-          title: `Night owl doctor, Dr. ${doctorLastName}!`,
+          title: `Night owl doctor, ${doctorLastName}!`,
           subtitle: "Thank you for your round-the-clock dedication"
         }
       ];
