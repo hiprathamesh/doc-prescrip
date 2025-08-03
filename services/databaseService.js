@@ -849,6 +849,22 @@ class DatabaseService {
       return 0;
     }
   }
+
+  async clearAllActivities(doctorId) {
+    try {
+      const validDoctorId = this.validateDoctorId(doctorId);
+      const collection = await getCollection('activities');
+
+      const result = await collection.deleteMany({
+        doctorId: validDoctorId
+      });
+
+      return result.deletedCount;
+    } catch (error) {
+      console.error('Error clearing all activities:', error);
+      return 0;
+    }
+  }
 }
 
 export const databaseService = new DatabaseService();

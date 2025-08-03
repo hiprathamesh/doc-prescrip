@@ -885,6 +885,18 @@ class Storage {
     }
   }
 
+  async clearAllActivities() {
+    try {
+      const response = await apiCall(`${API_ENDPOINTS.ACTIVITIES}`, {
+        method: 'DELETE'
+      });
+      return response.success !== false;
+    } catch (error) {
+      console.error('Error clearing all activities:', error);
+      return false;
+    }
+  }
+
   // Add JWT utility methods
   parseJwtToken(token) {
     if (!token) return null;

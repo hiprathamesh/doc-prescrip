@@ -170,7 +170,7 @@ class ActivityLogger {
   async clearActivities() {
     try {
       const { storage } = await import('./storage');
-      return await storage.clearOldActivities();
+      return await storage.clearAllActivities();
     } catch (error) {
       console.error('Error clearing activities:', error);
       return false;
