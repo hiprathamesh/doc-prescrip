@@ -10,6 +10,7 @@ import CustomSelect from './CustomSelect';
 import CustomDropdown from './CustomDropdown';
 import { activityLogger } from '../utils/activityLogger';
 import useScrollToTop from '../hooks/useScrollToTop';
+import { toast } from 'sonner';
 
 export default function MedicalCertificate({ patient, patients, onBack, onPatientUpdate }) {
   const [selectedPatient, setSelectedPatient] = useState(patient);
@@ -131,7 +132,9 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
 
   const handleCreateNewPatient = async () => {
     if (!newPatientData.name || !newPatientData.age || !newPatientData.phone) {
-      alert('Please fill all required fields for new patient');
+      toast.error('Missing Information', {
+        description: 'Please fill all required fields for new patient.'
+      });
       return;
     }
 
@@ -148,18 +151,22 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
 
       const updatedPatients = [...patients, newPatient];
       const success = await storage.savePatients(updatedPatients);
-      
+
       if (success) {
         await activityLogger.logPatientCreated(newPatient);
         onPatientUpdate(updatedPatients);
         setSelectedPatient(newPatient);
         setIsNewPatient(false);
       } else {
-        alert('Failed to create patient. Please try again.');
+        toast.error('Error', {
+          description: 'Failed to create patient. Please try again.'
+        });
       }
     } catch (error) {
       console.error('Error creating patient:', error);
-      alert('Failed to create patient. Please try again.');
+      toast.error('Error', {
+        description: 'Failed to create patient. Please try again.'
+      });
     }
   };
 
@@ -186,13 +193,18 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
   };
 
   const handleSaveCertificate = () => {
-    if (!selectedPatient) {
-      alert('Please select a patient');
+    if (!certificateData.patientName.trim()) {
+      toast.error('Missing Patient', {
+        description: 'Please select a patient first'
+      });
       return;
     }
-    
-    if (!certificateData.certificateFor) {
-      alert('Please specify what this certificate is for');
+
+    // Validate required fields
+    if (!certificateData.certificateFor.trim()) {
+      toast.error('Missing Information', {
+        description: 'Please specify what this certificate is for.'
+      });
       return;
     }
 
@@ -201,7 +213,7 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
 
   const handleConfirmSave = async () => {
     setIsProcessing(true);
-    
+
     try {
       const certificate = {
         id: Date.now().toString(),
@@ -233,16 +245,18 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
       }
 
       setSavedCertificate(certificate);
-      
+
       // Log activity
       await activityLogger.logMedicalCertificateCreated(selectedPatient, certificateData.certificateFor);
-      
+
       setShowConfirmation(false);
       setShowSuccess(true);
 
     } catch (error) {
       console.error('Error saving medical certificate:', error);
-      alert('Failed to save medical certificate. Please try again.');
+      toast.error('Error', {
+        description: 'Failed to save medical certificate. Please try again.'
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -779,22 +793,20 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                       <button
                         type="button"
                         onClick={() => setCertificateData({ ...certificateData, fitnessStatus: 'fit' })}
-                        className={`px-6 py-2.5 mr-1 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${
-                          certificateData.fitnessStatus === 'fit'
+                        className={`px-6 py-2.5 mr-1 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${certificateData.fitnessStatus === 'fit'
                             ? 'bg-green-500 text-white shadow-sm transform scale-105'
                             : 'text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
-                        }`}
+                          }`}
                       >
                         Medically Fit
                       </button>
                       <button
                         type="button"
                         onClick={() => setCertificateData({ ...certificateData, fitnessStatus: 'unfit' })}
-                        className={`px-6 py-2.5 ml-1 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${
-                          certificateData.fitnessStatus === 'unfit'
+                        className={`px-6 py-2.5 ml-1 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${certificateData.fitnessStatus === 'unfit'
                             ? 'bg-red-500 text-white shadow-sm transform scale-105'
                             : 'text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
-                        }`}
+                          }`}
                       >
                         Medically Unfit
                       </button>

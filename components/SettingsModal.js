@@ -425,34 +425,42 @@ export default function SettingsModal({ isOpen, onClose }) {
 	};
 
 	const handleLogoDelete = async () => {
-		if (!confirm('Are you sure you want to delete the hospital logo?')) {
-			return;
-		}
+		toast('Confirm Delete Logo', {
+			description: 'Are you sure you want to delete the hospital logo?',
+			action: {
+				label: 'Delete',
+				onClick: async () => {
+					try {
+						const currentDoctor = storage.getDoctorContext();
+						const doctorId = currentDoctor?.id || currentDoctor?.doctorId;
+						
+						if (!doctorId) {
+							throw new Error('Doctor context not found. Please log in again.');
+						}
 
-		try {
-			const currentDoctor = storage.getDoctorContext();
-			const doctorId = currentDoctor?.id || currentDoctor?.doctorId;
-			
-			if (!doctorId) {
-				throw new Error('Doctor context not found. Please log in again.');
+						const success = await storage.deleteHospitalLogo(doctorId);
+						
+						if (success) {
+							toast.success('Logo Deleted', {
+								description: 'Hospital logo has been removed.'
+							});
+							setHospitalLogo(prev => ({ ...prev, logoData: null }));
+						} else {
+							throw new Error('Failed to delete logo');
+						}
+					} catch (error) {
+						console.error('Error deleting logo:', error);
+						toast.error('Delete Failed', {
+							description: error.message || 'Failed to delete logo. Please try again.'
+						});
+					}
+				}
+			},
+			cancel: {
+				label: 'Cancel',
+				onClick: () => {}
 			}
-
-			const success = await storage.deleteHospitalLogo(doctorId);
-			
-			if (success) {
-				toast.success('Logo Deleted', {
-					description: 'Hospital logo has been removed.'
-				});
-				setHospitalLogo(prev => ({ ...prev, logoData: null }));
-			} else {
-				throw new Error('Failed to delete logo');
-			}
-		} catch (error) {
-			console.error('Error deleting logo:', error);
-			toast.error('Delete Failed', {
-				description: error.message || 'Failed to delete logo. Please try again.'
-			});
-		}
+		});
 	};
 
 	if (!isOpen) return null;

@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import { formatDate } from './dateUtils';
 import { storage } from './storage';
+import { toast } from 'sonner';
 
 export const generateMedicalCertificatePDF = async (certificate, patient, autoDownload = true) => {
   const pdf = new jsPDF('p', 'mm', 'a4');

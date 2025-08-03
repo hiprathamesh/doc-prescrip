@@ -249,12 +249,16 @@ export default function PrescriptionTemplates({ onBack }) {
           isDeleting: false
         });
       } else {
-        alert('Failed to delete template');
+        toast.error('Delete Failed', {
+          description: 'Failed to delete template. Please try again.'
+        });
         setDeleteConfirmation(prev => ({ ...prev, isDeleting: false }));
       }
     } catch (error) {
       console.error('Error deleting template:', error);
-      alert('Error deleting template');
+      toast.error('Delete Failed', {
+        description: 'Failed to delete template. Please try again.'
+      });
       setDeleteConfirmation(prev => ({ ...prev, isDeleting: false }));
     }
   };

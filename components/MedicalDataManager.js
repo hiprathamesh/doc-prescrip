@@ -196,7 +196,9 @@ export default function MedicalDataManager({ onBack }) {
       }
     } catch (error) {
       console.error('Error deleting item:', error);
-      alert('Failed to delete item. Please try again.');
+      toast.error('Error', {
+        description: 'Failed to delete item. Please try again.'
+      });
     }
   };
 

@@ -32,7 +32,7 @@ export default function RecentActivityPage({ onBack }) {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
-  
+
   // Header refs for floating header
   const headerRef = useRef(null);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -120,28 +120,36 @@ export default function RecentActivityPage({ onBack }) {
   };
 
   const clearAllActivities = async () => {
-    if (!confirm('Are you sure you want to clear all activity history? This action cannot be undone.')) {
-      return;
-    }
+    toast('Confirm Delete All', {
+      description: 'Are you sure you want to clear all activity history? This action cannot be undone.',
+      action: {
+        label: 'Delete All',
+        onClick: async () => {
+          try {
+            const { activityLogger } = await import('../utils/activityLogger');
+            const success = await activityLogger.clearActivities();
 
-    try {
-      const { activityLogger } = await import('../utils/activityLogger');
-      const success = await activityLogger.clearActivities();
-      
-      if (success) {
-        setActivities([]);
-        toast.success('Activities Cleared', {
-          description: 'All activity history has been cleared'
-        });
-      } else {
-        throw new Error('Failed to clear activities');
+            if (success) {
+              setActivities([]);
+              toast.success('Activities Cleared', {
+                description: 'All activity history has been cleared'
+              });
+            } else {
+              throw new Error('Failed to clear activities');
+            }
+          } catch (error) {
+            console.error('Error clearing activities:', error);
+            toast.error('Error', {
+              description: 'Failed to clear activities. Please try again.'
+            });
+          }
+        }
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {} // Just close the toast
       }
-    } catch (error) {
-      console.error('Error clearing activities:', error);
-      toast.error('Error', {
-        description: 'Failed to clear activities. Please try again.'
-      });
-    }
+    });
   };
 
   const exportActivities = () => {
@@ -287,13 +295,7 @@ export default function RecentActivityPage({ onBack }) {
                   <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </button>
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                    <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Recent Activity</h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Your practice activity history</p>
-                  </div>
+                  <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">Recent Activity</span>
                 </div>
               </div>
               <div className="flex items-center space-x-3">

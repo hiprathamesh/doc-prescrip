@@ -79,7 +79,9 @@ ${doctorName}`
 
   const handleClick = async () => {
     if (status === 'loading') {
-      alert('Please wait, checking authentication...')
+      toast.info('Please Wait', {
+        description: 'Checking authentication status...'
+      });
       return
     }
 
@@ -91,14 +93,18 @@ ${doctorName}`
         })
       } catch (error) {
         console.error('Sign in error:', error)
-        alert('Failed to sign in. Please try again.')
+        toast.error('Sign In Failed', {
+          description: 'Failed to sign in. Please try again.'
+        });
       }
       return
     }
 
     // Check if session has authentication error
     if (session.error === "RefreshAccessTokenError") {
-      alert('Your session has expired. Please sign in again.')
+      toast.warning('Session Expired', {
+        description: 'Your session has expired. Please sign in again.'
+      });
       signIn('google', { callbackUrl: window.location.href })
       return
     }
@@ -118,7 +124,9 @@ ${doctorName}`
       }
 
       if (!validPdfUrl) {
-        alert('PDF is not available. Please try regenerating the document.')
+        toast.error('PDF Not Available', {
+          description: 'PDF is not available. Please try regenerating the document.'
+        });
         return
       }
 
@@ -145,7 +153,9 @@ ${doctorName}`
       if (!res.ok) {
         if (res.status === 401) {
           // Token expired or invalid, trigger re-authentication
-          alert('Your Google authentication has expired. Please sign in again.')
+          toast.warning('Authentication Required', {
+            description: 'Your Google authentication has expired. Please sign in again.'
+          });
           signIn('google', { callbackUrl: window.location.href })
           return
         }

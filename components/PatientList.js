@@ -263,7 +263,9 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
   // Handle create new patient
   const handleCreateNewPatient = async () => {
     if (!newPatientData.name || !newPatientData.age || !newPatientData.phone) {
-      toast.error('Please fill all required fields');
+      toast.error('Missing Information', {
+        description: 'Please fill all required fields (Name, Age, and Phone are required)'
+      });
       return;
     }
 
