@@ -7,6 +7,7 @@ import { ACTIVITY_ICONS, ACTIVITY_COLORS } from '../utils/activityLogger';
 import { storage } from '../utils/storage';
 import { toast } from 'sonner';
 import useScrollToTop from '../hooks/useScrollToTop';
+import CustomDropdown from './CustomDropdown';
 
 // Loading skeleton for activities
 const ActivitySkeleton = () => (
@@ -224,6 +225,15 @@ export default function RecentActivityPage({ onBack }) {
 
   // Get unique activity types for filter dropdown
   const activityTypes = [...new Set(activities.map(activity => activity.type))];
+  
+  // Create filter options for CustomDropdown
+  const filterOptions = [
+    { value: 'all', label: 'All Activities' },
+    ...activityTypes.map(type => ({
+      value: type,
+      label: type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    }))
+  ];
 
   // Handle Ctrl+K shortcut for search
   useEffect(() => {
@@ -276,6 +286,14 @@ export default function RecentActivityPage({ onBack }) {
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
+                <div className="min-w-48">
+                  <CustomDropdown
+                    options={filterOptions}
+                    value={filterType}
+                    onChange={setFilterType}
+                    placeholder="Filter by type"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -313,6 +331,14 @@ export default function RecentActivityPage({ onBack }) {
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
+                <div className="min-w-48">
+                  <CustomDropdown
+                    options={filterOptions}
+                    value={filterType}
+                    onChange={setFilterType}
+                    placeholder="Filter by type"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -320,8 +346,8 @@ export default function RecentActivityPage({ onBack }) {
 
         <div className="max-w-5xl mx-auto px-6 space-y-6">
           {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
+          <div className="flex flex-col sm:flex-row gap-4 justify-end">
+            <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 ref={searchInputRef}
@@ -338,18 +364,6 @@ export default function RecentActivityPage({ onBack }) {
                 Ctrl K
               </div>
             </div>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm min-w-48"
-            >
-              <option value="all">All Activities</option>
-              {activityTypes.map(type => (
-                <option key={type} value={type}>
-                  {type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                </option>
-              ))}
-            </select>
           </div>
 
           {/* Activity List */}
@@ -379,7 +393,7 @@ export default function RecentActivityPage({ onBack }) {
                           <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
                             {activity.description}
                           </p>
-                          <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center space-x-1.5 text-xs text-gray-500 dark:text-gray-400">
                             <span>{formatTimeAgo(activity.timestamp)}</span>
                             <span>•</span>
                             <span>{formatDateTime(activity.timestamp)}</span>
