@@ -688,23 +688,34 @@ export default function PrescriptionTemplates({ onBack }) {
                 </div>
               </div>
             ) : (
-              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
-                <div className="text-center py-12">
-                  <FileText className="mx-auto h-8 w-8 text-gray-300 dark:text-gray-700 mb-3" />
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-1">No templates found</h3>
-                  <p className="text-xs text-gray-500 mb-4">
-                    {searchTerm ? 'No templates match your search.' : 'Create your first prescription template to get started.'}
-                  </p>
-                  {!searchTerm && (
-                    <button
-                      onClick={handleCreateNew}
-                      className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors duration-200 mx-auto cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Create Template</span>
-                    </button>
-                  )}
+              <div className="text-center py-12">
+                {/* Empty State Image */}
+                <div className="w-32 h-50 mx-auto mb-6 relative overflow-hidden">
+                  <picture className="w-full h-full">
+                    <source srcSet="/templateEmptyState.avif" type="image/avif" />
+                    <source srcSet="/templateEmptyState.webp" type="image/webp" />
+                    <img
+                      src="/templateEmptyState.png"
+                      alt="No templates"
+                      className="w-full h-full object-cover"
+                      draggable="false"
+                    />
+                  </picture>
                 </div>
+                
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-2">No templates found</h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  {searchTerm ? 'No templates match your search.' : 'Create your first prescription template to get started.'}
+                </p>
+                {!searchTerm && (
+                  <button
+                    onClick={handleCreateNew}
+                    className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors duration-200 mx-auto cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Template</span>
+                  </button>
+                )}
               </div>
             )}
           </div>

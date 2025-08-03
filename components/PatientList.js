@@ -1,11 +1,13 @@
 'use client';
 
-import { User, Phone, FileText, Trash2, MoreVertical, ArrowLeft, Search } from 'lucide-react';
+import { Phone, FileText, Trash2, MoreVertical, ArrowLeft, Search, Plus } from 'lucide-react';
 import { formatDate } from '../utils/dateUtils';
 import { useState, useRef, useEffect } from 'react';
 import CustomDropdown from './CustomDropdown';
 import ConfirmationDialog from './ConfirmationDialog';
 import useScrollToTop from '../hooks/useScrollToTop';
+import { storage } from '../utils/storage';
+import { toast } from 'sonner';
 
 export default function PatientList({ patients, onPatientSelect, onNewPrescription, onPatientDelete, onBack }) {
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -17,6 +19,22 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
   const patientHeaderRef = useRef(null);
   const [isPatientHeaderVisible, setIsPatientHeaderVisible] = useState(true);
   const searchInputRef = useRef(null);
+
+  // Add new patient modal state
+  const [showNewPatientModal, setShowNewPatientModal] = useState(false);
+  const [newPatientData, setNewPatientData] = useState({
+    name: '',
+    age: '',
+    gender: 'male',
+    phone: ''
+  });
+  const [isCreatingPatient, setIsCreatingPatient] = useState(false);
+
+  // Refs for new patient form fields
+  const nameRef = useRef(null);
+  const ageRef = useRef(null);
+  const genderRef = useRef(null);
+  const phoneRef = useRef(null);
 
   // Add confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState({
@@ -234,32 +252,220 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
   // Add scroll to top when component mounts
   useScrollToTop();
 
+  // Generate patient ID
+  const generatePatientId = () => {
+    const prefix = 'P';
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+    return `${prefix}${timestamp}${random}`;
+  };
+
+  // Handle create new patient
+  const handleCreateNewPatient = async () => {
+    if (!newPatientData.name || !newPatientData.age || !newPatientData.phone) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    setIsCreatingPatient(true);
+    try {
+      const patientId = generatePatientId();
+      const newPatient = {
+        id: patientId,
+        name: newPatientData.name,
+        age: parseInt(newPatientData.age),
+        gender: newPatientData.gender,
+        phone: newPatientData.phone,
+        createdAt: new Date(),
+        lastVisited: new Date(),
+        nextExpected: null,
+        followUpStatus: 'none',
+        hasPendingPayments: false
+      };
+
+      const currentPatients = await storage.getPatients();
+      const updatedPatients = [...currentPatients, newPatient];
+      await storage.savePatients(updatedPatients);
+
+      toast.success('Patient Added', {
+        description: `${newPatient.name} has been added successfully`
+      });
+
+      setShowNewPatientModal(false);
+      setNewPatientData({ name: '', age: '', gender: 'male', phone: '' });
+
+      // Refresh the page or notify parent component
+      window.location.reload();
+    } catch (error) {
+      console.error('Error creating patient:', error);
+      toast.error('Failed to create patient');
+    } finally {
+      setIsCreatingPatient(false);
+    }
+  };
+
+  // Handle Enter key press for form navigation
+  const handleKeyPress = (e, nextRef) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  };
+
+  // Handle last field Enter press
+  const handleLastFieldKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleCreateNewPatient();
+    }
+  };
+
+  // Handle gender dropdown Enter press
+  const handleGenderEnterPress = () => {
+    if (phoneRef.current) {
+      phoneRef.current.focus();
+    }
+  };
+
   if (patients.length === 0) {
     return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div ref={patientHeaderRef} className="patient-header">
-          <div className="max-w-4xl mx-auto px-6 py-4">
-            <div className="flex items-center space-x-3">
+      <>
+        <div className="space-y-6">
+          {/* Header */}
+          <div ref={patientHeaderRef} className="patient-header">
+            <div className="max-w-4xl mx-auto px-6 py-4">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={onBack}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
+                >
+                  <ArrowLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">Patients</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="text-center py-12">
+              {/* Empty State Image */}
+              <div className="w-32 h-50 mx-auto mb-6 relative overflow-hidden">
+                <picture className="w-full h-full">
+                  <source srcSet="/patientsEmptyState.avif" type="image/avif" />
+                  <source srcSet="/patientsEmptyState.webp" type="image/webp" />
+                  <img
+                    src="/patientsEmptyState.png"
+                    alt="No patients"
+                    className="w-full h-full object-cover"
+                    draggable="false"
+                  />
+                </picture>
+              </div>
+
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No one here yet</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Start by adding your first patient to begin managing their medical records.</p>
+
               <button
-                onClick={onBack}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors duration-200 cursor-pointer"
+                onClick={() => setShowNewPatientModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 mx-auto transition-covers duration-200 cursor-pointer"
               >
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
+                <Plus className="w-4 h-4" />
+                <span>Add Patient</span>
               </button>
-              <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">Patients</span>
             </div>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 sm:p-8 text-center">
-            <User className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mb-4" />
-            <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No patients found</h3>
-            <p className="text-sm sm:text-base text-gray-600 mb-4">Start by creating a new prescription for a patient.</p>
+        {/* New Patient Modal */}
+        {showNewPatientModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-6 max-w-md w-full border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Add New Patient</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Name *</label>
+                  <input
+                    ref={nameRef}
+                    type="text"
+                    value={newPatientData.name}
+                    onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
+                    onKeyPress={(e) => handleKeyPress(e, ageRef)}
+                    className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-12"
+                    placeholder="Enter patient name"
+                    autoFocus
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Age *</label>
+                  <input
+                    ref={ageRef}
+                    type="number"
+                    value={newPatientData.age}
+                    onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
+                    onKeyPress={(e) => handleKeyPress(e, genderRef)}
+                    className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-12"
+                    placeholder="Enter age"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Gender</label>
+                  <CustomDropdown
+                    ref={genderRef}
+                    options={[
+                      { value: 'male', label: 'Male' },
+                      { value: 'female', label: 'Female' },
+                      { value: 'other', label: 'Other' }
+                    ]}
+                    value={newPatientData.gender}
+                    onChange={(value) => setNewPatientData({ ...newPatientData, gender: value })}
+                    placeholder="Select gender..."
+                    onEnterPress={handleGenderEnterPress}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Phone *</label>
+                  <input
+                    ref={phoneRef}
+                    type="tel"
+                    value={newPatientData.phone}
+                    onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
+                    onKeyPress={handleLastFieldKeyPress}
+                    className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-12"
+                    placeholder="Enter phone number"
+                  />
+                </div>
+              </div>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  onClick={() => setShowNewPatientModal(false)}
+                  className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                  disabled={isCreatingPatient}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateNewPatient}
+                  disabled={isCreatingPatient}
+                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isCreatingPatient ? 'Creating...' : 'Create Patient'}
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
+                Tip: Press Enter on any field to move to the next one, or Enter on the last field to create patient
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
+        )}
+      </>
     );
   }
 
