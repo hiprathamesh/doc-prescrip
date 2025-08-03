@@ -209,7 +209,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
       return;
     }
 
-    const rootMarginTop = "-81px"; // Adjust based on main header height
+    const rootMarginTop = "-88px"; // Adjust based on main header height
 
     const observer = new window.IntersectionObserver(
       (entries) => {
@@ -371,7 +371,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
 
               <button
                 onClick={() => setShowNewPatientModal(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 mx-auto transition-covers duration-200 cursor-pointer"
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 font-medium rounded-lg flex items-center space-x-2 mx-auto transition-covers duration-200 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Patient</span>
@@ -478,7 +478,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
         className={`fixed left-0 right-0 z-30 transition-transform duration-300 ease-in-out
           ${isPatientHeaderVisible ? '-translate-y-full' : 'translate-y-0'}
         `}
-        style={{ top: '81px' }}
+        style={{ top: '88px' }}
       >
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-6 py-3">

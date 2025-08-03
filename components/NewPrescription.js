@@ -136,7 +136,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
 
     console.log('[IntersectionObserver Effect] Setting up IntersectionObserver...');
 
-    const rootMarginTop = "-81px"; // Adjust if your main header height is different
+    const rootMarginTop = "-88px"; // Adjust if your main header height is different
 
     const observer = new window.IntersectionObserver(
       (entries) => {
@@ -809,7 +809,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         className={`fixed left-0 right-0 z-30 transition-transform duration-300 ease-in-out
           ${isPresHeaderVisible ? '-translate-y-full' : 'translate-y-0'}
         `}
-        style={{ top: '81px' }}
+        style={{ top: '88px' }}
       >
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-slate-700">
           <div className="max-w-5xl mx-auto px-6 py-3">

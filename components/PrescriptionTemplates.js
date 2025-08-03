@@ -121,7 +121,7 @@ export default function PrescriptionTemplates({ onBack }) {
       return;
     }
 
-    const rootMarginTop = "-81px"; // Adjusted to match main header height
+    const rootMarginTop = "-88px"; // Adjusted to match main header height
 
     const observer = new window.IntersectionObserver(
       (entries) => {
@@ -472,7 +472,7 @@ export default function PrescriptionTemplates({ onBack }) {
         className={`fixed left-0 right-0 z-30 transition-transform duration-300 ease-in-out
           ${isTemplatesHeaderVisible ? '-translate-y-full' : 'translate-y-0'}
         `}
-        style={{ top: '81px' }}
+        style={{ top: '88px' }}
       >
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-6 py-3">
@@ -714,7 +714,7 @@ export default function PrescriptionTemplates({ onBack }) {
                 {!searchTerm && (
                   <button
                     onClick={handleCreateNew}
-                    className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors duration-200 mx-auto cursor-pointer"
+                    className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 font-medium rounded-lg text-sm flex items-center space-x-2 transition-colors duration-200 mx-auto cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Add Template</span>
@@ -784,7 +784,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
       return;
     }
 
-    const rootMarginTop = "-81px"; // Adjusted to match main header height
+    const rootMarginTop = "-88px"; // Adjusted to match main header height
 
     const observer = new window.IntersectionObserver(
       (entries) => {
@@ -986,7 +986,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
         className={`fixed left-0 right-0 z-30 transition-transform duration-300 ease-in-out
           ${isTemplateEditorHeaderVisible ? '-translate-y-full' : 'translate-y-0'}
         `}
-        style={{ top: '81px' }}
+        style={{ top: '88px' }}
       >
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-6 py-3">

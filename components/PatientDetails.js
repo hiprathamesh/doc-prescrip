@@ -536,7 +536,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         className={`fixed left-0 right-0 z-30 transition-transform duration-300 ease-in-out
           ${isHeaderVisible ? '-translate-y-full' : 'translate-y-0'}
         `}
-        style={{ top: '81px' }}
+        style={{ top: '88px' }}
       >
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-5xl mx-auto px-6 py-3">
