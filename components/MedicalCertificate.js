@@ -775,27 +775,29 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-3">Fitness Status</label>
-                    <div className="flex space-x-6">
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          value="fit"
-                          checked={certificateData.fitnessStatus === 'fit'}
-                          onChange={(e) => setCertificateData({ ...certificateData, fitnessStatus: e.target.value })}
-                          className="text-green-600 focus:ring-green-500"
-                        />
-                        <span className="text-green-700 text-sm font-medium">Medically Fit</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          value="unfit"
-                          checked={certificateData.fitnessStatus === 'unfit'}
-                          onChange={(e) => setCertificateData({ ...certificateData, fitnessStatus: e.target.value })}
-                          className="text-red-600 focus:ring-red-500"
-                        />
-                        <span className="text-red-700 text-sm font-medium">Medically Unfit</span>
-                      </label>
+                    <div className="inline-flex bg-gray-100 dark:bg-gray-800 rounded-lg p-2 border border-gray-200 dark:border-gray-700">
+                      <button
+                        type="button"
+                        onClick={() => setCertificateData({ ...certificateData, fitnessStatus: 'fit' })}
+                        className={`px-6 py-2.5 mr-1 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${
+                          certificateData.fitnessStatus === 'fit'
+                            ? 'bg-green-500 text-white shadow-sm transform scale-105'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
+                        }`}
+                      >
+                        Medically Fit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCertificateData({ ...certificateData, fitnessStatus: 'unfit' })}
+                        className={`px-6 py-2.5 ml-1 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${
+                          certificateData.fitnessStatus === 'unfit'
+                            ? 'bg-red-500 text-white shadow-sm transform scale-105'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+                        }`}
+                      >
+                        Medically Unfit
+                      </button>
                     </div>
                   </div>
                   <div>
