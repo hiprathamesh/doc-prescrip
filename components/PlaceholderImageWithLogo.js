@@ -43,6 +43,16 @@ export default function PlaceholderImageWithLogo({ isDarkTheme, themeInitialized
       {/* Background Image */}
       {themeInitialized && (
         <picture className="w-full h-full">
+          {/* AVIF - Best compression, modern browsers */}
+          <source
+            srcSet={isDarkTheme ? '/placeholderIMG.avif' : '/placeholderIMGlight.avif'}
+            type="image/avif"
+          />
+          {/* WebP - Good compression, wide browser support */}
+          <source
+            srcSet={isDarkTheme ? '/placeholderIMG.webp' : '/placeholderIMGlight.webp'}
+            type="image/webp"
+          />
           {/* PNG - Fallback for older browsers */}
           <img
             src={isDarkTheme ? '/placeholderIMG.png' : '/placeholderIMGlight.png'}
