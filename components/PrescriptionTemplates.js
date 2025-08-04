@@ -488,7 +488,7 @@ export default function PrescriptionTemplates({ onBack }) {
               </div>
               <button
                 onClick={handleCreateNew}
-                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200 cursor-pointer"
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-semibold flex items-center space-x-2 transition-colors duration-200 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Template</span>
@@ -514,7 +514,7 @@ export default function PrescriptionTemplates({ onBack }) {
               </div>
               <button
                 onClick={handleCreateNew}
-                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-medium cursor-pointer"
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 font-semibold cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>New Template</span>
@@ -714,7 +714,7 @@ export default function PrescriptionTemplates({ onBack }) {
                 {!searchTerm && (
                   <button
                     onClick={handleCreateNew}
-                    className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 font-medium rounded-lg text-sm flex items-center space-x-2 transition-colors duration-200 mx-auto cursor-pointer"
+                    className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 font-semibold rounded-lg text-sm flex items-center space-x-2 transition-colors duration-200 mx-auto cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Add Template</span>

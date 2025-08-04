@@ -371,7 +371,7 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
 
               <button
                 onClick={() => setShowNewPatientModal(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 font-medium rounded-lg flex items-center space-x-2 mx-auto transition-covers duration-200 cursor-pointer"
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 font-semibold rounded-lg flex items-center space-x-2 mx-auto transition-covers duration-200 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Patient</span>

@@ -825,7 +825,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               </div>
               <button
                 onClick={handleSavePrescription}
-                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200 cursor-pointer"
+                className="bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-4 py-2 rounded-md text-sm font-semibold flex items-center space-x-2 transition-colors duration-200 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Save & Send</span>
@@ -852,7 +852,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
               <div className="flex space-x-3">
                 <button
                   onClick={handleSavePrescription}
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 cursor-pointer"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white dark:text-gray-900 font-semibold px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200 cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save & Send</span>
@@ -889,7 +889,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                   </div>
                   <button
                     onClick={toggleNewPatient}
-                    className={`w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-medium transition-all duration-200 cursor-pointer ${isNewPatient ? 'bg-gray-600 hover:bg-gray-700' : ''
+                    className={`w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white dark:text-gray-900 px-5 py-2.5 rounded-lg flex items-center justify-center space-x-2 font-semibold transition-all duration-200 cursor-pointer ${isNewPatient ? 'bg-gray-600 hover:bg-gray-700' : ''
                       }`}
                   >
                     <Plus className={`w-5 h-5 transition-transform duration-300 ease-out ${isNewPatient ? 'rotate-45' : 'rotate-0'

@@ -23,13 +23,13 @@ export default function FluidToggle({
       translateCheckedPressed: 'translate-x-[0.75rem]'
     },
     default: {
-      track: 'w-12 h-6',
+      track: 'w-10 h-6',
       thumb: 'w-4 h-4',
       thumbPressed: 'w-6 h-4',
       thumbHovered: 'w-4 h-4',
       translateUnchecked: 'translate-x-1',
-      translateChecked: 'translate-x-[1.75rem]',
-      translateCheckedPressed: 'translate-x-[1.25rem]'
+      translateChecked: 'translate-x-[1.3rem]',
+      translateCheckedPressed: 'translate-x-[0.85rem]'
     },
     large: {
       track: 'w-14 h-7',
@@ -85,7 +85,7 @@ export default function FluidToggle({
   }, []);
 
   // Pre-calculate thumb classes with smooth transitions
-  let thumbClasses = 'inline-block rounded-full bg-white shadow-lg transition-all duration-150 ease-out transform ';
+  let thumbClasses = 'inline-block rounded-full bg-white dark:bg-gray-900 shadow-lg transition-all duration-150 ease-out transform ';
   
   if (isPressed) {
     thumbClasses += config.thumbPressed + ' ';
