@@ -32,6 +32,13 @@ export default function LoginPage() {
     isForgotPasswordLoading: false
   });
 
+  // Email autocomplete state
+  const [emailSuggestions, setEmailSuggestions] = useState({
+    show: false,
+    selectedIndex: -1,
+    domains: ['@gmail.com', '@yahoo.com', '@hotmail.com', '@outlook.com', '@live.com', '@icloud.com']
+  });
+
   // Registration state
   const [regData, setRegData] = useState({
     firstName: '',
@@ -131,6 +138,106 @@ export default function LoginPage() {
     setIsTransitioning(true);
     setCurrentStep(toStep);
     setIsTransitioning(false);
+  };
+
+  // Email suggestion handlers
+  const handleEmailChange = (value) => {
+    setLoginData(prev => ({ ...prev, email: value }));
+    
+    // Show suggestions when user starts typing and hasn't entered @
+    if (value.length > 0 && !value.includes('@')) {
+      setEmailSuggestions(prev => ({ ...prev, show: true, selectedIndex: -1 }));
+    } else {
+      setEmailSuggestions(prev => ({ ...prev, show: false, selectedIndex: -1 }));
+    }
+  };
+
+  const handleEmailKeyDown = (e) => {
+    if (!emailSuggestions.show) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        // Focus password field instead of submitting
+        const passwordField = document.getElementById('login-password');
+        if (passwordField) {
+          passwordField.focus();
+        }
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setEmailSuggestions(prev => ({
+          ...prev,
+          selectedIndex: prev.selectedIndex < prev.domains.length - 1 ? prev.selectedIndex + 1 : 0
+        }));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setEmailSuggestions(prev => ({
+          ...prev,
+          selectedIndex: prev.selectedIndex > 0 ? prev.selectedIndex - 1 : prev.domains.length - 1
+        }));
+        break;
+      case 'ArrowLeft':
+        if (emailSuggestions.selectedIndex >= 0) {
+          e.preventDefault();
+          setEmailSuggestions(prev => ({
+            ...prev,
+            selectedIndex: prev.selectedIndex > 0 ? prev.selectedIndex - 1 : prev.domains.length - 1
+          }));
+        }
+        break;
+      case 'ArrowRight':
+        if (emailSuggestions.selectedIndex >= 0) {
+          e.preventDefault();
+          setEmailSuggestions(prev => ({
+            ...prev,
+            selectedIndex: prev.selectedIndex < prev.domains.length - 1 ? prev.selectedIndex + 1 : 0
+          }));
+        }
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (emailSuggestions.selectedIndex >= 0) {
+          selectEmailSuggestion(emailSuggestions.selectedIndex);
+        } else {
+          // Focus password field
+          const passwordField = document.getElementById('login-password');
+          if (passwordField) {
+            passwordField.focus();
+          }
+        }
+        break;
+      case 'Escape':
+        setEmailSuggestions(prev => ({ ...prev, show: false, selectedIndex: -1 }));
+        break;
+    }
+  };
+
+  const selectEmailSuggestion = (index) => {
+    const domain = emailSuggestions.domains[index];
+    const emailValue = loginData.email + domain;
+    setLoginData(prev => ({ ...prev, email: emailValue }));
+    setEmailSuggestions(prev => ({ ...prev, show: false, selectedIndex: -1 }));
+    
+    // Focus password field after selection
+    setTimeout(() => {
+      const passwordField = document.getElementById('login-password');
+      if (passwordField) {
+        passwordField.focus();
+      }
+    }, 100);
+  };
+
+  const handleEmailBlur = (e) => {
+    // Hide suggestions after a delay to allow clicking on them
+    setTimeout(() => {
+      if (!e.relatedTarget?.classList.contains('email-suggestion')) {
+        setEmailSuggestions(prev => ({ ...prev, show: false, selectedIndex: -1 }));
+      }
+    }, 150);
   };
 
   const handleLoginSubmit = async (e) => {
@@ -676,14 +783,56 @@ export default function LoginPage() {
                     id="login-email"
                     type="email"
                     value={loginData.email}
-                    onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))
-                    }
+                    onChange={(e) => handleEmailChange(e.target.value)}
+                    onKeyDown={handleEmailKeyDown}
                     onFocus={() => setFocusedField('login-email')}
-                    onBlur={() => setFocusedField(null)}
+                    onBlur={(e) => {
+                      setFocusedField(null);
+                      handleEmailBlur(e);
+                    }}
                     className="peer text-sm w-full pl-10 pr-3 py-3 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 placeholder-transparent"
                     placeholder="Email"
                   />
                   <label htmlFor="login-email" className="form-label">Email</label>
+                  
+                  {/* Email Suggestions */}
+                  <div 
+                    className={`absolute left-0 right-0 top-full mt-2 z-50 transition-all duration-300 ease-out ${
+                      emailSuggestions.show 
+                        ? 'opacity-100 transform translate-y-0 pointer-events-auto' 
+                        : 'opacity-0 transform translate-y-[-10px] pointer-events-none'
+                    }`}
+                  >
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden">
+                      <div className="p-2 space-y-1">
+                        {emailSuggestions.domains.map((domain, index) => {
+                          // Truncate email if it's too long to fit with domain
+                          const maxEmailLength = 20; // Adjust based on container width
+                          let displayEmail = loginData.email;
+                          if (loginData.email.length > maxEmailLength) {
+                            displayEmail = '...' + loginData.email.slice(-(maxEmailLength - 3));
+                          }
+                          
+                          return (
+                            <button
+                              key={domain}
+                              type="button"
+                              className={`email-suggestion w-full text-left px-3 py-2 rounded-lg text-sm cursor-pointer min-h-[36px] flex items-center transition-colors duration-200 ${
+                                emailSuggestions.selectedIndex === index
+                                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                              }`}
+                              onClick={() => selectEmailSuggestion(index)}
+                              onMouseEnter={() => setEmailSuggestions(prev => ({ ...prev, selectedIndex: index }))}
+                            >
+                              <span className="text-gray-900 dark:text-gray-100 flex-shrink-0">{displayEmail}</span>
+                              <span className="text-blue-600 dark:text-blue-400 flex-shrink-0">{domain}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Password Field */}
