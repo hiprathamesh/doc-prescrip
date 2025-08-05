@@ -1,10 +1,19 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { NextAuthOptions } from "next-auth";
+import { getServerSession } from "next-auth/next";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "../../../../lib/mongodb";
 import { storage } from "../../../../utils/storage";
 import { ObjectId } from "mongodb";
+import bcrypt from "bcryptjs";
 
 const handler = NextAuth({
+  adapter: MongoDBAdapter(clientPromise, {
+    databaseName: process.env.MONGODB_DB_NAME || 'doc-prescrip',
+    collectionName: 'doctors'
+  }),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -14,68 +23,145 @@ const handler = NextAuth({
           scope: "openid email profile https://www.googleapis.com/auth/drive.readonly"
         }
       }
+    }),
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            return null;
+          }
+
+          const client = await clientPromise;
+          const db = client.db('doc-prescrip');
+          const doctors = db.collection('doctors');
+
+          // Find doctor by email
+          const doctor = await doctors.findOne({ email: credentials.email });
+          
+          if (!doctor) {
+            return null;
+          }
+
+          // Check if doctor has a password (for email/password login)
+          if (!doctor.passwordHash) {
+            return null;
+          }
+
+          // Verify password
+          const isValidPassword = await bcrypt.compare(credentials.password, doctor.passwordHash);
+          
+          if (!isValidPassword) {
+            return null;
+          }
+
+          // Return user object
+          return {
+            id: doctor.doctorId || doctor._id.toString(),
+            email: doctor.email,
+            name: doctor.name,
+            image: doctor.image,
+            doctorId: doctor.doctorId,
+            firstName: doctor.firstName,
+            lastName: doctor.lastName,
+          };
+        } catch (error) {
+          console.error("Credentials authorize error:", error);
+          return null;
+        }
+      }
     })
   ],
 
   callbacks: {
-    signIn: async ({ user, account }) => {
-      console.log("SIGNIN callback called:", { user, account })
+    signIn: async ({ user, account, profile }) => {
+      console.log("SIGNIN callback called:", { user, account, provider: account?.provider });
 
-      if (account.provider === 'google') {
-        try {
-          const client = await clientPromise
-          console.log("Connected to MongoDB")
+      try {
+        const client = await clientPromise;
+        const db = client.db('doc-prescrip');
+        const doctors = db.collection('doctors');
 
-          const db = client.db('doc-prescrip')
-          const doctors = db.collection('doctors')
+        const existingDoctor = await doctors.findOne({ email: user.email });
 
-          const existingDoctor = await doctors.findOne({ email: user.email })
+        if (existingDoctor) {
+          console.log("Existing doctor found:", existingDoctor.email);
 
-          if (existingDoctor) {
-            console.log("Existing doctor:", existingDoctor.email)
+          // Update doctor with provider information
+          const updateData = {
+            name: user.name || existingDoctor.name,
+            firstName: user.name?.split(' ')[0] || existingDoctor.firstName,
+            lastName: user.name?.split(' ').slice(1).join(' ') || existingDoctor.lastName,
+            image: user.image || existingDoctor.image,
+            updatedAt: new Date()
+          };
 
-            if (!existingDoctor.googleId) {
-              await doctors.updateOne(
-                { email: user.email },
-                {
-                  $set: {
-                    googleId: user.id,
-                    isGoogleUser: true,
-                    image: user.image || existingDoctor.image,
-                    updatedAt: new Date()
-                  }
-                }
-              )
-            }
-            return true
-          } else {
-            console.log("New doctor, creating profile")
-
-            await doctors.insertOne({
-              email: user.email,
-              name: user.name,
-              firstName: user.name?.split(' ')[0] || '',
-              lastName: user.name?.split(' ').slice(1).join(' ') || '',
-              image: user.image,
-              googleId: user.id,
-              isGoogleUser: true,
-              emailVerified: true,
-              isActive: false,
-              profileComplete: false,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            })
-
-            return true
+          // If this is a Google sign-in, add Google-specific data
+          if (account?.provider === 'google') {
+            updateData.googleId = user.id;
+            updateData.isGoogleUser = true;
           }
 
-        } catch (error) {
-          console.error("SIGNIN error:", error)
-          return false
-        }
-      }
+          await doctors.updateOne(
+            { email: user.email },
+            { $set: updateData }
+          );
 
-      return true
+          return true;
+        } else {
+          console.log("New doctor, creating profile");
+
+          // Create new doctor profile
+          const newDoctor = {
+            email: user.email,
+            name: user.name,
+            firstName: user.name?.split(' ')[0] || '',
+            lastName: user.name?.split(' ').slice(1).join(' ') || '',
+            image: user.image,
+            emailVerified: true,
+            isActive: false,
+            profileComplete: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+
+          // Add provider-specific data
+          if (account?.provider === 'google') {
+            newDoctor.googleId = user.id;
+            newDoctor.isGoogleUser = true;
+          }
+
+          // Generate doctorId if not present
+          if (!newDoctor.doctorId) {
+            const firstName = newDoctor.firstName || 'Doctor';
+            const lastName = newDoctor.lastName || 'User';
+            const hospitalName = 'Clinic';
+            
+            // Generate unique doctor ID
+            let doctorId = `${firstName.toLowerCase().replace(/[^a-z]/g, '')}_${lastName.toLowerCase().replace(/[^a-z]/g, '')}_${hospitalName.toLowerCase().replace(/[^a-z]/g, '')}`;
+            
+            // Ensure uniqueness
+            let counter = 1;
+            let uniqueDoctorId = doctorId;
+            while (await doctors.findOne({ doctorId: uniqueDoctorId })) {
+              uniqueDoctorId = `${doctorId}_${counter}`;
+              counter++;
+            }
+            
+            newDoctor.doctorId = uniqueDoctorId;
+          }
+
+          await doctors.insertOne(newDoctor);
+          return true;
+        }
+      } catch (error) {
+        console.error("SIGNIN error:", error);
+        return false;
+      }
     },
 
     async jwt({ token, account, user }) {
@@ -114,8 +200,8 @@ const handler = NextAuth({
           doctor = { ...newDoctor, _id: result.insertedId };
         }
 
-        // Update Google ID if it's missing
-        if (doctor && !doctor.googleId && account?.providerAccountId) {
+        // Update Google ID if it's missing and this is a Google sign-in
+        if (doctor && !doctor.googleId && account?.providerAccountId && account?.provider === 'google') {
           await doctors.updateOne(
             { email },
             {
@@ -126,6 +212,9 @@ const handler = NextAuth({
               }
             }
           );
+          // Update the doctor object for the rest of the function
+          doctor.googleId = account.providerAccountId;
+          doctor.isGoogleUser = true;
         }
 
         const hasRequiredFields = !!(

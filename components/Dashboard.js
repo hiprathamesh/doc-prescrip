@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import PatientList from './PatientList';
 import PatientDetails from './PatientDetails';
 import NewPrescription from './NewPrescription';
@@ -38,11 +39,11 @@ import { activityLogger, ACTIVITY_ICONS, ACTIVITY_COLORS } from '../utils/activi
 import useScrollToTop from '../hooks/useScrollToTop';
 import DarkModeToggle from './DarkModeToggle';
 import { logout } from '../utils/auth';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import DocPill from './icons/DocPill';
 
 export default function Dashboard() {
+  const { data: session } = useSession();
   const [patients, setPatients] = useState([]);
   const [prescriptions, setPrescriptions] = useState([]);
   const [bills, setBills] = useState([]);
@@ -311,27 +312,34 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     try {
-      await logout();
-
       // Clear doctor context first
       storage.clearDoctorContext();
       
-      const response = await fetch('/api/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        // Force a full page reload to ensure middleware takes effect and cookies are cleared
-        window.location.replace('/login');
+      // If user has NextAuth session, use NextAuth signOut
+      if (session) {
+        await signOut({ redirect: false });
+        // Then manually redirect after a brief delay
+        setTimeout(() => {
+          window.location.replace('/login');
+        }, 100);
       } else {
-        console.error('Logout failed');
-        // Fallback: clear cookies manually and redirect
-        document.cookie = 'doctor-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'pin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        window.location.replace('/login');
+        // For custom JWT auth, call logout API then redirect
+        const response = await fetch('/api/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          window.location.replace('/login');
+        } else {
+          console.error('Logout failed');
+          // Fallback: clear cookies manually and redirect
+          document.cookie = 'doctor-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          document.cookie = 'pin-auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          window.location.replace('/login');
+        }
       }
     } catch (error) {
       console.error('Logout error:', error);

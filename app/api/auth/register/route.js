@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import clientPromise from '../../../../lib/mongodb';
 import { Redis } from '@upstash/redis';
 
 const redis = new Redis({
@@ -34,6 +35,12 @@ async function incrementRegisterAttempts(key) {
 async function resetRegisterAttempts(key, lockKey) {
   await redis.del(key);
   await redis.del(lockKey);
+}
+
+// Generate unique doctor ID
+function generateDoctorId(firstName, lastName, hospitalName) {
+  const baseId = `${firstName.toLowerCase().replace(/[^a-z]/g, '')}_${lastName.toLowerCase().replace(/[^a-z]/g, '')}_${hospitalName.toLowerCase().replace(/[^a-z]/g, '')}`;
+  return baseId;
 }
 
 export async function POST(request) {
@@ -93,8 +100,12 @@ export async function POST(request) {
 
     const { doctorService } = await import('../../../../services/doctorService');
 
+    const client = await clientPromise;
+    const db = client.db('doc-prescrip');
+    const doctors = db.collection('doctors');
+
     // Check if email already exists
-    const emailExists = await doctorService.checkEmailExists(email);
+    const emailExists = await doctors.findOne({ email });
     if (emailExists) {
       return NextResponse.json(
         { success: false, error: 'An account with this email already exists' },
@@ -103,7 +114,7 @@ export async function POST(request) {
     }
 
     // Check if phone already exists
-    const phoneExists = await doctorService.checkPhoneExists(phone);
+    const phoneExists = await doctors.findOne({ phone });
     if (phoneExists) {
       return NextResponse.json(
         { success: false, error: 'An account with this phone number already exists' },
@@ -128,8 +139,16 @@ export async function POST(request) {
       expiryDate = null;
     }
 
-    // Generate unique doctor ID using firstName and lastName
-    const doctorId = doctorService.generateDoctorId(firstName, lastName, hospitalName);
+    // Generate unique doctor ID
+    let doctorId = generateDoctorId(firstName, lastName, hospitalName);
+    
+    // Ensure uniqueness
+    let counter = 1;
+    let uniqueDoctorId = doctorId;
+    while (await doctors.findOne({ doctorId: uniqueDoctorId })) {
+      uniqueDoctorId = `${doctorId}_${counter}`;
+      counter++;
+    }
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
@@ -137,10 +156,10 @@ export async function POST(request) {
 
     // Create doctor object
     const newDoctor = {
-      doctorId,
+      doctorId: uniqueDoctorId,
       firstName,
       lastName,
-      name: `${firstName} ${lastName}`, // Combined full name
+      name: `${firstName} ${lastName}`,
       email,
       passwordHash,
       hospitalName,
@@ -150,8 +169,11 @@ export async function POST(request) {
       phone,
       accessType,
       expiryDate,
+      emailVerified: false, // Will be verified through NextAuth
+      isActive: true,
+      profileComplete: true,
       createdAt: new Date(),
-      isActive: true
+      updatedAt: new Date()
     };
 
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
@@ -166,9 +188,9 @@ export async function POST(request) {
     }
 
     // Save doctor
-    const success = await doctorService.createDoctor(newDoctor);
+    const result = await doctors.insertOne(newDoctor);
 
-    if (success) {
+    if (result.insertedId) {
       await resetRegisterAttempts(rate.key, rate.lockKey);
       // If access key was used, mark it as used
       if (accessKey && accessKey.trim()) {
@@ -177,7 +199,7 @@ export async function POST(request) {
 
       return NextResponse.json({
         success: true,
-        message: 'Doctor registered successfully',
+        message: 'Doctor registered successfully. Please sign in with your credentials.',
         doctor: {
           doctorId: newDoctor.doctorId,
           firstName: newDoctor.firstName,

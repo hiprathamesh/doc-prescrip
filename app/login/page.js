@@ -15,7 +15,7 @@ import PlaceholderImageWithLogo from '../../components/PlaceholderImageWithLogo'
 import DocPill from '../../components/icons/DocPill';
 
 export default function LoginPage() {
-  const [currentStep, setCurrentStep] = useState('login'); // 'login', 'register', 'otp'
+  const [currentStep, setCurrentStep] = useState('login'); // 'login', 'register'
   const [isVisible, setIsVisible] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
@@ -47,7 +47,7 @@ export default function LoginPage() {
     isLoading: false
   });
 
-  // OTP state
+  // OTP state - keeping for potential future use but not currently used
   const [otpData, setOtpData] = useState({
     emailOtp: ['', '', '', '', '', ''], // Changed to array for 6 digits
     isLoading: false,
@@ -93,7 +93,7 @@ export default function LoginPage() {
     };
   }, []);
 
-  // Countdown timer for OTP resend
+  // Countdown timer for OTP resend - keeping for potential future use
   useEffect(() => {
     let interval;
     if (otpData.countdown > 0) {
@@ -110,7 +110,7 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [otpData.countdown]);
 
-  // Auto-focus first OTP input when OTP step is reached
+  // Auto-focus first OTP input when OTP step is reached - keeping for potential future use
   useEffect(() => {
     if (currentStep === 'otp') {
       const timer = setTimeout(() => {
@@ -151,38 +151,22 @@ export default function LoginPage() {
     setLoginData(prev => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await fetch(getApiUrl('/api/auth/login'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: loginData.email,
-          password: loginData.password
-        })
+      // Use NextAuth signIn for credentials
+      const result = await signIn('credentials', {
+        email: loginData.email,
+        password: loginData.password,
+        redirect: false,
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        storage.setCurrentDoctor(data.doctor.doctorId, {
-          name: data.doctor.name,
-          lastName: data.doctor.lastName,
-          accessType: data.doctor.accessType,
-          phone: data.doctor.phone || '',
-          degree: data.doctor.degree || '',
-          registrationNumber: data.doctor.registrationNumber || '',
-          hospitalName: data.doctor.hospitalName || '',
-          hospitalAddress: data.doctor.hospitalAddress || ''
-        });
-
-        toast.success('Login Successful', {
-          description: `Welcome back, ${data.doctor.name}!`
-        });
-
-        router.push('/');
-      } else {
+      if (result?.error) {
         toast.error('Login Failed', {
-          description: data.error || 'Invalid credentials'
+          description: 'Invalid email or password'
         });
+      } else if (result?.ok) {
+        toast.success('Login Successful', {
+          description: 'Welcome back!'
+        });
+        router.push('/');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -267,19 +251,19 @@ export default function LoginPage() {
     setRegData(prev => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await fetch(getApiUrl('/api/auth/send-otp'), {
+      const response = await fetch(getApiUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           firstName: regData.firstName,
           lastName: regData.lastName,
           email: regData.email,
-          phone: regData.phone,
           password: regData.password,
           hospitalName: regData.hospitalName,
           hospitalAddress: regData.hospitalAddress,
           degree: regData.degree,
           registrationNumber: regData.registrationNumber,
+          phone: regData.phone,
           accessKey: regData.accessKey
         }),
       });
@@ -287,24 +271,39 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        toast.success('OTP Sent', {
-          description: 'Verification codes have been sent to your email'
+        toast.success('Registration Successful', {
+          description: 'Account created successfully. Please sign in with your credentials.'
         });
 
-        setOtpData(prev => ({
-          ...prev,
-          countdown: 60,
-          canResend: false
-        }));
+        // Reset form and switch to login
+        setRegData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          hospitalName: '',
+          hospitalAddress: '',
+          degree: '',
+          registrationNumber: '',
+          phone: '',
+          accessKey: '',
+          showPassword: false,
+          showConfirmPassword: false,
+          isLoading: false
+        });
 
-        await handleModeSwitch('otp');
+        // Pre-fill login form with registered email
+        setLoginData(prev => ({ ...prev, email: regData.email }));
+        
+        await handleModeSwitch('login');
       } else {
-        toast.error('Failed to Send OTP', {
-          description: data.error || 'Failed to send verification codes'
+        toast.error('Registration Failed', {
+          description: data.error || 'Failed to create account'
         });
       }
     } catch (error) {
-      console.error('OTP send error:', error);
+      console.error('Registration error:', error);
       toast.error('Error', {
         description: 'Network error. Please try again.'
       });

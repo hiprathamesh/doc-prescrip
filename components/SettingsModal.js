@@ -1,11 +1,35 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Settings as SettingsIcon, Shield, User, Bell, Palette, Database, Download, Upload, Trash2, Save, FileText, DollarSign, Clock, Users, Stethoscope, Image, AlertCircle } from 'lucide-react';
+import {
+	X,
+	Settings as SettingsIcon,
+	Shield,
+	User,
+	Bell,
+	Palette,
+	Database,
+	Download,
+	Upload,
+	Trash2,
+	Save,
+	FileText,
+	DollarSign,
+	Clock,
+	Users,
+	Stethoscope,
+	Image,
+	AlertCircle,
+	Link,
+	ExternalLink,
+	Chrome,
+	CheckCircle,
+} from 'lucide-react';
 import { storage } from '../utils/storage';
 import { toast } from 'sonner';
 import FluidToggle from './FluidToggle';
 import CustomDropdown from './CustomDropdown';
+import { useSession, signIn } from 'next-auth/react';
 
 const SETTINGS_SECTIONS = [
 	{
@@ -57,6 +81,12 @@ const SETTINGS_SECTIONS = [
 		description: 'Theme and display settings',
 	},
 	{
+		id: 'google-integration',
+		label: 'Google Integration',
+		icon: Link,
+		description: 'Google account and Drive integration',
+	},
+	{
 		id: 'data',
 		label: 'Data Management',
 		icon: Database,
@@ -65,6 +95,7 @@ const SETTINGS_SECTIONS = [
 ];
 
 export default function SettingsModal({ isOpen, onClose }) {
+	const { data: session } = useSession();
 	const [activeSection, setActiveSection] = useState('profile');
 	const [settings, setSettings] = useState({
 		profile: {
@@ -155,6 +186,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 		logoData: null,
 		isLoading: true
 	});
+	const [googleLinking, setGoogleLinking] = useState({
+		isLinking: false,
+		isUnlinking: false
+	});
 
 	useEffect(() => {
 		if (isOpen) {
@@ -244,25 +279,25 @@ export default function SettingsModal({ isOpen, onClose }) {
 
 		const sidebarContainer = sidebarRef.current;
 		const activeSectionButton = sidebarContainer.querySelector(`[data-section="${sectionId}"]`);
-		
+
 		if (!activeSectionButton) return;
 
 		const containerRect = sidebarContainer.getBoundingClientRect();
 		const buttonRect = activeSectionButton.getBoundingClientRect();
-		
+
 		// Calculate if the button is out of view
 		const isAboveView = buttonRect.top < containerRect.top;
 		const isBelowView = buttonRect.bottom > containerRect.bottom;
-		
+
 		if (isAboveView || isBelowView) {
 			// Calculate scroll position to center the button in the container
 			const containerHeight = containerRect.height;
 			const buttonHeight = buttonRect.height;
 			const buttonOffsetTop = activeSectionButton.offsetTop;
-			
+
 			// Center the button in the visible area
 			const targetScrollTop = buttonOffsetTop - (containerHeight / 2) + (buttonHeight / 2);
-			
+
 			sidebarContainer.scrollTo({
 				top: Math.max(0, targetScrollTop),
 				behavior: 'smooth'
@@ -295,15 +330,15 @@ export default function SettingsModal({ isOpen, onClose }) {
 		try {
 			setHospitalLogo(prev => ({ ...prev, isLoading: true }));
 			const currentDoctor = storage.getDoctorContext();
-			
+
 			if (currentDoctor?.id || currentDoctor?.doctorId) {
 				// Use either id or doctorId property
 				const doctorId = currentDoctor.id || currentDoctor.doctorId;
 				const logoData = await storage.getHospitalLogo(doctorId);
-				setHospitalLogo(prev => ({ 
-					...prev, 
+				setHospitalLogo(prev => ({
+					...prev,
 					logoData: logoData,
-					isLoading: false 
+					isLoading: false
 				}));
 			} else {
 				console.warn('No valid doctor ID found in context:', currentDoctor);
@@ -397,13 +432,13 @@ export default function SettingsModal({ isOpen, onClose }) {
 		try {
 			const currentDoctor = storage.getDoctorContext();
 			const doctorId = currentDoctor?.id || currentDoctor?.doctorId;
-			
+
 			if (!doctorId) {
 				throw new Error('Doctor context not found. Please log in again.');
 			}
 
 			const result = await storage.uploadHospitalLogo(file, doctorId);
-			
+
 			if (result.success) {
 				toast.success('Logo Uploaded', {
 					description: 'Hospital logo has been uploaded successfully.'
@@ -433,13 +468,13 @@ export default function SettingsModal({ isOpen, onClose }) {
 					try {
 						const currentDoctor = storage.getDoctorContext();
 						const doctorId = currentDoctor?.id || currentDoctor?.doctorId;
-						
+
 						if (!doctorId) {
 							throw new Error('Doctor context not found. Please log in again.');
 						}
 
 						const success = await storage.deleteHospitalLogo(doctorId);
-						
+
 						if (success) {
 							toast.success('Logo Deleted', {
 								description: 'Hospital logo has been removed.'
@@ -458,7 +493,70 @@ export default function SettingsModal({ isOpen, onClose }) {
 			},
 			cancel: {
 				label: 'Cancel',
-				onClick: () => {}
+				onClick: () => { }
+			}
+		});
+	};
+
+	const handleGoogleLinking = async () => {
+		setGoogleLinking(prev => ({ ...prev, isLinking: true }));
+
+		try {
+			// Use NextAuth to initiate Google OAuth
+			await signIn('google', {
+				callbackUrl: window.location.href, // Stay on current page after linking
+				redirect: false
+			});
+		} catch (error) {
+			console.error('Google linking error:', error);
+			toast.error('Connection Failed', {
+				description: 'Failed to connect Google account. Please try again.'
+			});
+		} finally {
+			setGoogleLinking(prev => ({ ...prev, isLinking: false }));
+		}
+	};
+
+	const handleGoogleUnlinking = async () => {
+		toast('Confirm Disconnect', {
+			description: 'Are you sure you want to disconnect your Google account? You will lose access to Google Drive sharing features.',
+			action: {
+				label: 'Disconnect',
+				onClick: async () => {
+					setGoogleLinking(prev => ({ ...prev, isUnlinking: true }));
+
+					try {
+						const response = await fetch('/api/auth/unlink-google', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' }
+						});
+
+						const data = await response.json();
+
+						if (data.success) {
+							toast.success('Account Disconnected', {
+								description: 'Google account has been disconnected successfully'
+							});
+							// Refresh the page to update the session
+							setTimeout(() => {
+								window.location.reload();
+							}, 1000);
+						} else {
+							throw new Error(data.error || 'Failed to disconnect Google account');
+						}
+					} catch (error) {
+						console.error('Google unlinking error:', error);
+						toast.error('Disconnect Failed', {
+							description: error.message || 'Failed to disconnect Google account. Please try again.'
+						});
+					} finally {
+						setGoogleLinking(prev => ({ ...prev, isUnlinking: false }));
+					}
+				}
+			},
+			cancel: {
+				label: 'Cancel',
+				onClick: () => { }
 			}
 		});
 	};
@@ -497,9 +595,9 @@ export default function SettingsModal({ isOpen, onClose }) {
 										) : hospitalLogo.logoData ? (
 											<div className="space-y-3">
 												<div className="flex items-center space-x-3">
-													<img 
-														src={hospitalLogo.logoData.base64} 
-														alt="Hospital Logo" 
+													<img
+														src={hospitalLogo.logoData.base64}
+														alt="Hospital Logo"
 														className="w-16 h-16 object-contain border border-blue-200 dark:border-blue-700 rounded bg-white dark:bg-gray-800"
 													/>
 													<div className="flex-1">
@@ -546,9 +644,8 @@ export default function SettingsModal({ isOpen, onClose }) {
 													</p>
 													<label
 														htmlFor="logo-upload"
-														className={`bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer inline-block ${
-															hospitalLogo.isUploading ? 'opacity-50 cursor-not-allowed' : ''
-														}`}
+														className={`bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer inline-block ${hospitalLogo.isUploading ? 'opacity-50 cursor-not-allowed' : ''
+															}`}
 													>
 														{hospitalLogo.isUploading ? 'Uploading...' : 'Upload Logo'}
 													</label>
@@ -1360,6 +1457,179 @@ export default function SettingsModal({ isOpen, onClose }) {
 					</div>
 				);
 
+			case 'google-integration':
+				return (
+					<div>
+						<div className="flex items-center space-x-3 mb-6">
+							<h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+								Google Integration
+							</h3>
+						</div>
+
+						<div className="space-y-6">
+							{/* Google Account Status */}
+							<div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+								<h4 className="text-md font-medium text-gray-900 dark:text-gray-100 mb-3">
+									Account Status
+								</h4>
+
+								<div className="space-y-3">
+									<div className="flex items-center justify-between">
+										<div className="flex items-center space-x-3">
+											<Chrome className="w-5 h-5 text-gray-400" />
+											<div>
+												<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+													Google Account
+												</span>
+												{session?.user?.email && (
+													<p className="text-xs text-gray-500 dark:text-gray-400">
+														{session.user.email}
+													</p>
+												)}
+											</div>
+										</div>
+										<div className="flex items-center space-x-2">
+											{session?.user?.googleId ? (
+												<>
+													<CheckCircle className="w-4 h-4 text-green-600" />
+													<span className="text-sm text-green-600 font-medium">Connected</span>
+												</>
+											) : (
+												<>
+													<AlertCircle className="w-4 h-4 text-amber-600" />
+													<span className="text-sm text-amber-600 font-medium">Not Connected</span>
+												</>
+											)}
+										</div>
+									</div>
+
+									<div className="flex items-center justify-between">
+										<div className="flex items-center space-x-3">
+											<CheckCircle className="w-5 h-5 text-gray-400" />
+											<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+												Google Drive Access
+											</span>
+										</div>
+										<div className="flex items-center space-x-2">
+											{session?.user?.googleId ? (
+												<>
+													<CheckCircle className="w-4 h-4 text-green-600" />
+													<span className="text-sm text-green-600 font-medium">Available</span>
+												</>
+											) : (
+												<>
+													<AlertCircle className="w-4 h-4 text-gray-400" />
+													<span className="text-sm text-gray-400 font-medium">Unavailable</span>
+												</>
+											)}
+										</div>
+									</div>
+								</div>
+							</div>
+
+							{/* Google Drive Benefits */}
+							<div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+								<h4 className="text-md font-medium text-blue-900 dark:text-blue-100 mb-3 flex items-center">
+									<CheckCircle className="w-4 h-4 mr-2" />
+									Google Drive Benefits
+								</h4>
+								<ul className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+									<li className="flex items-start space-x-2">
+										<CheckCircle className="w-4 h-4 mt-0.5 text-blue-600" />
+										<span>Share prescriptions and bills directly via WhatsApp with secure Google Drive links</span>
+									</li>
+									<li className="flex items-start space-x-2">
+										<CheckCircle className="w-4 h-4 mt-0.5 text-blue-600" />
+										<span>Automatic cloud backup of all generated PDFs</span>
+									</li>
+									<li className="flex items-start space-x-2">
+										<CheckCircle className="w-4 h-4 mt-0.5 text-blue-600" />
+										<span>Patients can easily access their documents anytime</span>
+									</li>
+									<li className="flex items-start space-x-2">
+										<CheckCircle className="w-4 h-4 mt-0.5 text-blue-600" />
+										<span>Professional document sharing with branded links</span>
+									</li>
+								</ul>
+							</div>
+
+							{/* Action Buttons */}
+							<div className="space-y-4">
+								{!session?.user?.googleId ? (
+									<div>
+										<button
+											onClick={handleGoogleLinking}
+											disabled={googleLinking.isLinking}
+											className="w-full flex items-center justify-center space-x-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 px-4 rounded-lg font-medium transition-colors cursor-pointer"
+										>
+											{googleLinking.isLinking ? (
+												<>
+													<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+													<span>Connecting...</span>
+												</>
+											) : (
+												<>
+													<Chrome className="w-5 h-5" />
+													<span>Connect Google Account</span>
+													<ExternalLink className="w-4 h-4" />
+												</>
+											)}
+										</button>
+										<p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+											You'll be redirected to Google to authorize access to your Drive
+										</p>
+									</div>
+								) : (
+									<div className="space-y-3">
+										<div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+											<div className="flex items-center space-x-2 mb-2">
+												<CheckCircle className="w-5 h-5 text-green-600" />
+												<span className="font-medium text-green-800 dark:text-green-200">
+													Google Account Connected
+												</span>
+											</div>
+											<p className="text-sm text-green-700 dark:text-green-300">
+												You can now share prescriptions and bills directly to patients through Google Drive links.
+											</p>
+										</div>
+
+										<button
+											onClick={handleGoogleUnlinking}
+											disabled={googleLinking.isUnlinking}
+											className="w-full flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white py-2 px-4 rounded-lg font-medium transition-colors cursor-pointer"
+										>
+											{googleLinking.isUnlinking ? (
+												<>
+													<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+													<span>Disconnecting...</span>
+												</>
+											) : (
+												<span>Disconnect Google Account</span>
+											)}
+										</button>
+									</div>
+								)}
+							</div>
+
+							{/* Usage Instructions */}
+							{session?.user?.googleId && (
+								<div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+									<h4 className="text-md font-medium text-gray-900 dark:text-gray-100 mb-3">
+										How to Share Documents
+									</h4>
+									<div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+										<p>1. Generate a prescription or bill for any patient</p>
+										<p>2. Click the "Share" button next to the PDF</p>
+										<p>3. The document will be uploaded to your Google Drive</p>
+										<p>4. A WhatsApp message with the Drive link will open automatically</p>
+										<p>5. Send the message to your patient's WhatsApp number</p>
+									</div>
+								</div>
+							)}
+						</div>
+					</div>
+				);
+
 			case 'data':
 				return (
 					<div className="space-y-6">
@@ -1513,19 +1783,17 @@ export default function SettingsModal({ isOpen, onClose }) {
 										key={section.id}
 										data-section={section.id}
 										onClick={() => handleSectionClick(section.id)}
-										className={`w-full text-left p-2.5 rounded-lg transition-colors duration-200 cursor-pointer ${
-											isActive
+										className={`w-full text-left p-2.5 rounded-lg transition-colors duration-200 cursor-pointer ${isActive
 												? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
 												: 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-										}`}
+											}`}
 									>
 										<div className="flex items-center space-x-2.5">
 											<IconComponent
-												className={`w-4 h-4 ${
-													isActive
+												className={`w-4 h-4 ${isActive
 														? 'text-blue-600 dark:text-blue-400'
 														: 'text-gray-500 dark:text-gray-400'
-												}`}
+													}`}
 											/>
 											<div>
 												<div className="font-medium text-sm">{section.label}</div>
