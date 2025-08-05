@@ -35,6 +35,10 @@ export default function TitleManager() {
         case '/terms':
           pageTitle = 'Terms of Service';
           break;
+        case '/404':
+        case '/not-found':
+          pageTitle = 'Page Not Found';
+          break;
         default:
           // For dynamic routes or other pages, extract from pathname
           if (pathname.includes('/patient/')) {
@@ -45,7 +49,7 @@ export default function TitleManager() {
             pageTitle = 'Templates';
           } else if (pathname.includes('/settings')) {
             pageTitle = 'Settings';
-          }
+          } else pageTitle = 'Page Not Found';
           break;
       }
 
