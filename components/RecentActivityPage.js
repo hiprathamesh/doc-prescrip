@@ -434,7 +434,19 @@ export default function RecentActivityPage({ onBack }) {
               </>
             ) : (
               <div className="text-center py-12">
-                <Activity className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                {/* Empty State Image */}
+                <div className="w-35 h-50 mx-auto mb-6 relative overflow-hidden">
+                  <picture className="w-full h-full">
+                    <source srcSet="/recentActivityEmptyState.avif" type="image/avif" />
+                    <source srcSet="/recentActivityEmptyState.webp" type="image/webp" />
+                    <img
+                      src="/recentActivityEmptyState.png"
+                      alt="No recent activity"
+                      className="w-full h-full object-cover"
+                      draggable="false"
+                    />
+                  </picture>
+                </div>
                 <p className="text-gray-600 dark:text-gray-400">
                   {searchTerm ? `No activities found matching "${searchTerm}"` : 'No activities recorded yet'}
                 </p>

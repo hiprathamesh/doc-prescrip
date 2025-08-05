@@ -1090,8 +1090,20 @@ export default function Dashboard() {
                         );
                       })
                     ) : (
-                      <div className="text-center py-8">
-                        <Activity className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+                      <div className="text-center py-0">
+                        {/* Empty State Image */}
+                        <div className="w-25 h-25 mx-auto mb-6 relative overflow-hidden">
+                          <picture className="w-full h-full">
+                            <source srcSet="/recentSectionEmptyState.avif" type="image/avif" />
+                            <source srcSet="/recentSectionEmptyState.webp" type="image/webp" />
+                            <img
+                              src="/recentSectionEmptyState.png"
+                              alt="No recent activity"
+                              className="w-full h-full object-cover"
+                              draggable="false"
+                            />
+                          </picture>
+                        </div>
                         <p className="text-gray-500 dark:text-gray-400">No recent activity</p>
                         <p className="text-sm text-gray-400 dark:text-gray-500">Your activities will appear here</p>
                       </div>
