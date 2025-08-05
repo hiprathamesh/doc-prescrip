@@ -1092,7 +1092,7 @@ export default function Dashboard() {
                     ) : (
                       <div className="text-center py-0">
                         {/* Empty State Image */}
-                        <div className="w-25 h-25 mx-auto mb-6 relative overflow-hidden">
+                        <div className="w-23 h-25 mx-auto mb-6 relative overflow-hidden">
                           <picture className="w-full h-full">
                             <source srcSet="/recentSectionEmptyState.avif" type="image/avif" />
                             <source srcSet="/recentSectionEmptyState.webp" type="image/webp" />

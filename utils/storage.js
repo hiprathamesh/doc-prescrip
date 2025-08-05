@@ -834,6 +834,24 @@ class Storage {
         throw new Error('Valid doctor ID is required for logo deletion');
       }
 
+      // For client-side requests, use the API endpoint
+      if (typeof window !== 'undefined') {
+        const response = await fetch('/api/hospital-logo', {
+          method: 'DELETE',
+          headers: {
+            'X-Doctor-ID': doctorId,
+          },
+        });
+        
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to delete logo');
+        }
+        
+        return true;
+      }
+
+      // Server-side direct database access
       // Ensure databaseService is initialized
       if (!this.databaseService) {
         await this.initializeDatabaseService();
