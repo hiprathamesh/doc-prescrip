@@ -143,7 +143,10 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
       message: `Are you sure you want to delete patient ${patient.name}? This will permanently remove all their data including prescriptions and bills.`,
       isLoading: false,
       onConfirm: () => handleConfirmDelete(patient.id),
-      patientToDelete: patient
+      patientToDelete: patient,
+      requireConfirmation: true,
+      confirmationText: patient.name,
+      confirmationPlaceholder: 'Enter patient name to confirm'
     });
     setDropdownOpen(null);
   };
@@ -791,6 +794,9 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
         onConfirm={confirmDialog.onConfirm}
         onCancel={handleCancelDelete}
         isLoading={confirmDialog.isLoading}
+        requireConfirmation={confirmDialog.requireConfirmation}
+        confirmationText={confirmDialog.confirmationText}
+        confirmationPlaceholder={confirmDialog.confirmationPlaceholder}
       />
     </>
   );

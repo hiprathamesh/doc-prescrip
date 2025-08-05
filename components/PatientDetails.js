@@ -342,7 +342,8 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       title,
       message,
       isLoading: false,
-      onConfirm: () => handleDeleteConfirm(visitId, billId, visitType)
+      onConfirm: () => handleDeleteConfirm(visitId, billId, visitType),
+      requireConfirmation: false // Visit deletion doesn't require name confirmation
     });
   };
 
@@ -1010,6 +1011,9 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         onConfirm={confirmDialog.onConfirm}
         onCancel={handleCancelDelete}
         isLoading={confirmDialog.isLoading}
+        requireConfirmation={confirmDialog.requireConfirmation}
+        confirmationText={confirmDialog.confirmationText}
+        confirmationPlaceholder={confirmDialog.confirmationPlaceholder}
       />
 
     </div>

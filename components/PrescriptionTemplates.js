@@ -737,6 +737,7 @@ export default function PrescriptionTemplates({ onBack }) {
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
         isLoading={deleteConfirmation.isDeleting}
+        requireConfirmation={false} // Template deletion doesn't require name confirmation
       />
     </>
   );
