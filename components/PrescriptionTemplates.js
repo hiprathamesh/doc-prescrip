@@ -13,6 +13,7 @@ import useScrollToTop from '../hooks/useScrollToTop';
 import CustomDropdown from './CustomDropdown';
 import ConfirmationDialog from './ConfirmationDialog';
 import { toast } from 'sonner';
+import usePageTitle from '../hooks/usePageTitle';
 
 // Loading skeleton component for templates list
 const TemplatesListSkeleton = () => (
@@ -72,6 +73,8 @@ const TemplatesListSkeleton = () => (
 );
 
 export default function PrescriptionTemplates({ onBack }) {
+  usePageTitle('Templates');
+
   const [templates, setTemplates] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentView, setCurrentView] = useState('list'); // 'list' | 'create' | 'edit'

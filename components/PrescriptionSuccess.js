@@ -10,9 +10,12 @@ import { formatDate, formatDateTime } from '../utils/dateUtils';
 import SharePDFButton from './SharePDFButton';
 import { toast } from 'sonner';
 import useScrollToTop from '../hooks/useScrollToTop';
+import usePageTitle from '../hooks/usePageTitle';
 import { activityLogger } from '../utils/activityLogger';
 
 export default function PrescriptionSuccess({ prescription, patient, bill, onBack }) {
+  usePageTitle('Prescription Created');
+  
   const [prescriptionPdfUrl, setPrescriptionPdfUrl] = useState(null);
   const [billPdfUrl, setBillPdfUrl] = useState(null);
   const [isGeneratingPrescriptionPdf, setIsGeneratingPrescriptionPdf] = useState(false);

@@ -17,8 +17,10 @@ import CustomDropdown from './CustomDropdown';
 import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
 import useScrollToTop from '../hooks/useScrollToTop';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function NewPrescription({ patient, patients, onBack, onPatientUpdate }) {
+  usePageTitle('New Prescription');
   console.log('[NewPrescription] Component rendering/re-rendering. Selected patient:', patient ? patient.id : 'none'); // TOP-LEVEL LOG
 
   const [selectedPatient, setSelectedPatient] = useState(patient);

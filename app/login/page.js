@@ -13,8 +13,11 @@ import { initializeTheme, initializeThemeSync, getInitialTheme } from '../../uti
 import DarkModeToggle from '../../components/DarkModeToggle';
 import PlaceholderImageWithLogo from '../../components/PlaceholderImageWithLogo';
 import DocPill from '../../components/icons/DocPill';
+import usePageTitle from '../../hooks/usePageTitle';
 
 export default function LoginPage() {
+  usePageTitle('Login');
+
   const [currentStep, setCurrentStep] = useState('login'); // 'login', 'register'
   const [isVisible, setIsVisible] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);

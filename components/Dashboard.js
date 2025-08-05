@@ -43,6 +43,7 @@ import DarkModeToggle from './DarkModeToggle';
 import { logout } from '../utils/auth';
 import { useRouter } from 'next/navigation';
 import DocPill from './icons/DocPill';
+import TitleUpdater from './TitleUpdater';
 
 export default function Dashboard() {
   const { data: session } = useSession();
@@ -109,7 +110,7 @@ export default function Dashboard() {
     try {
       setIsDataLoading(true);
       setIsStatsLoading(true);
-      
+
       // Load all data concurrently
       const [savedPatients, savedPrescriptions, savedBills] = await Promise.all([
         storage.getPatients(),
@@ -122,7 +123,7 @@ export default function Dashboard() {
       setBills(savedBills);
 
       calculateStats(savedPatients, savedPrescriptions, savedBills);
-      
+
       setIsDataLoading(false);
       setIsStatsLoading(false);
     } catch (error) {
@@ -148,7 +149,7 @@ export default function Dashboard() {
   const loadRecommendedSettings = async () => {
     try {
       setRecommendedSettings(prev => ({ ...prev, isLoading: true }));
-      
+
       const currentDoctor = storage.getDoctorContext();
       let needsLogo = false;
       let needsGoogleLink = false;
@@ -323,13 +324,13 @@ export default function Dashboard() {
     // Optimistically update patients state
     setPatients(updatedPatients);
     await storage.savePatients(updatedPatients);
-    
+
     // Recalculate stats without full reload
     const [currentPrescriptions, currentBills] = await Promise.all([
       storage.getPrescriptions(),
       storage.getBills()
     ]);
-    
+
     calculateStats(updatedPatients, currentPrescriptions, currentBills);
   };
 
@@ -364,7 +365,7 @@ export default function Dashboard() {
     try {
       // Clear doctor context first
       storage.clearDoctorContext();
-      
+
       // If user has NextAuth session, use NextAuth signOut
       if (session) {
         await signOut({ redirect: false });
@@ -1313,6 +1314,18 @@ export default function Dashboard() {
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
       />
+
+      {/* Title updater based on current view */}
+      <TitleUpdater title={
+        showSettingsModal ? 'Settings' :
+          currentView === 'dashboard' ? 'Dashboard' :
+            currentView === 'list' ? 'Patients' :
+              currentView === 'prescription' ? 'New Prescription' :
+                currentView === 'templates' ? 'Templates' :
+                  currentView === 'medical-certificate' ? 'Medical Certificate' :
+                    currentView === 'activity' ? 'Recent Activity' :
+                      currentView === 'medical-data' ? 'Data Manager' : "Dashboard"
+      } />
     </div>
   );
 }

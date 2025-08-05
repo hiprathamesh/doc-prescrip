@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
 import CustomDropdown from './CustomDropdown';
 import useScrollToTop from '../hooks/useScrollToTop';
+import usePageTitle from '../hooks/usePageTitle';
 
 // Loading skeleton for custom items
 const CustomItemsSkeleton = () => (
@@ -36,6 +37,8 @@ const PredefinedItemsSkeleton = () => (
 );
 
 export default function MedicalDataManager({ onBack }) {
+  usePageTitle('Data Manager');
+
   const [activeTab, setActiveTab] = useState('symptoms');
   const [customSymptoms, setCustomSymptoms] = useState([]);
   const [customDiagnoses, setCustomDiagnoses] = useState([]);

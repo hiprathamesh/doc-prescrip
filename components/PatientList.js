@@ -8,8 +8,11 @@ import ConfirmationDialog from './ConfirmationDialog';
 import useScrollToTop from '../hooks/useScrollToTop';
 import { storage } from '../utils/storage';
 import { toast } from 'sonner';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function PatientList({ patients, onPatientSelect, onNewPrescription, onPatientDelete, onBack }) {
+  usePageTitle('Patients');
+
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBy, setFilterBy] = useState('all');

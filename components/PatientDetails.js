@@ -9,6 +9,7 @@ import ConfirmationDialog from './ConfirmationDialog';
 import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
 import useScrollToTop from '../hooks/useScrollToTop';
+import usePageTitle from '../hooks/usePageTitle';
 
 // Loading skeleton component for medical history
 const MedicalHistorySkeleton = () => (
@@ -72,6 +73,8 @@ const VisitTimelineSkeleton = () => (
 );
 
 export default function PatientDetails({ patient, onBack, onNewPrescription }) {
+  usePageTitle(`${patient.name} Details`);
+
   const [visits, setVisits] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [showFloatingHeader, setShowFloatingHeader] = useState(false);

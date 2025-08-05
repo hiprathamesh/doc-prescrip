@@ -8,8 +8,11 @@ import SharePDFButton from './SharePDFButton';
 import { activityLogger } from '../utils/activityLogger';
 import { toast } from 'sonner';
 import useScrollToTop from '../hooks/useScrollToTop';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function MedicalCertificateSuccess({ certificate, patient, onBack }) {
+  usePageTitle('Certificate Created');
+
   const [certificatePdfUrl, setCertificatePdfUrl] = useState(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(true);
 

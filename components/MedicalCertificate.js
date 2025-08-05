@@ -11,8 +11,11 @@ import CustomDropdown from './CustomDropdown';
 import { activityLogger } from '../utils/activityLogger';
 import useScrollToTop from '../hooks/useScrollToTop';
 import { toast } from 'sonner';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function MedicalCertificate({ patient, patients, onBack, onPatientUpdate }) {
+  usePageTitle('Medical Certificate');
+
   const [selectedPatient, setSelectedPatient] = useState(patient);
   const [isNewPatient, setIsNewPatient] = useState(false);
   const [newPatientData, setNewPatientData] = useState({

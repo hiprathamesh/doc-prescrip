@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner"
 import ThemeScript from '../components/ThemeScript';
 import StoreDoctorId from '../components/StoreDoctorId';
 import AuthGuard from '../components/AuthGuard';
+import TitleManager from '../components/TitleManager';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,6 +26,7 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <SessionWrapper>
           <StoreDoctorId />
+          <TitleManager />
           <AuthGuard>
             {children}
           </AuthGuard>

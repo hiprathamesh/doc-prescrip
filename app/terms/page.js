@@ -2,8 +2,10 @@
 
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import usePageTitle from '../../hooks/usePageTitle';
 
 export default function TermsOfService() {
+  usePageTitle('Terms of Service');
   const router = useRouter();
 
   return (
