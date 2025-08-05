@@ -399,7 +399,11 @@ export default function MedicalCertificate({ patient, patients, onBack, onPatien
                         }
                       }}
                       placeholder="Select or search patient..."
-                      onAddNew={() => setIsNewPatient(true)}
+                      onAddNew={(patientName) => {
+                        setIsNewPatient(true);
+                        setSelectedPatient(null);
+                        setNewPatientData(prev => ({ ...prev, name: patientName }));
+                      }}
                     />
                   </div>
                   <button

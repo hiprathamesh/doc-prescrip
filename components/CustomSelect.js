@@ -83,8 +83,8 @@ export default function CustomSelect({ options, value, onChange, placeholder, on
             // Select first (most relevant) option
             handleSelect(filteredOptions[0].value);
           } else if (onAddNew && searchTerm.trim()) {
-            // No matches found, create new
-            onChange('new');
+            // No matches found, create new with search term
+            onAddNew(searchTerm.trim());
             setIsOpen(false);
             setSearchTerm('');
             setHighlightedIndex(-1);
@@ -203,7 +203,7 @@ export default function CustomSelect({ options, value, onChange, placeholder, on
             onAddNew ? (
               <div
                 onClick={() => {
-                  onChange('new');
+                  onAddNew(searchTerm.trim());
                   setIsOpen(false);
                   setSearchTerm('');
                   setHighlightedIndex(-1);

@@ -886,7 +886,11 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
                         }
                       }}
                       placeholder="Select or search patient..."
-                      onAddNew={() => setIsNewPatient(true)}
+                      onAddNew={(patientName) => {
+                        setIsNewPatient(true);
+                        setSelectedPatient(null);
+                        setNewPatientData(prev => ({ ...prev, name: patientName }));
+                      }}
                     />
                   </div>
                   <button
