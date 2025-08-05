@@ -31,7 +31,9 @@ import {
   Trash2,
   Download,
   Key,
-  Settings
+  Settings,
+  Image,
+  Link
 } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, formatTimeAgo } from '../utils/dateUtils';
@@ -65,12 +67,18 @@ export default function Dashboard() {
   const [isGreetingLoading, setIsGreetingLoading] = useState(true);
   const [isActivitiesLoading, setIsActivitiesLoading] = useState(true);
   const [maxRecentActivities, setMaxRecentActivities] = useState(3); // Default to 3
+  const [recommendedSettings, setRecommendedSettings] = useState({
+    needsLogo: false,
+    needsGoogleLink: false,
+    isLoading: true
+  });
 
   useEffect(() => {
     loadAllData();
     loadRecentActivities();
     loadDoctorContext();
     loadSettings(); // Load settings for activity preferences
+    loadRecommendedSettings(); // Load recommended settings status
 
     // Update greeting every minute to check for time period changes
     const greetingInterval = setInterval(() => {
@@ -136,6 +144,48 @@ export default function Dashboard() {
       setIsActivitiesLoading(false);
     }
   };
+
+  const loadRecommendedSettings = async () => {
+    try {
+      setRecommendedSettings(prev => ({ ...prev, isLoading: true }));
+      
+      const currentDoctor = storage.getDoctorContext();
+      let needsLogo = false;
+      let needsGoogleLink = false;
+
+      // Check if logo is uploaded
+      if (currentDoctor?.id || currentDoctor?.doctorId) {
+        const doctorId = currentDoctor.id || currentDoctor.doctorId;
+        const logoData = await storage.getHospitalLogo(doctorId);
+        needsLogo = !logoData;
+      } else {
+        needsLogo = true;
+      }
+
+      // Check if Google account is linked (this will be checked by the component that has access to session)
+      needsGoogleLink = !session?.user?.googleId;
+
+      setRecommendedSettings({
+        needsLogo,
+        needsGoogleLink,
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Error loading recommended settings:', error);
+      setRecommendedSettings({
+        needsLogo: true,
+        needsGoogleLink: true,
+        isLoading: false
+      });
+    }
+  };
+
+  // Update recommended settings when session changes
+  useEffect(() => {
+    if (session !== undefined) { // Only run when session is loaded (not undefined)
+      loadRecommendedSettings();
+    }
+  }, [session]);
 
   const loadSettings = async () => {
     try {
@@ -644,6 +694,15 @@ export default function Dashboard() {
     setShowSettingsModal(true);
   };
 
+  const handleRecommendedSettingClick = (settingId) => {
+    setShowSettingsModal(true);
+    // Use a timeout to ensure the modal is rendered before trying to navigate
+    setTimeout(() => {
+      const event = new CustomEvent('navigateToSetting', { detail: { settingId } });
+      window.dispatchEvent(event);
+    }, 150);
+  };
+
   return (
     <div className={`min-h-screen bg-white dark:bg-gray-900 ${showSettingsModal ? 'overflow-hidden' : ''}`}>
       {/* Minimal Header */}
@@ -1107,6 +1166,91 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                {/* Recommended Settings */}
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recommended Settings</h3>
+                    {!recommendedSettings.isLoading && (recommendedSettings.needsLogo || recommendedSettings.needsGoogleLink) && (
+                      <div className="flex items-center justify-center w-5 h-5 bg-blue-100 dark:bg-blue-900/20 rounded-full">
+                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                          {(recommendedSettings.needsLogo ? 1 : 0) + (recommendedSettings.needsGoogleLink ? 1 : 0)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {recommendedSettings.isLoading ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3 py-2 animate-pulse">
+                        <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                        <div className="flex-1 space-y-1">
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                        </div>
+                        <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      </div>
+                    </div>
+                  ) : (recommendedSettings.needsLogo || recommendedSettings.needsGoogleLink) ? (
+                    <div className="space-y-1">
+                      {recommendedSettings.needsLogo && (
+                        <button
+                          onClick={() => handleRecommendedSettingClick('profile')}
+                          className="w-full py-1 px-1 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-sm transition-colors duration-200 text-left cursor-pointer group first:pt-1 last:pb-1"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="p-1.5 bg-amber-600 dark:bg-amber-500 rounded">
+                              <Image className="w-3.5 h-3.5 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Upload Hospital Logo</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Add logo for your pdfs
+                              </p>
+                            </div>
+                            <div className="text-gray-400 dark:text-gray-500">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
+                          </div>
+                        </button>
+                      )}
+
+                      {recommendedSettings.needsLogo && recommendedSettings.needsGoogleLink && (
+                        <div className="border-t border-gray-100 dark:border-gray-700"></div>
+                      )}
+
+                      {recommendedSettings.needsGoogleLink && (
+                        <button
+                          onClick={() => handleRecommendedSettingClick('google-integration')}
+                          className="w-full py-1 px-1 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-sm transition-colors duration-200 text-left cursor-pointer group first:pt-1 last:pb-1"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="p-1.5 bg-blue-600 dark:bg-blue-500 rounded">
+                              <Link className="w-3.5 h-3.5 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Connect Google Account</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Enable sharing via Drive
+                              </p>
+                            </div>
+                            <div className="text-gray-400 dark:text-gray-500">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
+                          </div>
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-3">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No settings to recommend as of now</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

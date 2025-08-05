@@ -190,6 +190,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 		isLinking: false,
 		isUnlinking: false
 	});
+	const [rippleSection, setRippleSection] = useState(null);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -201,6 +202,17 @@ export default function SettingsModal({ isOpen, onClose }) {
 			document.body.style.top = `-${scrollY}px`;
 			document.body.style.width = '100%';
 			document.body.style.overflow = 'hidden';
+
+			// Listen for navigation events from recommended settings
+			const handleNavigateToSetting = (event) => {
+				const { settingId } = event.detail;
+				handleSectionClick(settingId);
+				// Add ripple effect
+				setRippleSection(settingId);
+				setTimeout(() => setRippleSection(null), 1500);
+			};
+
+			window.addEventListener('navigateToSetting', handleNavigateToSetting);
 
 			const observer = new IntersectionObserver(
 				(entries) => {
@@ -225,6 +237,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 			});
 
 			return () => {
+				window.removeEventListener('navigateToSetting', handleNavigateToSetting);
 				sections.forEach((section) => {
 					if (section) {
 						observer.unobserve(section);
@@ -1812,7 +1825,15 @@ export default function SettingsModal({ isOpen, onClose }) {
 					<div ref={contentRef} className="flex-1 p-6 overflow-y-auto scroll-smooth">
 						<div className="space-y-12">
 							{SETTINGS_SECTIONS.map((section) => (
-								<div key={section.id} id={section.id} className="settings-section pt-2">
+								<div 
+									key={section.id} 
+									id={section.id} 
+									className={`settings-section pt-2 relative transition-all duration-500 ease-out ${
+										rippleSection === section.id 
+											? 'highlight-section' 
+											: ''
+									}`}
+								>
 									{renderSectionContent(section.id)}
 								</div>
 							))}

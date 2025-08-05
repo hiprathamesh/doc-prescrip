@@ -394,3 +394,53 @@
   touch-action: none;
   -webkit-overflow-scrolling: touch;
 }
+
+/* Professional highlight effect for settings sections */
+@keyframes settingsHighlight {
+  0% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 rgb(59 130 246 / 0);
+  }
+  25% {
+    background-color: rgb(239 246 255 / 0.8);
+    box-shadow: 0 0 0 2px rgb(59 130 246 / 0.3);
+  }
+  75% {
+    background-color: rgb(239 246 255 / 0.8);
+    box-shadow: 0 0 0 2px rgb(59 130 246 / 0.3);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 rgb(59 130 246 / 0);
+  }
+}
+
+@keyframes settingsHighlightDark {
+  0% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 rgb(59 130 246 / 0);
+  }
+  25% {
+    background-color: rgb(59 130 246 / 0.15);
+    box-shadow: 0 0 0 2px rgb(59 130 246 / 0.4);
+  }
+  75% {
+    background-color: rgb(59 130 246 / 0.15);
+    box-shadow: 0 0 0 2px rgb(59 130 246 / 0.4);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 rgb(59 130 246 / 0);
+  }
+}
+
+.highlight-section {
+  animation: settingsHighlight 2s ease-out;
+  border-radius: 8px;
+  margin: -4px;
+  padding: 4px;
+}
+
+.dark .highlight-section {
+  animation: settingsHighlightDark 2s ease-out;
+}
