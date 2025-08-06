@@ -367,95 +367,106 @@ export default function RecentActivityPage({ onBack }) {
           </div>
 
           {/* Activity List */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Activity History
-              </h3>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                {filteredActivities.length} {filteredActivities.length === 1 ? 'activity' : 'activities'}
-                {searchTerm && ' found'}
+          {isLoading ? (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Activity History
+                </h3>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Loading...
+                </div>
+              </div>
+              <ActivitySkeleton />
+            </div>
+          ) : filteredActivities.length > 0 ? (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Activity History
+                </h3>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {filteredActivities.length} {filteredActivities.length === 1 ? 'activity' : 'activities'}
+                  {searchTerm && ' found'}
+                </div>
+              </div>
+              <div className="space-y-0">
+                <>
+                  <div className="space-y-0">
+                    {paginatedActivities.map((activity, index) => (
+                      <div key={activity.id}>
+                        <div className="flex items-center space-x-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer rounded-lg px-3 -mx-3">
+                          <div className={`p-2.5 rounded-lg ${getActivityColor(activity.type)}`}>
+                            {getActivityIcon(activity.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                              {activity.description}
+                            </p>
+                            <div className="flex items-center space-x-1.5 text-xs text-gray-500 dark:text-gray-400">
+                              <span>{formatTimeAgo(activity.timestamp)}</span>
+                              <span>•</span>
+                              <span>{formatDateTime(activity.timestamp)}</span>
+                              {activity.patientName && (
+                                <>
+                                  <span>•</span>
+                                  <span className="font-medium">{activity.patientName}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs text-gray-400 dark:text-gray-500">
+                              {formatDate(activity.timestamp)}
+                            </div>
+                          </div>
+                        </div>
+                        {index < paginatedActivities.length - 1 && (
+                          <div className="border-b border-gray-100 dark:border-gray-700"></div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                        showingStart={startIndex + 1}
+                        showingEnd={Math.min(endIndex, filteredActivities.length)}
+                        totalItems={filteredActivities.length}
+                      />
+                    </div>
+                  )}
+                </>
               </div>
             </div>
-
-            {isLoading ? (
-              <ActivitySkeleton />
-            ) : filteredActivities.length > 0 ? (
-              <>
-                <div className="space-y-0">
-                  {paginatedActivities.map((activity, index) => (
-                    <div key={activity.id}>
-                      <div className="flex items-center space-x-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer rounded-lg px-3 -mx-3">
-                        <div className={`p-2.5 rounded-lg ${getActivityColor(activity.type)}`}>
-                          {getActivityIcon(activity.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                            {activity.description}
-                          </p>
-                          <div className="flex items-center space-x-1.5 text-xs text-gray-500 dark:text-gray-400">
-                            <span>{formatTimeAgo(activity.timestamp)}</span>
-                            <span>•</span>
-                            <span>{formatDateTime(activity.timestamp)}</span>
-                            {activity.patientName && (
-                              <>
-                                <span>•</span>
-                                <span className="font-medium">{activity.patientName}</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xs text-gray-400 dark:text-gray-500">
-                            {formatDate(activity.timestamp)}
-                          </div>
-                        </div>
-                      </div>
-                      {index < paginatedActivities.length - 1 && (
-                        <div className="border-b border-gray-100 dark:border-gray-700"></div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={handlePageChange}
-                      showingStart={startIndex + 1}
-                      showingEnd={Math.min(endIndex, filteredActivities.length)}
-                      totalItems={filteredActivities.length}
-                    />
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-12">
-                {/* Empty State Image */}
-                <div className="w-35 h-50 mx-auto mb-6 relative overflow-hidden">
-                  <picture className="w-full h-full">
-                    <source srcSet="/recentActivityEmptyState.avif" type="image/avif" />
-                    <source srcSet="/recentActivityEmptyState.webp" type="image/webp" />
-                    <img
-                      src="/recentActivityEmptyState.png"
-                      alt="No recent activity"
-                      className="w-full h-full object-cover"
-                      draggable="false"
-                    />
-                  </picture>
-                </div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {searchTerm ? `No activities found matching "${searchTerm}"` : 'No activities recorded yet'}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                  {searchTerm ? 'Try adjusting your search terms' : 'Your activities will appear here as you use the app'}
-                </p>
+          ) : (
+            <div className="text-center py-12">
+              {/* Empty State Image */}
+              <div className="w-35 h-50 mx-auto mb-6 relative overflow-hidden">
+                <picture className="w-full h-full">
+                  <source srcSet="/recentActivityEmptyState.avif" type="image/avif" />
+                  <source srcSet="/recentActivityEmptyState.webp" type="image/webp" />
+                  <img
+                    src="/recentActivityEmptyState.png"
+                    alt="No recent activity"
+                    className="w-full h-full object-cover"
+                    draggable="false"
+                  />
+                </picture>
               </div>
-            )}
-          </div>
+              <p className="text-gray-600 dark:text-gray-400">
+                {searchTerm ? `No activities found matching "${searchTerm}"` : 'No activities recorded yet'}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                {searchTerm ? 'Try adjusting your search terms' : 'Your activities will appear here as you use the app'}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </>
