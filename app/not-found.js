@@ -28,7 +28,7 @@ export default function NotFound() {
                         </picture>
                     </div>
                     <h1 className="text-xl font-bold text-gray-800 dark:text-gray-300 mb-1">
-                        404
+                        404 Not Found
                     </h1>
                     <p className="text-sm text-gray-600 dark:text-gray-400 italic">
                         maybe the diagnosis was wrong, doc
