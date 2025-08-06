@@ -945,6 +945,31 @@ export default function LoginPage() {
                   <a href="/privacy" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Privacy Policy</a>.
                 </p>
               </div>
+
+              {/* Recruiter Note */}
+              <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">Note</p>
+                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                      If you are from a recruiting team, please click continue to fill in login details for a sample account.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginData(prev => ({ 
+                        ...prev, 
+                        email: 'sample@gmail.com', 
+                        password: 'Sample@123' 
+                      }));
+                    }}
+                    className="ml-3 px-3 py-1.5 bg-blue-600 dark:bg-blue-500 text-white text-xs font-medium rounded hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-blue-50 transition-all duration-200 cursor-pointer"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
