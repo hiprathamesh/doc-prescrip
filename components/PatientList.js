@@ -10,7 +10,7 @@ import { storage } from '../utils/storage';
 import { toast } from 'sonner';
 import usePageTitle from '../hooks/usePageTitle';
 
-export default function PatientList({ patients, onPatientSelect, onNewPrescription, onPatientDelete, onBack }) {
+export default function PatientList({ patients, onPatientSelect, onNewPrescription, onPatientDelete, onBack, onAddPatientClick }) {
   usePageTitle('Patients');
 
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -498,22 +498,31 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                 </button>
                 <span className="text-md font-semibold text-gray-900 dark:text-gray-100">Patients</span>
               </div>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Search patients..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-64 pl-10 pr-16 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors"
-                />
-                <div
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded border cursor-pointer"
-                  onClick={() => searchInputRef.current?.focus()}
-                >
-                  Ctrl K
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search patients..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-70 pl-9 pr-16 py-2.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors"
+                  />
+                  <div
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border cursor-pointer"
+                    onClick={() => searchInputRef.current?.focus()}
+                  >
+                    Ctrl K
+                  </div>
                 </div>
+                <button
+                  onClick={onAddPatientClick}
+                  className="p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 cursor-pointer"
+                  title="Add Patient"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
@@ -534,22 +543,31 @@ export default function PatientList({ patients, onPatientSelect, onNewPrescripti
                 </button>
                 <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">Patients</span>
               </div>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Search patients..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-70 pl-9 pr-16 py-2.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors"
-                />
-                <div
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border cursor-pointer"
-                  onClick={() => searchInputRef.current?.focus()}
-                >
-                  Ctrl K
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search patients..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-70 pl-9 pr-16 py-2.5 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors"
+                  />
+                  <div
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded border cursor-pointer"
+                    onClick={() => searchInputRef.current?.focus()}
+                  >
+                    Ctrl K
+                  </div>
                 </div>
+                <button
+                  onClick={onAddPatientClick}
+                  className="p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 cursor-pointer"
+                  title="Add Patient"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>

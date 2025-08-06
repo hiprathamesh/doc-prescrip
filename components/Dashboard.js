@@ -44,6 +44,8 @@ import { logout } from '../utils/auth';
 import { useRouter } from 'next/navigation';
 import DocPill from './icons/DocPill';
 import TitleUpdater from './TitleUpdater';
+import CustomDropdown from './CustomDropdown';
+import { toast } from 'sonner';
 
 export default function Dashboard() {
   const { data: session } = useSession();
@@ -73,6 +75,13 @@ export default function Dashboard() {
     needsGoogleLink: false,
     isLoading: true
   });
+  const [showPatientCreationModal, setShowPatientCreationModal] = useState(false);
+  const [newPatientData, setNewPatientData] = useState({ name: '', age: '', gender: 'male', phone: '' });
+  const [isCreatingPatient, setIsCreatingPatient] = useState(false);
+  const nameRef = useRef(null);
+  const ageRef = useRef(null);
+  const genderRef = useRef(null);
+  const phoneRef = useRef(null);
 
   useEffect(() => {
     loadAllData();
@@ -704,6 +713,52 @@ export default function Dashboard() {
     }, 150);
   };
 
+  const handleAddPatientClick = () => {
+    setShowPatientCreationModal(true);
+  };
+
+  const handlePatientModalClose = () => {
+    setShowPatientCreationModal(false);
+    setNewPatientData({ name: '', age: '', gender: 'male', phone: '' });
+  };
+
+  const handleCreateNewPatient = async () => {
+    if (!newPatientData.name || !newPatientData.age || !newPatientData.phone) {
+      toast.error('Missing Information', {
+        description: 'Please fill all required fields (Name, Age, and Phone are required)'
+      });
+      return;
+    }
+    setIsCreatingPatient(true);
+    try {
+      const patientId = 'P' + Date.now().toString().slice(-6) + Math.floor(Math.random() * 100).toString().padStart(2, '0');
+      const newPatient = {
+        id: patientId,
+        name: newPatientData.name,
+        age: parseInt(newPatientData.age),
+        gender: newPatientData.gender,
+        phone: newPatientData.phone,
+        createdAt: new Date(),
+        lastVisited: new Date(),
+        nextExpected: null,
+        followUpStatus: 'none',
+        hasPendingPayments: false
+      };
+      const currentPatients = await storage.getPatients();
+      const updatedPatients = [...currentPatients, newPatient];
+      await storage.savePatients(updatedPatients);
+      toast.success('Patient Added', { description: `${newPatient.name} has been added successfully` });
+      setShowPatientCreationModal(false);
+      setNewPatientData({ name: '', age: '', gender: 'male', phone: '' });
+      loadAllData();
+    } catch (error) {
+      console.error('Error creating patient:', error);
+      toast.error('Failed to create patient');
+    } finally {
+      setIsCreatingPatient(false);
+    }
+  };
+
   return (
     <div className={`min-h-screen bg-white dark:bg-gray-900 ${showSettingsModal ? 'overflow-hidden' : ''}`}>
       {/* Minimal Header */}
@@ -1277,6 +1332,7 @@ export default function Dashboard() {
             onNewPrescription={handleNewPrescription}
             onPatientDelete={handlePatientDelete}
             onBack={handleBackToDashboard}
+            onAddPatientClick={handleAddPatientClick}
           />
         )}
 
@@ -1338,6 +1394,84 @@ export default function Dashboard() {
                     currentView === 'activity' ? 'Recent Activity' :
                       currentView === 'medical-data' ? 'Data Manager' : "Dashboard"
       } />
+
+      {/* Patient Creation Modal (controlled from Dashboard) */}
+      {showPatientCreationModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 max-w-md w-full border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Add New Patient</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Name *</label>
+                <input
+                  ref={nameRef}
+                  type="text"
+                  value={newPatientData.name}
+                  onChange={(e) => setNewPatientData({ ...newPatientData, name: e.target.value })}
+                  onKeyPress={(e) => { if (e.key === 'Enter') ageRef.current?.focus(); }}
+                  className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-12"
+                  placeholder="Enter patient name"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Age *</label>
+                <input
+                  ref={ageRef}
+                  type="number"
+                  value={newPatientData.age}
+                  onChange={(e) => setNewPatientData({ ...newPatientData, age: e.target.value })}
+                  onKeyPress={(e) => { if (e.key === 'Enter') genderRef.current?.focus(); }}
+                  className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-12"
+                  placeholder="Enter age"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Gender</label>
+                <CustomDropdown
+                  ref={genderRef}
+                  options={[{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }, { value: 'other', label: 'Other' }]}
+                  value={newPatientData.gender}
+                  onChange={(value) => setNewPatientData({ ...newPatientData, gender: value })}
+                  placeholder="Select gender..."
+                  onEnterPress={() => phoneRef.current?.focus()}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1.5">Phone *</label>
+                <input
+                  ref={phoneRef}
+                  type="tel"
+                  value={newPatientData.phone}
+                  onChange={(e) => setNewPatientData({ ...newPatientData, phone: e.target.value })}
+                  onKeyPress={(e) => { if (e.key === 'Enter') handleCreateNewPatient(); }}
+                  className="w-full text-sm p-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-0 focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors h-12"
+                  placeholder="Enter phone number"
+                />
+              </div>
+            </div>
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={handlePatientModalClose}
+                className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                disabled={isCreatingPatient}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateNewPatient}
+                disabled={isCreatingPatient}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCreatingPatient ? 'Creating...' : 'Create Patient'}
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
+              Tip: Press Enter on any field to move to the next one, or Enter on the last field to create patient
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
