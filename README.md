@@ -96,7 +96,7 @@ Doc Prescrip is a modern, secure, and user-friendly platform for doctors and cli
 ## Support & Contact
 For help, feedback, or feature requests:
 - Email: [prathameshnikam21119@gmail.com](mailto:prathameshnikam21119@gmail.com)
-- [Privacy Policy](/privacy) | [Terms of Service](/terms)
+- [Privacy Policy](https://doc-prescrip.vercel.app/privacy) | [Terms of Service](https://doc-prescrip.vercel.app/terms)
 
 ---
 
