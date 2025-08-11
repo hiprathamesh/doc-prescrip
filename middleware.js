@@ -70,6 +70,10 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
+  if (request.nextUrl.pathname === '/googlec2f92b121acd7f08.html') {
+    return NextResponse.next();
+  }
+
   // If accessing login page, allow through
   if (request.nextUrl.pathname === '/login') {
     // If already authenticated with valid doctor ID and accessing login, redirect to home
