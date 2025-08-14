@@ -449,10 +449,10 @@ export default function RecentActivityPage({ onBack }) {
               {/* Empty State Image */}
               <div className="w-35 h-50 mx-auto mb-6 relative overflow-hidden">
                 <picture className="w-full h-full">
-                  <source srcSet="/recentActivityEmptyState.avif" type="image/avif" />
-                  <source srcSet="/recentActivityEmptyState.webp" type="image/webp" />
+                  <source srcSet="/recentActivityPageEmptyState.avif" type="image/avif" />
+                  <source srcSet="/recentActivityPageEmptyState.webp" type="image/webp" />
                   <img
-                    src="/recentActivityEmptyState.png"
+                    src="/recentActivityPageEmptyState.png"
                     alt="No recent activity"
                     className="w-full h-full object-cover"
                     draggable="false"
