@@ -5,18 +5,18 @@ import { Share2, Loader2 } from 'lucide-react'
 import { storage } from '../utils/storage'
 import { toast } from 'sonner'
 
-export default function SharePDFButton({ 
-  pdfUrl, 
-  filename, 
-  phone, 
-  disabled, 
-  type, 
-  patientName, 
-  visitDate, 
-  billDate, 
-  amount, 
-  isPaid, 
-  certificateDate, 
+export default function SharePDFButton({
+  pdfUrl,
+  filename,
+  phone,
+  disabled,
+  type,
+  patientName,
+  visitDate,
+  billDate,
+  amount,
+  isPaid,
+  certificateDate,
   certificateFor,
   className,
   variant = 'button', // 'button' or 'dropdown'
@@ -34,7 +34,7 @@ export default function SharePDFButton({
     // Get current doctor context
     const currentDoctor = storage.getDoctorContext();
     const doctorName = currentDoctor?.name || 'Dr. Prashant Nikam';
-    
+
     if (type === 'prescription') {
       return `Hello ${patientName},
 
@@ -87,9 +87,9 @@ ${doctorName}`
 
     if (!session) {
       try {
-        await signIn('google', { 
+        await signIn('google', {
           callbackUrl: window.location.href,
-          redirect: false 
+          redirect: false
         })
       } catch (error) {
         console.error('Sign in error:', error)
@@ -135,13 +135,20 @@ ${doctorName}`
       if (!response.ok) {
         throw new Error('Failed to fetch PDF')
       }
-      
+
       const blob = await response.blob()
-      
+
       // Create FormData to send the file
       const formData = new FormData()
       formData.append('file', blob, filename)
       formData.append('filename', filename)
+      formData.append('patientName', patientName)
+      formData.append('visitDate', visitDate || new Date().toISOString().split("T")[0])
+      formData.append('billDate', billDate || new Date().toISOString().split("T")[0])
+      formData.append('amount', amount || '0')
+      formData.append('isPaid', isPaid ? 'true' : 'false')
+      formData.append('certificateDate', certificateDate || new Date().toISOString().split("T")[0])
+      formData.append('certificateFor', certificateFor || 'General')
 
       const res = await fetch('/api/upload-to-drive', {
         method: 'POST',
@@ -149,7 +156,7 @@ ${doctorName}`
       })
 
       const data = await res.json()
-      
+
       if (!res.ok) {
         if (res.status === 401) {
           // Token expired or invalid, trigger re-authentication
@@ -161,20 +168,20 @@ ${doctorName}`
         }
         throw new Error(data.error || 'Upload failed')
       }
-      
+
       if (data.link) {
         const message = generateMessage()
         const whatsappMessage = `${message}\n\nDocument link: ${data.link}`
         const encoded = encodeURIComponent(whatsappMessage)
         const phoneNumber = phone.replace(/\D/g, '') // Remove non-digits
         const formattedPhone = phoneNumber.startsWith('91') ? phoneNumber : `91${phoneNumber}`
-        
+
         window.open(`https://wa.me/${formattedPhone}?text=${encoded}`, '_blank')
-        
+
         toast.success('Document Shared', {
           description: `${type === 'prescription' ? 'Prescription' : type === 'bill' ? 'Bill' : 'Certificate'} shared via WhatsApp successfully`
         });
-        
+
         // Call onShare callback if provided (for dropdown variant)
         if (onShare) {
           onShare()
@@ -202,7 +209,7 @@ ${doctorName}`
   // Dropdown variant styling
   if (variant === 'dropdown') {
     return (
-      <button 
+      <button
         onClick={handleClick}
         disabled={disabled || status === 'loading'}
         className={className || "w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center space-x-2"}
@@ -215,7 +222,7 @@ ${doctorName}`
 
   // Default button variant styling
   return (
-    <button 
+    <button
       onClick={handleClick}
       disabled={disabled || status === 'loading' || isUploading}
       className={className || "flex items-center space-x-2 px-4 py-2 bg-green-600 dark:bg-green-500 text-white dark:text-gray-900 rounded-md hover:bg-green-700 dark:hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm cursor-pointer"}

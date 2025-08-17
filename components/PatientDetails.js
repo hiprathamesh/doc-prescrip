@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, FileText, Phone, User, Trash2, MoreVertical, Pill, Download, Share2, Calendar, MapPin, Clock, CreditCard, CheckCircle } from 'lucide-react';
+import { ArrowLeft, FileText, Phone, User, Trash2, MoreVertical, Pill, Download, Share, Calendar, MapPin, Clock, CreditCard, CheckCircle } from 'lucide-react';
 import { storage } from '../utils/storage';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
-import SharePDFButton from './SharePDFButton';
 import ConfirmationDialog from './ConfirmationDialog';
 import { toast } from 'sonner';
 import { activityLogger } from '../utils/activityLogger';
 import useScrollToTop from '../hooks/useScrollToTop';
 import usePageTitle from '../hooks/usePageTitle';
+import ShareModal from './ShareModal';
 
 // Loading skeleton component for medical history
 const MedicalHistorySkeleton = () => (
@@ -80,11 +80,13 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   const [showFloatingHeader, setShowFloatingHeader] = useState(false);
   const headerRef = useRef(null);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareModalData, setShareModalData] = useState({ url: '', title: '', fileName: '' });
+
   // Add loading states
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [medicalHistory, setMedicalHistory] = useState([]);
-  
+
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
@@ -149,7 +151,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
     try {
       const patientPrescriptions = await storage.getPrescriptionsByPatient(patient.id);
       const patientBills = await storage.getBillsByPatient(patient.id);
-      
+
       // Load medical certificates for this patient
       const allCertificates = JSON.parse(localStorage.getItem('medicalCertificates') || '[]');
       const patientCertificates = allCertificates.filter(cert => cert.patientId === patient.id);
@@ -166,19 +168,19 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
           if (bill.prescriptionId && prescription.prescriptionId) {
             return bill.prescriptionId === prescription.prescriptionId;
           }
-          
+
           // Fallback: match by date and patient (within 1 hour window for better accuracy)
           const billDate = new Date(bill.createdAt);
           const prescriptionDate = new Date(prescription.createdAt);
           const timeDifference = Math.abs(billDate.getTime() - prescriptionDate.getTime());
           const tenSec = 10000; // 1 hour in milliseconds
-          
+
           return bill.patientId === prescription.patientId && timeDifference <= tenSec;
         });
-        
+
         // Use visitDate if available, otherwise fall back to createdAt
         const visitDateTime = prescription.visitDate ? new Date(prescription.visitDate) : new Date(prescription.createdAt);
-        
+
         return {
           ...prescription,
           type: 'prescription',
@@ -200,7 +202,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         } else {
           certificateDateTime = new Date();
         }
-        
+
         return {
           ...certificate,
           type: 'certificate',
@@ -212,21 +214,21 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
 
       // Combine all visits and sort by date (most recent first)
       const allVisits = [...prescriptionVisits, ...certificateVisits];
-      
+
       // Sort by sortDate in descending order (most recent first) with proper date comparison
       const sortedVisits = allVisits.sort((a, b) => {
         const dateA = new Date(a.sortDate);
         const dateB = new Date(b.sortDate);
-        
+
         // Ensure we have valid dates
         if (isNaN(dateA.getTime())) return 1;
         if (isNaN(dateB.getTime())) return -1;
-        
+
         return dateB.getTime() - dateA.getTime(); // Most recent first
       });
-      
+
       setVisits(sortedVisits);
-      
+
       // Calculate medical history from visits
       const calculatedMedicalHistory = getMedicalHistory(sortedVisits);
       setMedicalHistory(calculatedMedicalHistory);
@@ -242,10 +244,10 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
   const toggleBillPayment = async (billId) => {
     try {
       // Find the visit and bill to update
-      const visitToUpdate = visits.find(visit => 
+      const visitToUpdate = visits.find(visit =>
         visit.bill && (visit.bill.id === billId || visit.bill.billId === billId)
       );
-      
+
       if (!visitToUpdate || !visitToUpdate.bill) {
         toast.error('Error', {
           description: 'Bill not found'
@@ -302,10 +304,10 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       );
 
       await storage.saveBills(updatedBills);
-      
+
       // Log activity immediately after successful update
       await activityLogger.logBillPaymentUpdated(patient, finalUpdatedBill.amount, finalUpdatedBill.isPaid);
-      
+
       // Update visits with the final bill including PDF URL
       const finalVisits = visits.map(visit => {
         if (visit.bill && (visit.bill.id === billId || visit.bill.billId === billId)) {
@@ -331,12 +333,44 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
     }
   };
 
+  const sharePrescription = async (presUrl, visitDate) => {
+    if (!presUrl) {
+      toast.error('PDF Not Available', {
+        description: 'Prescription PDF is not available. Please try regenerating the document.'
+      });
+      return;
+    }
+
+    setShareModalData({
+      url: presUrl,
+      title: 'Prescription PDF',
+      fileName: `prescription-${patient.name}-${formatDate(visitDate)}.pdf`
+    });
+    setShareModalOpen(true);
+  };
+
+  const shareBill = async (billUrl, createdAt) => {
+    if (!billUrl) {
+      toast.error('PDF Not Available', {
+        description: 'Bill PDF is not available. Please try regenerating the document.'
+      });
+      return;
+    }
+
+    setShareModalData({
+      url: billUrl,
+      title: 'Bill PDF',
+      fileName: `bill-${patient.name}-${formatDate(createdAt)}.pdf`
+    });
+    setShareModalOpen(true);
+  };
+
   const deleteVisit = async (visitId, billId, visitType = 'prescription') => {
     const title = visitType === 'certificate' ? 'Delete Medical Certificate' : 'Delete Visit Record';
-    const message = visitType === 'certificate' 
+    const message = visitType === 'certificate'
       ? 'Are you sure you want to delete this medical certificate? This action cannot be undone.'
       : 'Are you sure you want to delete this visit record? This action cannot be undone.';
-      
+
     setConfirmDialog({
       isOpen: true,
       title,
@@ -349,7 +383,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
 
   const handleDeleteConfirm = async (visitId, billId, visitType) => {
     setConfirmDialog(prev => ({ ...prev, isLoading: true }));
-    
+
     try {
       if (visitType === 'certificate') {
         // Delete medical certificate
@@ -386,7 +420,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       setConfirmDialog({ isOpen: false, title: '', message: '', isLoading: false, onConfirm: null });
 
       toast.success(visitType === 'certificate' ? 'Certificate Deleted' : 'Visit Deleted', {
-        description: visitType === 'certificate' 
+        description: visitType === 'certificate'
           ? 'Medical certificate has been deleted successfully'
           : 'Visit record has been deleted successfully'
       });
@@ -459,7 +493,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
     try {
       const { generateMedicalCertificatePDF } = await import('../utils/medicalCertificatePDFGenerator');
       const certificateBlob = await generateMedicalCertificatePDF(certificate, patient, false);
-      
+
       const url = URL.createObjectURL(certificateBlob);
       const a = document.createElement('a');
       a.href = url;
@@ -485,12 +519,12 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
 
   const formatMedicationTiming = (timing) => {
     if (!timing) return '1-0-1-0'; // Default pattern
-    
+
     const morning = timing.morning ? '1' : '0';
     const afternoon = timing.afternoon ? '1' : '0';
     const evening = timing.evening ? '1' : '0';
     const night = timing.night ? '1' : '0';
-    
+
     return `${morning}-${afternoon}-${evening}-${night}`;
   };
 
@@ -573,7 +607,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
       <div ref={headerRef}>
         <HeaderContent />
       </div>
-          
+
       {/* Patient EMR Card */}
       <div className="bg-white dark:bg-gray-900 rounded-lg p-6">
         <div className="flex items-center justify-between mb-6">
@@ -683,11 +717,10 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                   {/* Timeline circle and date row */}
                   <div className="flex items-center space-x-4 mb-4">
                     <div className="relative flex-shrink-0">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-sm ${
-                        visit.type === 'certificate' 
-                          ? 'bg-green-100' 
-                          : 'bg-blue-100'
-                      }`}>
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-sm ${visit.type === 'certificate'
+                        ? 'bg-green-100'
+                        : 'bg-blue-100'
+                        }`}>
                         {visit.type === 'certificate' ? (
                           <CheckCircle className="w-5 h-5 text-green-600" />
                         ) : (
@@ -697,7 +730,7 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                     </div>
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-900 dark:text-gray-200">
-                        {visit.type === 'certificate' 
+                        {visit.type === 'certificate'
                           ? formatDate(visit.displayDate)
                           : formatDate(visit.visitDate || visit.displayDate)
                         }
@@ -764,20 +797,16 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                       <Download className="w-4 h-4 text-gray-500" />
                                       <span>Download Prescription</span>
                                     </button>
-                                    <SharePDFButton
-                                      pdfUrl={visit.pdfUrl}
-                                      filename={`prescription-${patient.name}-${formatDate(visit.visitDate)}.pdf`}
-                                      phone={patient.phone}
-                                      type="prescription"
-                                      patientName={patient.name}
-                                      visitDate={formatDate(visit.visitDate)}
+                                    <button
+                                      onClick={() => {
+                                        sharePrescription(visit.pdfUrl, visit.displayDate);
+                                        setDropdownOpen(null);
+                                      }}
                                       className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2 cursor-pointer"
-                                      variant="dropdown"
-                                      onShare={() => setDropdownOpen(null)}
-                                      prescription={visit}
-                                      patient={patient}
-                                      customText="Share Prescription PDF"
-                                    />
+                                    >
+                                      <Share className="w-4 h-4 text-gray-500" />
+                                      <span>Share Prescription</span>
+                                    </button>
                                   </>
                                 )}
                                 {visit.bill?.pdfUrl && (
@@ -792,22 +821,16 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                                       <Download className="w-4 h-4 text-gray-500" />
                                       <span>Download Bill</span>
                                     </button>
-                                    <SharePDFButton
-                                      pdfUrl={visit.bill.pdfUrl}
-                                      filename={`bill-${patient.name}-${formatDate(visit.bill.createdAt)}.pdf`}
-                                      phone={patient.phone}
-                                      type="bill"
-                                      patientName={patient.name}
-                                      billDate={formatDate(visit.bill.createdAt)}
-                                      amount={visit.bill.amount}
-                                      isPaid={visit.bill.isPaid}
+                                    <button
+                                      onClick={() => {
+                                        shareBill(visit.bill.pdfUrl, visit.bill.createdAt);
+                                        setDropdownOpen(null);
+                                      }}
                                       className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center space-x-2 cursor-pointer"
-                                      variant="dropdown"
-                                      onShare={() => setDropdownOpen(null)}
-                                      bill={visit.bill}
-                                      patient={patient}
-                                      customText="Share Bill PDF"
-                                    />
+                                    >
+                                      <Share className="w-4 h-4 text-gray-500" />
+                                      <span>Share Bill</span>
+                                    </button>
                                   </>
                                 )}
                               </>
@@ -844,8 +867,8 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                             <button
                               onClick={() => toggleBillPayment(visit.bill.id || visit.bill.billId)}
                               className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${visit.bill.isPaid
-                                  ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                  : 'bg-red-100 text-red-800 hover:bg-red-200'
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                : 'bg-red-100 text-red-800 hover:bg-red-200'
                                 }`}
                             >
                               {visit.bill.isPaid && <CheckCircle className="w-3 h-3" />}
@@ -873,16 +896,14 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                         <div>
                           <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Fitness Status</h4>
                           <div className="flex items-center space-x-2">
-                            <div className={`w-2 h-2 rounded-full ${
-                              visit.fitnessStatus === 'fit' 
-                                ? 'bg-green-500' 
-                                : 'bg-red-500'
-                            }`}></div>
-                            <div className={`text-xs font-medium py-2 ${
-                              visit.fitnessStatus === 'fit' 
-                                ? 'text-gray-700 dark:text-gray-400' 
-                                : 'text-gray-700 dark:text-gray-400'
-                            }`}>
+                            <div className={`w-2 h-2 rounded-full ${visit.fitnessStatus === 'fit'
+                              ? 'bg-green-500'
+                              : 'bg-red-500'
+                              }`}></div>
+                            <div className={`text-xs font-medium py-2 ${visit.fitnessStatus === 'fit'
+                              ? 'text-gray-700 dark:text-gray-400'
+                              : 'text-gray-700 dark:text-gray-400'
+                              }`}>
                               {visit.fitnessStatus === 'fit' ? 'Medically Fit' : 'Medically Unfit'}
                             </div>
                           </div>
@@ -975,10 +996,10 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-gray-800 dark:text-gray-300">Follow-up:</span>
                           <span className={`text-xs px-2 py-1 rounded font-medium ${visit.followUpStatus === 'completed'
-                              ? 'bg-green-100 text-green-800'
-                              : visit.followUpStatus === 'overdue'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
+                            ? 'bg-green-100 text-green-800'
+                            : visit.followUpStatus === 'overdue'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
                             }`}>
                             {formatDate(visit.followUpDate)}
                             {visit.followUpStatus === 'completed' && ' ✓'}
@@ -1014,6 +1035,15 @@ export default function PatientDetails({ patient, onBack, onNewPrescription }) {
         requireConfirmation={confirmDialog.requireConfirmation}
         confirmationText={confirmDialog.confirmationText}
         confirmationPlaceholder={confirmDialog.confirmationPlaceholder}
+      />
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        shareUrl={shareModalData.url}
+        title={shareModalData.title}
+        fileName={shareModalData.fileName}
       />
 
     </div>

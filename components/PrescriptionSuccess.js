@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Download, FileText, DollarSign, CheckCircle, Pill, FlaskConical, Calendar, User, Phone } from 'lucide-react';
+import { ArrowLeft, Download, FileText, DollarSign, CheckCircle, Pill, FlaskConical, Calendar, User, Phone, Share } from 'lucide-react';
 import { generatePDF } from '../utils/pdfGenerator';
 import { storage } from '../utils/storage';
 import { generateBillPDF } from '../utils/billGenerator';
 import { sendWhatsApp, generateWhatsAppMessage } from '../utils/whatsapp';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
-import SharePDFButton from './SharePDFButton';
 import { toast } from 'sonner';
 import useScrollToTop from '../hooks/useScrollToTop';
 import usePageTitle from '../hooks/usePageTitle';
 import { activityLogger } from '../utils/activityLogger';
+import ShareModal from './ShareModal';
 
 export default function PrescriptionSuccess({ prescription, patient, bill, onBack }) {
   usePageTitle('Prescription Created');
@@ -21,6 +21,8 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
   const [isGeneratingPrescriptionPdf, setIsGeneratingPrescriptionPdf] = useState(false);
   const [isGeneratingBillPdf, setIsGeneratingBillPdf] = useState(false);
   const [currentBill, setCurrentBill] = useState(bill);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareModalData, setShareModalData] = useState({ url: '', title: '', fileName: '' });
 
   // Add refs and state for floating header
   const successHeaderRef = useRef(null);
@@ -207,24 +209,38 @@ export default function PrescriptionSuccess({ prescription, patient, bill, onBac
     }
   };
 
+
+
   const sharePrescription = () => {
-    const message = generateWhatsAppMessage(patient.name, formatDate(prescription.visitDate));
-    sendWhatsApp(patient.phone, message);
+    if (!prescriptionPdfUrl) {
+      toast.error('PDF Not Available', { 
+        description: 'Prescription PDF is not available. Please try regenerating the document.'
+      });
+      return;
+    }
+
+    setShareModalData({
+      url: prescriptionPdfUrl,
+      title: 'Prescription PDF',
+      fileName: `prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`
+    });
+    setShareModalOpen(true);
   };
 
   const shareBill = () => {
-    const message = `Hello ${patient.name},
+    if (!billPdfUrl) {
+      toast.error('PDF Not Available', { 
+        description: 'Bill PDF is not available. Please try regenerating the document.'
+      });
+      return;
+    }
 
-Your bill for the consultation on ${formatDate(bill.createdAt)} is ready.
-
-Amount: ₹${bill.amount}
-Status: ${bill.isPaid ? 'Paid' : 'Pending'}
-
-Thank you for visiting us.
-
-Best regards,
-Dr. Prashant Nikam`;
-    sendWhatsApp(patient.phone, message);
+    setShareModalData({
+      url: billPdfUrl,
+      title: 'Bill PDF',
+      fileName: `bill-${patient.name}-${formatDate(currentBill.createdAt)}.pdf`
+    });
+    setShareModalOpen(true);
   };
 
   const formatMedicationTiming = (timing) => {
@@ -483,17 +499,14 @@ Dr. Prashant Nikam`;
                   <Download className="w-4 h-4" />
                   <span>Download</span>
                 </button>
-                <SharePDFButton
-                  pdfUrl={prescriptionPdfUrl}
-                  filename={`prescription-${patient.name}-${formatDate(prescription.visitDate)}.pdf`}
-                  phone={patient.phone}
+                <button
+                  onClick={sharePrescription}
                   disabled={!prescriptionPdfUrl || isGeneratingPrescriptionPdf}
-                  type="prescription"
-                  patientName={patient.name}
-                  visitDate={formatDate(prescription.visitDate)}
-                  prescription={prescription}
-                  patient={patient}
-                />
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white dark:text-gray-900 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium cursor-pointer"
+                >
+                  <Share className="w-4 h-4" />
+                  <span>Share</span>
+                </button>
               </div>
             </div>
 
@@ -606,25 +619,29 @@ Dr. Prashant Nikam`;
                     <Download className="w-4 h-4" />
                     <span>Download</span>
                   </button>
-                  <SharePDFButton
-                    pdfUrl={billPdfUrl}
-                    filename={`bill-${patient.name}-${formatDate(currentBill.createdAt)}.pdf`}
-                    phone={patient.phone}
+                  <button
+                    onClick={shareBill}
                     disabled={!billPdfUrl || isGeneratingBillPdf}
-                    type="bill"
-                    patientName={patient.name}
-                    billDate={formatDate(currentBill.createdAt)}
-                    amount={currentBill.amount}
-                    isPaid={currentBill.isPaid}
-                    bill={currentBill}
-                    patient={patient}
-                  />
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white dark:text-gray-900 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium cursor-pointer"
+                  >
+                    <Share className="w-4 h-4" />
+                    <span>Share</span>
+                  </button>
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Share Modal */}
+      <ShareModal 
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        shareUrl={shareModalData.url}
+        title={shareModalData.title}
+        fileName={shareModalData.fileName}
+      />
     </>
   );
 }

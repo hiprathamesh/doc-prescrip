@@ -24,6 +24,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
   console.log('[NewPrescription] Component rendering/re-rendering. Selected patient:', patient ? patient.id : 'none'); // TOP-LEVEL LOG
 
   const [selectedPatient, setSelectedPatient] = useState(patient);
+  console.log('[NewPrescription] Selected patient state:', selectedPatient ? selectedPatient.name : 'none'); // LOG SELECTED PATIENT
   const [isNewPatient, setIsNewPatient] = useState(false);
   const [newPatientData, setNewPatientData] = useState({
     name: '',
@@ -621,7 +622,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       }
 
       const prescription = {
-        prescriptionId: Date.now().toString(),
+        prescriptionId: `PRES_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // More unique ID
         patientId: selectedPatient.id?.toString(),
         visitDate: new Date(),
         symptoms,
@@ -641,6 +642,26 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       // Generate prescription PDF immediately
       const prescriptionBlob = await generatePDF(prescription, selectedPatient, false);
       const prescriptionUrl = URL.createObjectURL(prescriptionBlob);
+
+      const formData = new FormData()
+      formData.append('file', prescriptionBlob, `prescription-${selectedPatient.name}-${Date.now()}.pdf`)
+      formData.append('filename', `prescription-${selectedPatient.name}-${Date.now()}.pdf`)
+      formData.append('patientName', selectedPatient.name)
+      formData.append('visitDate', new Date().toISOString().split("T")[0])
+
+      const res = await fetch('/api/upload-to-drive', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+
+      if (!data || !data.link) {
+        toast.error('Prescription Upload Failed', {
+          description: 'Failed to upload prescription PDF. Please try again.'
+        });
+        return;
+      }
 
       let bill = null;
       let billBlob = null;
@@ -666,10 +687,30 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
         billUrl = URL.createObjectURL(billBlob);
       }
 
+      const billFormData = new FormData();
+      billFormData.append('file', billBlob, `bill-${selectedPatient.name}-${Date.now()}.pdf`);
+      billFormData.append('filename', `bill-${selectedPatient.name}-${Date.now()}.pdf`);
+      billFormData.append('patientName', selectedPatient.name);
+      billFormData.append('visitDate', new Date().toISOString().split("T")[0]);
+
+      const billRes = await fetch('/api/upload-to-drive', {
+        method: 'POST',
+        body: billFormData,
+      });
+
+      const billData = await billRes.json();
+
+      if (!billData || !billData.link) {
+        toast.error('Bill Upload Failed', {
+          description: 'Failed to upload bill PDF. Please try again.'
+        });
+        return;
+      }
+      
       // Add PDF URLs to the objects for storage
-      prescription.pdfUrl = prescriptionUrl;
+      prescription.pdfUrl = data.link;
       if (bill) {
-        bill.pdfUrl = billUrl;
+        bill.pdfUrl = billData.link;
       }
 
       // If this visit completes a follow-up, update the previous prescription
@@ -734,7 +775,7 @@ export default function NewPrescription({ patient, patients, onBack, onPatientUp
       // Set data for success page with current bill state
       setSavedPrescription({
         ...prescription,
-        pdfUrl: prescriptionUrl
+        pdfUrl: data.link,
       });
       setSavedBill(bill ? { ...bill } : null);
 
