@@ -30,15 +30,32 @@ export async function POST(request) {
 
     if (!token?.serverAccessToken) {
       return NextResponse.json(
-        { error: "Unauthorized - No Google access token found" },
+        { error: "Unauthorized - No Google access token found. Please sign out and sign in again." },
         { status: 401 }
       );
     }
 
     // Setup OAuth2 client with stored token
-    const oauth2Client = new google.auth.OAuth2();
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET
+    );
+    
     oauth2Client.setCredentials({
       access_token: token.serverAccessToken,
+      refresh_token: token.serverRefreshToken,
+    });
+
+    // Handle automatic token refresh
+    oauth2Client.on('tokens', (tokens) => {
+      console.log('Tokens refreshed automatically');
+      if (tokens.refresh_token) {
+        // Store the new refresh token if provided
+        oauth2Client.setCredentials({
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+        });
+      }
     });
 
     const drive = google.drive({ version: "v3", auth: oauth2Client });
@@ -91,6 +108,15 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error("Google Drive upload error:", error);
+    
+    // If it's an authentication error, suggest re-login
+    if (error.code === 401 || error.message?.includes('invalid_grant') || error.message?.includes('unauthorized')) {
+      return NextResponse.json(
+        { error: "Google authentication expired. Please sign out and sign in again to refresh your access." },
+        { status: 401 }
+      );
+    }
+    
     return NextResponse.json(
       { error: "Upload failed: " + error.message },
       { status: 500 }

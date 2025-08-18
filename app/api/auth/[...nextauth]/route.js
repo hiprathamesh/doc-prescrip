@@ -20,7 +20,9 @@ const handler = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       authorization: {
         params: {
-          scope: "openid email profile https://www.googleapis.com/auth/drive.file"
+          scope: "openid email profile https://www.googleapis.com/auth/drive.file",
+          access_type: "offline",
+          prompt: "consent"
         }
       }
     }),
@@ -232,9 +234,43 @@ const handler = NextAuth({
         token.needsAdditionalInfo = !hasRequiredFields;
         token.googleId = doctor.googleId;
 
-        // Optional: store access token if you use it server-side
-        if (account?.access_token) {
+        // Handle Google OAuth tokens with refresh
+        if (account?.provider === 'google') {
           token.serverAccessToken = account.access_token;
+          token.serverRefreshToken = account.refresh_token;
+          token.accessTokenExpires = account.expires_at * 1000; // Convert to milliseconds
+        }
+
+        // If we have a refresh token and the access token has expired, refresh it
+        if (token.serverRefreshToken && Date.now() > token.accessTokenExpires) {
+          try {
+            const response = await fetch("https://oauth2.googleapis.com/token", {
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: new URLSearchParams({
+                client_id: process.env.GOOGLE_CLIENT_ID,
+                client_secret: process.env.GOOGLE_CLIENT_SECRET,
+                grant_type: "refresh_token",
+                refresh_token: token.serverRefreshToken,
+              }),
+              method: "POST",
+            });
+
+            const tokens = await response.json();
+
+            if (!response.ok) throw tokens;
+
+            token.serverAccessToken = tokens.access_token;
+            token.accessTokenExpires = Date.now() + tokens.expires_in * 1000;
+            
+            // Refresh token may or may not be returned
+            if (tokens.refresh_token) {
+              token.serverRefreshToken = tokens.refresh_token;
+            }
+          } catch (error) {
+            console.error("Error refreshing access token", error);
+            // Return token with expired access token, which will force re-authentication
+            token.error = "RefreshAccessTokenError";
+          }
         }
 
       } catch (error) {
