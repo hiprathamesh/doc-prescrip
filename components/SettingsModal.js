@@ -321,6 +321,30 @@ export default function SettingsModal({ isOpen, onClose }) {
 	const loadSettings = async () => {
 		try {
 			const savedSettings = await storage.getSettings();
+			const doctorContext = storage.getDoctorContext();
+			
+			// Try to fetch latest doctor profile from database
+			let latestDoctorData = doctorContext;
+			if (doctorContext?.id) {
+				try {
+					const response = await fetch(`/api/doctor/profile?doctorId=${doctorContext.id}`);
+					if (response.ok) {
+						const result = await response.json();
+						if (result.success && result.data) {
+							latestDoctorData = {
+								...doctorContext,
+								...result.data
+							};
+							// Update localStorage with latest data
+							storage.setCurrentDoctor(doctorContext.id, latestDoctorData);
+						}
+					}
+				} catch (error) {
+					console.warn('Could not fetch latest doctor profile:', error);
+					// Continue with localStorage data
+				}
+			}
+			
 			if (savedSettings) {
 				// Deep merge to ensure all properties exist
 				setSettings((prevSettings) => {
@@ -331,8 +355,42 @@ export default function SettingsModal({ isOpen, onClose }) {
 							...savedSettings[section]
 						};
 					});
+					
+					// Override profile section with latest doctor data if available
+					if (latestDoctorData) {
+						mergedSettings.profile = {
+							...mergedSettings.profile,
+							doctorName: latestDoctorData.name || mergedSettings.profile.doctorName || '',
+							specialization: latestDoctorData.specialization || mergedSettings.profile.specialization || '',
+							qualification: latestDoctorData.degree || mergedSettings.profile.qualification || '',
+							registrationNumber: latestDoctorData.registrationNumber || mergedSettings.profile.registrationNumber || '',
+							hospitalName: latestDoctorData.hospitalName || mergedSettings.profile.hospitalName || '',
+							hospitalAddress: latestDoctorData.hospitalAddress || mergedSettings.profile.hospitalAddress || '',
+							phoneNumber: latestDoctorData.phone || mergedSettings.profile.phoneNumber || '',
+							email: session?.user?.email || latestDoctorData.email || mergedSettings.profile.email || '',
+							emergencyContact: mergedSettings.profile.emergencyContact || '',
+						};
+					}
+					
 					return mergedSettings;
 				});
+			} else if (latestDoctorData) {
+				// If no saved settings but we have doctor context, populate profile
+				setSettings((prevSettings) => ({
+					...prevSettings,
+					profile: {
+						...prevSettings.profile,
+						doctorName: latestDoctorData.name || '',
+						specialization: latestDoctorData.specialization || '',
+						qualification: latestDoctorData.degree || '',
+						registrationNumber: latestDoctorData.registrationNumber || '',
+						hospitalName: latestDoctorData.hospitalName || '',
+						hospitalAddress: latestDoctorData.hospitalAddress || '',
+						phoneNumber: latestDoctorData.phone || '',
+						email: session?.user?.email || latestDoctorData.email || '',
+						emergencyContact: '',
+					}
+				}));
 			}
 		} catch (error) {
 			console.error('Error loading settings:', error);
@@ -377,6 +435,48 @@ export default function SettingsModal({ isOpen, onClose }) {
 	const saveSettings = async () => {
 		try {
 			await storage.saveSettings(settings);
+			
+			// Also update doctor profile in database if profile settings changed
+			const doctorContext = storage.getDoctorContext();
+			if (doctorContext && settings.profile) {
+				// Update doctor profile data
+				const profileUpdates = {
+					name: settings.profile.doctorName,
+					specialization: settings.profile.specialization,
+					degree: settings.profile.qualification,
+					registrationNumber: settings.profile.registrationNumber,
+					hospitalName: settings.profile.hospitalName,
+					hospitalAddress: settings.profile.hospitalAddress,
+					phone: settings.profile.phoneNumber,
+					email: settings.profile.email
+				};
+
+				// Update in database via API
+				try {
+					const response = await fetch('/api/doctor/profile', {
+						method: 'PUT',
+						headers: {
+							'Content-Type': 'application/json',
+							'X-Doctor-ID': doctorContext.id
+						},
+						body: JSON.stringify(profileUpdates)
+					});
+
+					if (response.ok) {
+						// Update local doctor context
+						storage.setCurrentDoctor(doctorContext.id, {
+							...doctorContext,
+							...profileUpdates
+						});
+					} else {
+						console.warn('Failed to update doctor profile in database');
+					}
+				} catch (profileError) {
+					console.error('Error updating doctor profile:', profileError);
+					// Continue with settings save even if profile update fails
+				}
+			}
+			
 			setHasUnsavedChanges(false);
 			toast.success('Settings Saved', {
 				description: 'Your preferences have been updated successfully',

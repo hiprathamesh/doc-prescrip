@@ -776,7 +776,9 @@ export default function Dashboard() {
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {currentDoctor?.hospitalName || 'Chaitanya Hospital'}, {currentDoctor?.hospitalAddress?.split(',')[0] || 'Deola'}
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Practice Management</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {currentDoctor?.name || 'Dr. Nikam'} - {currentDoctor?.degree || 'Practice Management'}
+                </p>
               </div>
             </div>
 

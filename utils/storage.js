@@ -143,7 +143,7 @@ class Storage {
       }
       
       // Handle both string parameters and object parameter
-      let name, lastName, accessType, phone, degree, registrationNumber, hospitalName, hospitalAddress;
+      let name, lastName, accessType, phone, degree, registrationNumber, hospitalName, hospitalAddress, specialization;
       if (typeof doctorData === 'object') {
         // If second parameter is an object, extract from it
         name = doctorData.name || doctorData.firstName + ' ' + doctorData.lastName || 'Dr. Nikam';
@@ -154,6 +154,7 @@ class Storage {
         registrationNumber = doctorData.registrationNumber || '';
         hospitalName = doctorData.hospitalName || 'Chaitanya Hospital';
         hospitalAddress = doctorData.hospitalAddress || 'Deola, Maharashtra';
+        specialization = doctorData.specialization || '';
       } else {
         // If passed as separate parameters (legacy support)
         name = doctorData || 'Dr. Nikam';
@@ -164,6 +165,7 @@ class Storage {
         registrationNumber = '';
         hospitalName = 'Chaitanya Hospital';
         hospitalAddress = 'Deola, Maharashtra';
+        specialization = '';
       }
       
       localStorage.setItem('currentDoctorId', doctorId);
@@ -175,6 +177,7 @@ class Storage {
       localStorage.setItem('currentDoctorRegistrationNumber', registrationNumber);
       localStorage.setItem('currentDoctorHospitalName', hospitalName);
       localStorage.setItem('currentDoctorHospitalAddress', hospitalAddress);
+      localStorage.setItem('currentDoctorSpecialization', specialization);
     }
   }
 
@@ -191,7 +194,6 @@ class Storage {
     throw new Error('Doctor context not available');
   }
 
-  // Add missing getDoctorContext method
   getDoctorContext() {
     if (typeof window !== 'undefined') {
       const doctorId = localStorage.getItem('currentDoctorId');
@@ -203,6 +205,7 @@ class Storage {
       const registrationNumber = localStorage.getItem('currentDoctorRegistrationNumber');
       const hospitalName = localStorage.getItem('currentDoctorHospitalName');
       const hospitalAddress = localStorage.getItem('currentDoctorHospitalAddress');
+      const specialization = localStorage.getItem('currentDoctorSpecialization');
 
       if (doctorId) {
         return {
@@ -215,7 +218,8 @@ class Storage {
           degree: degree || '',
           registrationNumber: registrationNumber || '',
           hospitalName: hospitalName || 'Chaitanya Hospital',
-          hospitalAddress: hospitalAddress || 'Deola, Maharashtra'
+          hospitalAddress: hospitalAddress || 'Deola, Maharashtra',
+          specialization: specialization || ''
         };
       }
     }
@@ -234,6 +238,7 @@ class Storage {
       localStorage.removeItem('currentDoctorRegistrationNumber');
       localStorage.removeItem('currentDoctorHospitalName');
       localStorage.removeItem('currentDoctorHospitalAddress');
+      localStorage.removeItem('currentDoctorSpecialization');
     }
   }
 
@@ -1014,6 +1019,7 @@ class Storage {
       localStorage.removeItem('currentDoctorRegistrationNumber');
       localStorage.removeItem('currentDoctorHospitalName');
       localStorage.removeItem('currentDoctorHospitalAddress');
+      localStorage.removeItem('currentDoctorSpecialization');
     }
   }
 
