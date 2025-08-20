@@ -16,8 +16,6 @@ import {
 	FileText,
 	DollarSign,
 	Clock,
-	Users,
-	Stethoscope,
 	Image,
 	AlertCircle,
 	Link,
@@ -334,7 +332,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 		try {
 			const savedSettings = await storage.getSettings();
 			const doctorContext = storage.getDoctorContext();
-			
+
 			// Try to fetch latest doctor profile from database
 			let latestDoctorData = doctorContext;
 			if (doctorContext?.id) {
@@ -356,7 +354,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 					// Continue with localStorage data
 				}
 			}
-			
+
 			if (savedSettings) {
 				// Deep merge to ensure all properties exist
 				setSettings((prevSettings) => {
@@ -367,7 +365,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 							...savedSettings[section]
 						};
 					});
-					
+
 					// Override profile section with latest doctor data if available
 					if (latestDoctorData) {
 						mergedSettings.profile = {
@@ -383,7 +381,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 							emergencyContact: mergedSettings.profile.emergencyContact || '',
 						};
 					}
-					
+
 					return mergedSettings;
 				});
 			} else if (latestDoctorData) {
@@ -447,7 +445,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 	const saveSettings = async () => {
 		try {
 			await storage.saveSettings(settings);
-			
+
 			// Apply appearance settings immediately after saving
 			if (settings.appearance) {
 				// Apply theme
@@ -456,24 +454,24 @@ export default function SettingsModal({ isOpen, onClose }) {
 				} else if (settings.appearance.theme === 'light') {
 					document.documentElement.classList.remove('dark');
 				}
-				
+
 				// Update local storage for theme persistence
 				localStorage.setItem('theme', settings.appearance.theme);
 
 				// Dispatch custom event to notify other components
-				window.dispatchEvent(new CustomEvent('themeChanged', { 
-					detail: { theme: settings.appearance.theme } 
+				window.dispatchEvent(new CustomEvent('themeChanged', {
+					detail: { theme: settings.appearance.theme }
 				}));
-				
+
 				// Apply compact mode
 				document.body.style.zoom = settings.appearance.compactMode ? "90%" : "100%";
 			}
-			
+
 			// Dispatch settings changed event to notify other components
-			window.dispatchEvent(new CustomEvent('settingsChanged', { 
-				detail: { settings } 
+			window.dispatchEvent(new CustomEvent('settingsChanged', {
+				detail: { settings }
 			}));
-			
+
 			// Also update doctor profile in database if profile settings changed
 			const doctorContext = storage.getDoctorContext();
 			if (doctorContext && settings.profile) {
@@ -514,7 +512,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 					// Continue with settings save even if profile update fails
 				}
 			}
-			
+
 			setHasUnsavedChanges(false);
 			toast.success('Settings Saved', {
 				description: 'Your preferences have been updated successfully',
@@ -1597,7 +1595,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 											onChange={(value) => updateSetting('appearance', 'showAnimations', value)}
 										/>
 									</div>
-									
+
 									<div className="flex items-center justify-between">
 										<div>
 											<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1898,19 +1896,10 @@ export default function SettingsModal({ isOpen, onClose }) {
 			<div className="relative w-full max-w-5xl h-[60vh] bg-white dark:bg-gray-900 rounded-xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col">
 				{/* Header - Reduced padding */}
 				<div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
-					<div className="flex items-center space-x-3">
-						<div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-							<SettingsIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-						</div>
-						<div>
-							<h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-								Settings
-							</h2>
-							<p className="text-sm text-gray-500 dark:text-gray-400">
-								Manage your application preferences
-							</p>
-						</div>
-					</div>
+					<h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+						Settings
+					</h2>
+
 					<div className="flex items-center space-x-2">
 						{hasUnsavedChanges && (
 							<button
@@ -1945,15 +1934,15 @@ export default function SettingsModal({ isOpen, onClose }) {
 										data-section={section.id}
 										onClick={() => handleSectionClick(section.id)}
 										className={`w-full text-left p-2.5 rounded-lg transition-colors duration-200 cursor-pointer ${isActive
-												? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-												: 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+											? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+											: 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
 											}`}
 									>
 										<div className="flex items-center space-x-2.5">
 											<IconComponent
 												className={`w-4 h-4 ${isActive
-														? 'text-blue-600 dark:text-blue-400'
-														: 'text-gray-500 dark:text-gray-400'
+													? 'text-blue-600 dark:text-blue-400'
+													: 'text-gray-500 dark:text-gray-400'
 													}`}
 											/>
 											<div>
@@ -1973,14 +1962,13 @@ export default function SettingsModal({ isOpen, onClose }) {
 					<div ref={contentRef} className="flex-1 p-6 overflow-y-auto scroll-smooth">
 						<div className="space-y-12">
 							{SETTINGS_SECTIONS.map((section) => (
-								<div 
-									key={section.id} 
-									id={section.id} 
-									className={`settings-section pt-2 relative transition-all duration-500 ease-out ${
-										rippleSection === section.id 
-											? 'highlight-section' 
+								<div
+									key={section.id}
+									id={section.id}
+									className={`settings-section pt-2 relative transition-all duration-500 ease-out ${rippleSection === section.id
+											? 'highlight-section'
 											: ''
-									}`}
+										}`}
 								>
 									{renderSectionContent(section.id)}
 								</div>
