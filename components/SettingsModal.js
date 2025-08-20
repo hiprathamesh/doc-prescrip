@@ -196,6 +196,18 @@ export default function SettingsModal({ isOpen, onClose }) {
 		if (isOpen) {
 			loadSettings();
 			loadHospitalLogo();
+			// Apply compact mode if it's enabled
+			const applyCompactMode = async () => {
+				try {
+					const savedSettings = await storage.getSettings();
+					if (savedSettings?.appearance?.compactMode) {
+						document.body.style.zoom = "90%";
+					}
+				} catch (error) {
+					console.error('Error applying compact mode:', error);
+				}
+			};
+			applyCompactMode();
 			// Prevent background scroll when modal is open
 			const scrollY = window.scrollY;
 			document.body.style.position = 'fixed';
@@ -435,6 +447,32 @@ export default function SettingsModal({ isOpen, onClose }) {
 	const saveSettings = async () => {
 		try {
 			await storage.saveSettings(settings);
+			
+			// Apply appearance settings immediately after saving
+			if (settings.appearance) {
+				// Apply theme
+				if (settings.appearance.theme === 'dark') {
+					document.documentElement.classList.add('dark');
+				} else if (settings.appearance.theme === 'light') {
+					document.documentElement.classList.remove('dark');
+				}
+				
+				// Update local storage for theme persistence
+				localStorage.setItem('theme', settings.appearance.theme);
+
+				// Dispatch custom event to notify other components
+				window.dispatchEvent(new CustomEvent('themeChanged', { 
+					detail: { theme: settings.appearance.theme } 
+				}));
+				
+				// Apply compact mode
+				document.body.style.zoom = settings.appearance.compactMode ? "90%" : "100%";
+			}
+			
+			// Dispatch settings changed event to notify other components
+			window.dispatchEvent(new CustomEvent('settingsChanged', { 
+				detail: { settings } 
+			}));
 			
 			// Also update doctor profile in database if profile settings changed
 			const doctorContext = storage.getDoctorContext();
@@ -1515,12 +1553,14 @@ export default function SettingsModal({ isOpen, onClose }) {
 										</label>
 										<CustomDropdown
 											options={[
-												{ value: 'system', label: 'System' },
 												{ value: 'light', label: 'Light' },
 												{ value: 'dark', label: 'Dark' }
 											]}
-											value={settings.appearance?.theme || 'system'}
-											onChange={(value) => updateSetting('appearance', 'theme', value)}
+											value={settings.appearance?.theme || 'dark'}
+											onChange={(value) => {
+												// Only update the setting state, don't apply theme immediately
+												updateSetting('appearance', 'theme', value);
+											}}
 											placeholder="Select theme"
 										/>
 									</div>
@@ -1543,27 +1583,35 @@ export default function SettingsModal({ isOpen, onClose }) {
 								</div>
 
 								<div className="space-y-3">
-									{[
-										{ key: 'compactMode', label: 'Compact mode', desc: 'Reduce spacing for more content' },
-										{ key: 'showAnimations', label: 'Show animations', desc: 'Enable smooth transitions and effects' },
-										{ key: 'showPatientPhotos', label: 'Show patient photos', desc: 'Display patient photos in lists and details' },
-										{ key: 'highlightUrgentCases', label: 'Highlight urgent cases', desc: 'Visually emphasize urgent patients' },
-									].map((setting) => (
-										<div key={setting.key} className="flex items-center justify-between">
-											<div>
-												<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-													{setting.label}
-												</label>
-												<p className="text-xs text-gray-500 dark:text-gray-400">
-													{setting.desc}
-												</p>
-											</div>
-											<FluidToggle
-												checked={settings.appearance?.[setting.key] || false}
-												onChange={(value) => updateSetting('appearance', setting.key, value)}
-											/>
+									<div className="flex items-center justify-between">
+										<div>
+											<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+												Show animations
+											</label>
+											<p className="text-xs text-gray-500 dark:text-gray-400">
+												Enable smooth transitions and theme change animations
+											</p>
 										</div>
-									))}
+										<FluidToggle
+											checked={settings.appearance?.showAnimations !== false} // Default to true
+											onChange={(value) => updateSetting('appearance', 'showAnimations', value)}
+										/>
+									</div>
+									
+									<div className="flex items-center justify-between">
+										<div>
+											<label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+												Compact mode
+											</label>
+											<p className="text-xs text-gray-500 dark:text-gray-400">
+												Set browser zoom to 90% for more content visibility
+											</p>
+										</div>
+										<FluidToggle
+											checked={settings.appearance?.compactMode || false}
+											onChange={(value) => updateSetting('appearance', 'compactMode', value)}
+										/>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -1869,7 +1917,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 								onClick={saveSettings}
 								className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors cursor-pointer flex items-center space-x-1"
 							>
-								<Save className="w-4 h-4" />
+								<Save className="w-5 h-5" />
 								<span>Save</span>
 							</button>
 						)}

@@ -90,6 +90,20 @@ export default function Dashboard() {
     loadSettings(); // Load settings for activity preferences
     loadRecommendedSettings(); // Load recommended settings status
 
+    const applyCompactMode = async () => {
+			try {
+				const savedSettings = await storage.getSettings();
+				if (savedSettings?.appearance?.compactMode) {
+					document.body.style.zoom = "90%";
+				} else {
+					document.body.style.zoom = "100%";
+				}
+			} catch (error) {
+				console.error('Error applying compact mode:', error);
+			}
+		};
+	applyCompactMode();
+
     // Update greeting every minute to check for time period changes
     const greetingInterval = setInterval(() => {
       updateGreeting();

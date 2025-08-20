@@ -3,22 +3,72 @@ import { useState, useEffect, useRef } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { toggleDarkMode } from '../utils/theme';
 import { flushSync } from 'react-dom';
+import { storage } from '../utils/storage';
 
 export default function DarkModeToggle() {
   const [isDark, setIsDark] = useState(false);
+  const [showAnimations, setShowAnimations] = useState(true);
   const ref = useRef(null);
 
   useEffect(() => {
     // Check current theme
     setIsDark(document.documentElement.classList.contains('dark'));
+    
+    // Load animation settings
+    const loadSettings = async () => {
+      try {
+        const settings = await storage.getSettings();
+        // Default to true if not set
+        setShowAnimations(settings?.appearance?.showAnimations !== false);
+      } catch (error) {
+        console.error('Error loading animation settings:', error);
+      }
+    };
+    
+    loadSettings();
+
+    // Listen for theme changes from other components (like settings modal)
+    const handleThemeChange = (event) => {
+      const newTheme = event.detail.theme;
+      setIsDark(newTheme === 'dark');
+    };
+
+    // Listen for settings changes to update animation preferences
+    const handleSettingsChange = async (event) => {
+      try {
+        const settings = event.detail.settings || await storage.getSettings();
+        setShowAnimations(settings?.appearance?.showAnimations !== false);
+      } catch (error) {
+        console.error('Error loading updated animation settings:', error);
+      }
+    };
+
+    window.addEventListener('themeChanged', handleThemeChange);
+    window.addEventListener('settingsChanged', handleSettingsChange);
+
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange);
+      window.removeEventListener('settingsChanged', handleSettingsChange);
+    };
+
   }, []);
 
   const handleToggle = async () => {
     // If the button is disabled, do nothing
     if (!ref.current) return;
+    
+    // Save the new theme in settings
+    try {
+      const settings = await storage.getSettings() || {};
+      if (!settings.appearance) settings.appearance = {};
+      settings.appearance.theme = !isDark ? 'dark' : 'light';
+      await storage.saveSettings(settings);
+    } catch (error) {
+      console.error('Error saving theme setting:', error);
+    }
   
-    // Check if View Transitions API is supported
-    if (document.startViewTransition) {
+    // Check if animations are enabled and View Transitions API is supported
+    if (showAnimations && document.startViewTransition) {
       // Add class to prevent layout shifts during transition
       document.body.classList.add('dark-mode-transitioning');
       
@@ -55,7 +105,7 @@ export default function DarkModeToggle() {
         document.body.classList.remove('dark-mode-transitioning');
       });
     } else {
-      // Fallback for browsers that don't support View Transitions
+      // No animation version
       toggleDarkMode();
       setIsDark(!isDark);
     }
