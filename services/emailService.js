@@ -3,7 +3,11 @@ import { Resend } from 'resend';
 class EmailService {
   constructor() {
     this.resend = new Resend(process.env.RESEND_API_KEY);
-    this.fromEmail = process.env.RESEND_FROM_EMAIL || 'doc@krkm.in';
+    this.fromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@updates.nik.am.in';
+  }
+
+  escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   async sendOtpEmail(email, otp, firstName) {
@@ -230,7 +234,7 @@ class EmailService {
             
             <p>We have received a request to reset your password for your Doc Prescrip account. Your new temporary password is:</p>
             
-            <div class="password-box">${newPassword}</div>
+            <div class="password-box">${this.escapeHtml(newPassword)}</div>
             
             <p>Please use this password to log in to your account. For security reasons, we strongly recommend that you change this password immediately after logging in.</p>
             
