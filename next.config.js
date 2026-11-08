@@ -8,9 +8,6 @@ const nextConfig = {
     });
     return config;
   },
-  experimental: {
-    appDir: true,
-  },
   images: {
     // Configure Next.js Image component to support modern formats
     formats: ['image/avif', 'image/webp'],
